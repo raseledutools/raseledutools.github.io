@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOCX Editor with Image Resize</title>
+    
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .controls {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        #editor-container {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            margin-bottom: 50px;
+        }
+
+        /* Editor Padding */
+        .ql-editor { padding: 25mm; }
+
+        /* Button Style */
+        .btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn:hover { background: #34495e; }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <input type="file" id="upload" accept=".docx" />
+        <button class="btn" onclick="saveDoc()">Download DOCX</button>
+    </div>
+
+    <div id="editor-container"></div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script>
+        // --- IMPORTANT FIX FOR IMAGE RESIZE ---
+        // The resize module needs Quill to be global
+        window.Quill = Quill; 
+
+        // 1. Initialize Quill with Image Resize Module
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                // Activate the resize module here
+                imageResize: {
+                    displaySize: true // Shows the size in pixels
+                },
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'align': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['image'], // Image button
+                    [{ 'color': [] }, { 'background': [] }]
+                ]
+            }
+        });
+
+        // 2. Load DOCX
+        document.getElementById('upload').addEventListener('change', function(event) {
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                mammoth.convertToHtml({arrayBuffer: reader.result})
+                    .then(function(result) {
+                        // Load content into editor
+                        quill.clipboard.dangerouslyPasteHTML(result.value);
+                    })
+                    .catch(function(err) { console.error(err); });
+            };
+            reader.readAsArrayBuffer(this.files[0]);
+        });
+
+        // 3. Save DOCX
+        function saveDoc() {
+            // We need to get the HTML inside the editor
+            var content = document.querySelector('.ql-editor').innerHTML;
+            
+            var html = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>
+                <head><meta charset='utf-8'><title>Document</title></head>
+                <body>${content}</body></html>`;
+
+            var converted = htmlDocx.asBlob(html);
+            saveAs(converted, 'updated_document.docx');
+        }
+    </script>
+</body>
+</html>

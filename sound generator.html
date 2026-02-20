@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nature Noise Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000; /* ব্যাকগ্রাউন্ড কালো করা হলো ক্যানভাসের জন্য */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; /* স্ক্রল বন্ধ */
+        }
+
+        /* ভিজ্যুয়াল ক্যানভাস স্টাইল */
+        #visual-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* সবকিছুর নিচে থাকবে */
+            opacity: 0.6; /* দৃশ্যমানতা বাড়ানো হলো */
+        }
+
+        h1 { margin-bottom: 30px; color: #00d2be; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* ৪ কলাম */
+            gap: 15px;
+            max-width: 900px;
+        }
+
+        .sound-btn {
+            background: rgba(51, 51, 51, 0.6); /* একটু স্বচ্ছ */
+            border: 1px solid #444;
+            color: #ddd;
+            padding: 15px 10px;
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .sound-btn span {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        /* Active State (On) */
+        .sound-btn.active {
+            background: rgba(0, 106, 78, 0.8);
+            border-color: #00d2be;
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 210, 190, 0.4);
+            transform: scale(1.05);
+        }
+
+        .sound-btn:hover {
+            border-color: #00d2be;
+            background: rgba(70, 70, 70, 0.8);
+        }
+
+        .volume-control {
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+
+        input[type=range] {
+            width: 200px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- অ্যানিমেশনের জন্য ক্যানভাস -->
+    <canvas id="visual-canvas"></canvas>
+
+    <h1>Nature Noise Generator</h1>
+
+    <div class="grid">
+        <button class="sound-btn" id="white" onclick="toggleSound('white')">
+            <span>📺</span> White Noise
+        </button>
+        <button class="sound-btn" id="brown" onclick="toggleSound('brown')">
+            <span>🏔️</span> Brown Noise
+        </button>
+        <button class="sound-btn" id="rain" onclick="toggleSound('rain')">
+            <span>🌧️</span> Heavy Rain
+        </button>
+        <button class="sound-btn" id="waterfall" onclick="toggleSound('waterfall')">
+            <span>🌊</span> Waterfall
+        </button>
+        
+        <!-- নতুন বাটন -->
+        <button class="sound-btn" id="wind" onclick="toggleSound('wind')">
+            <span>💨</span> Wind
+        </button>
+        <button class="sound-btn" id="fire" onclick="toggleSound('fire')">
+            <span>🔥</span> Bonfire
+        </button>
+        <button class="sound-btn" id="thunder" onclick="toggleSound('thunder')">
+            <span>⚡</span> Thunder
+        </button>
+        <button class="sound-btn" id="night" onclick="toggleSound('night')">
+            <span>🦗</span> Night
+        </button>
+    </div>
+
+    <div class="volume-control">
+        <span>Volume: </span>
+        <input type="range" min="0" max="100" value="30" oninput="changeVolume(this.value)">
+    </div>
+
+    <script>
+        // --- ১. অডিও সেটআপ ---
+        let audioCtx;
+        const activeNodes = {}; // প্লে হওয়া সাউন্ড ট্র্যাক করার জন্য
+        let masterGain;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.3; 
+                masterGain.connect(audioCtx.destination);
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function createNoiseBuffer(type) {
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = buffer.getChannelData(0);
+
+            if (type === 'white' || type === 'rain' || type === 'wind') {
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+            } else if (type === 'brown' || type === 'waterfall' || type === 'fire' || type === 'thunder') {
+                let lastOut = 0;
+                for (let i = 0; i < bufferSize; i++) {
+                    const white = Math.random() * 2 - 1;
+                    output[i] = (lastOut + (0.02 * white)) / 1.02;
+                    lastOut = output[i];
+                    output[i] *= 3.5;
+                }
+            }
+            return buffer;
+        }
+
+        function toggleSound(type) {
+            initAudio();
+            const btn = document.getElementById(type);
+
+            // সাউন্ড বন্ধ করা
+            if (activeNodes[type]) {
+                if(activeNodes[type].stop) activeNodes[type].stop(); // For oscillators
+                if(activeNodes[type].source) activeNodes[type].source.stop(); // For buffers
+                delete activeNodes[type];
+                btn.classList.remove('active');
+                return;
+            }
+
+            // সাউন্ড চালু করা
+            btn.classList.add('active');
+
+            // বিশেষ সাউন্ড (Night/Cricket) - অসিলেটর ব্যবহার করে
+            if (type === 'night') {
+                playCrickets(type);
+                return;
+            }
+            
+            // নয়েজ সাউন্ড
+            const buffer = createNoiseBuffer(type);
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.loop = true;
+
+            const filter = audioCtx.createBiquadFilter();
+
+            // সাউন্ড ফিল্টারিং লজিক
+            if (type === 'white') {
+                source.connect(masterGain);
+            } 
+            else if (type === 'brown') {
+                source.connect(masterGain);
+            }
+            else if (type === 'rain') {
+                filter.type = 'lowpass';
+                filter.frequency.value = 800;
+                source.connect(filter);
+                filter.connect(masterGain);
+            } 
+            else if (type === 'waterfall') {
+                filter.type = 'highpass';
+                filter.frequency.value = 100;
+                source.connect(filter);
+                filter.connect(masterGain);
+            }
+            else if (type === 'wind') {
+                // বাতাসের জন্য ব্যান্ডপাস ফিল্টার
+                filter.type = 'bandpass';
+                filter.frequency.value = 400;
+                filter.Q.value = 1; // বাতাসের শোঁ শোঁ ভাব
+                source.connect(filter);
+                filter.connect(masterGain);
+                
+                // বাতাসের গতি পরিবর্তন (Modulation)
+                const lfo = audioCtx.createOscillator();
+                lfo.frequency.value = 0.1; // খুব ধীর গতি
+                const lfoGain = audioCtx.createGain();
+                lfoGain.gain.value = 300;
+                lfo.connect(lfoGain);
+                lfoGain.connect(filter.frequency);
+                lfo.start();
+                activeNodes[type] = { source: source, lfo: lfo }; // LFO সহ সেভ
+                return;
+            }
+            else if (type === 'fire') {
+                // আগুনের জন্য লো-পাস ব্রাউন নয়েজ + ক্র্যাকলিং দরকার (এখানে শুধু বেস দেওয়া হলো)
+                filter.type = 'lowpass';
+                filter.frequency.value = 200; // আগুনের গর্জন
+                source.connect(filter);
+                filter.connect(masterGain);
+            }
+            else if (type === 'thunder') {
+                // বজ্রপাতের জন্য খুব গভীর শব্দ
+                filter.type = 'lowpass';
+                filter.frequency.value = 150;
+                source.connect(filter);
+                filter.connect(masterGain);
+            }
+
+            source.start();
+            if (!activeNodes[type]) activeNodes[type] = { source: source };
+        }
+
+        // ঝিঁঝিঁ পোকার ডাক (Cricket Sound Synthesis)
+        function playCrickets(type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const modulator = audioCtx.createOscillator();
+            const modGain = audioCtx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.value = 4500; // হাই পিচ
+
+            modulator.type = 'square';
+            modulator.frequency.value = 4; // পোকার ডাকের রিদম
+            
+            modGain.gain.value = 1000; // মডুলেশন ডেপথ
+
+            // কানেকশন: Modulator -> Oscillator Frequency (FM)
+            // সিম্পল আম্পলিচিউড মডুলেশন (AM) ভালো শোনায়
+            const amGain = audioCtx.createGain();
+            osc.connect(amGain);
+            
+            modulator.connect(amGain.gain);
+            
+            amGain.connect(masterGain);
+            
+            osc.start();
+            modulator.start();
+
+            activeNodes[type] = { 
+                stop: () => { osc.stop(); modulator.stop(); } 
+            };
+        }
+
+        function changeVolume(val) {
+            if (masterGain) {
+                masterGain.gain.value = val / 100;
+            }
+        }
+
+        // --- ২. ভিডিও/অ্যানিমেশন সেটআপ (Canvas) ---
+        const canvas = document.getElementById('visual-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = []; 
+        let stars = []; // তারার জন্য
+        let flashOpacity = 0; // বজ্রপাতের জন্য
+
+        // ক্যানভাস রিসাইজ হ্যান্ডেল করা
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initParticles();
+            initStars();
+        }
+        window.addEventListener('resize', resize);
+        
+        function initStars() {
+            stars = [];
+            for(let i=0; i<200; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 2,
+                    alpha: Math.random()
+                });
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for(let i=0; i<500; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    speed: Math.random() * 10 + 5,
+                    len: Math.random() * 20 + 10,
+                    angle: Math.random() * Math.PI * 2, // বাতাসের জন্য
+                    life: Math.random() * 100 // আগুনের জন্য
+                });
+            }
+        }
+        
+        resize();
+
+        // কোন ভিজ্যুয়াল দেখাতে হবে তা ঠিক করা
+        function getVisualType() {
+            // লাস্ট ক্লিক করা বা অ্যাক্টিভ থাকা সাউন্ডের ভিজ্যুয়াল দেখাবে
+            if (activeNodes['thunder']) return 'thunder';
+            if (activeNodes['fire']) return 'fire';
+            if (activeNodes['wind']) return 'wind';
+            if (activeNodes['night']) return 'night';
+            if (activeNodes['waterfall']) return 'waterfall';
+            if (activeNodes['rain']) return 'rain';
+            if (activeNodes['white']) return 'white';
+            if (activeNodes['brown']) return 'brown';
+            return null;
+        }
+
+        // অ্যানিমেশন লুপ
+        function animate() {
+            requestAnimationFrame(animate);
+            const activeType = getVisualType();
+
+            // ট্রেইল এফেক্ট বা ক্লিয়ার করা
+            if (activeType === 'white' || activeType === 'brown' || activeType === 'night') {
+                ctx.clearRect(0, 0, width, height);
+            } else if (activeType === 'fire') {
+                 ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // স্মুথ ট্রেইল
+                 ctx.fillRect(0, 0, width, height);
+            } else {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; 
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            if (!activeType) return;
+
+            // ভিজ্যুয়াল ড্র করা
+            if (activeType === 'white') drawStatic(2, 'white');
+            else if (activeType === 'brown') drawStatic(20, '#5C4033');
+            else if (activeType === 'rain') drawRain(false);
+            else if (activeType === 'waterfall') drawRain(true);
+            else if (activeType === 'wind') drawWind();
+            else if (activeType === 'fire') drawFire();
+            else if (activeType === 'thunder') drawThunder();
+            else if (activeType === 'night') drawNight();
+        }
+
+        // --- ড্রয়িং ফাংশনসমূহ ---
+
+        function drawStatic(size, color) {
+            for (let i = 0; i < 800; i++) {
+                ctx.fillStyle = color === 'white' ? 
+                    `rgba(255, 255, 255, ${Math.random()})` : 
+                    `rgba(92, 64, 51, ${Math.random() * 0.5})`;
+                const x = Math.floor(Math.random() * (width / size)) * size;
+                const y = Math.floor(Math.random() * (height / size)) * size;
+                ctx.fillRect(x, y, size, size);
+            }
+        }
+
+        function drawRain(isWaterfall) {
+            ctx.strokeStyle = isWaterfall ? 'rgba(135, 206, 235, 0.5)' : 'rgba(174, 194, 224, 0.5)';
+            ctx.lineWidth = isWaterfall ? 3 : 1;
+            ctx.beginPath();
+            for(let p of particles) {
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x, p.y + p.len);
+                p.y += isWaterfall ? p.speed * 2.5 : p.speed;
+                if (p.y > height) { p.y = -p.len; p.x = Math.random() * width; }
+            }
+            ctx.stroke();
+        }
+
+        function drawWind() {
+            ctx.strokeStyle = 'rgba(200, 200, 200, 0.1)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for(let p of particles) {
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x + p.len * 2, p.y); // হরাইজন্টাল লাইন
+                p.x += p.speed * 3; // দ্রুত গতি
+                if (p.x > width) { p.x = -p.len * 2; p.y = Math.random() * height; }
+            }
+            ctx.stroke();
+        }
+
+        function drawFire() {
+            for(let p of particles) {
+                // আগুন নিচ থেকে উঠবে
+                if (p.life <= 0) {
+                    p.x = width / 2 + (Math.random() * 100 - 50);
+                    p.y = height;
+                    p.life = Math.random() * 100;
+                    p.speed = Math.random() * 2 + 1;
+                }
+                
+                // কালার গ্রেডিয়েন্ট (হলুদ থেকে লাল)
+                const r = 255;
+                const g = Math.floor((p.life / 100) * 200);
+                const b = 0;
+                const a = p.life / 100;
+                
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, Math.random() * 5 + 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                p.y -= p.speed; // উপরে ওঠা
+                p.x += Math.random() * 2 - 1; // একটু নড়াচড়া
+                p.life -= 1;
+            }
+        }
+
+        function drawThunder() {
+            // ব্যাকগ্রাউন্ড ফ্ল্যাশ লজিক
+            if (Math.random() > 0.98) flashOpacity = 1; // হঠাৎ ফ্ল্যাশ
+            
+            if (flashOpacity > 0) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${flashOpacity})`;
+                ctx.fillRect(0, 0, width, height);
+                flashOpacity -= 0.1; // ফেড আউট
+            } else {
+                drawRain(false); // ফ্ল্যাশ না থাকলে বৃষ্টি দেখাবে
+            }
+        }
+
+        function drawNight() {
+            // কালো আকাশ
+            ctx.fillStyle = '#050510';
+            ctx.fillRect(0, 0, width, height);
+
+            // তারা
+            for(let s of stars) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(Math.sin(Date.now() * 0.001 + s.x))})`; // মিটমিট করা
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // অ্যানিমেশন শুরু
+        animate();
+
+    </script>
+</body>
+</html>
