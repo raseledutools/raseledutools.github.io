@@ -3,73 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Chat | Admin View</title>
+    <title>Global Chat | Admin Broadcast View</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; overflow: hidden; }
         .bg-overlay { position: fixed; inset: 0; z-index: -1; background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.98)), url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2500'); background-size: cover; background-position: center; }
-        .chat-container { height: calc(100vh - 160px); scroll-behavior: smooth; }
         .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .message-bubble { max-width: 85%; animation: slideUp 0.3s ease-out forwards; }
-        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        .message-box { animation: zoomIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden relative">
 
     <div class="bg-overlay"></div>
 
-    <!-- Header Section -->
+    <!-- Header -->
     <header class="p-4 glass-panel flex items-center justify-between shadow-md relative z-10">
         <div class="flex items-center gap-3">
             <a href="index.html" class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-full transition-colors border border-white/10 text-slate-300">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
             <div>
-                <h1 class="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">Admin Broadcast</h1>
+                <h1 class="font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-purple-300">Live Notification</h1>
                 <p class="text-[10px] text-emerald-400 flex items-center gap-1.5 font-medium uppercase tracking-wider">
                     <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span> 
-                    Real-time Active
+                    Active Sync Mode
                 </p>
             </div>
         </div>
         <div class="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
-            <img src="developer.jpg" class="w-6 h-6 rounded-full" onerror="this.style.display='none'">
-            <span class="text-[10px] font-bold text-pink-400 uppercase tracking-widest">Admin</span>
+            <img src="developer.jpg" class="w-6 h-6 rounded-full" onerror="this.src='https://ui-avatars.com/api/?name=Admin&background=db2777&color=fff'">
+            <span class="text-[10px] font-bold text-pink-400 uppercase tracking-widest">Admin Control</span>
         </div>
     </header>
 
-    <!-- Chat Messages Area -->
-    <main id="chat-box" class="flex-grow overflow-y-auto p-4 space-y-6 chat-container relative z-10">
-        <div id="loading" class="flex flex-col items-center justify-center h-full text-slate-500">
-            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-500 mb-3"></div>
-            <p class="text-sm">Connecting to broadcast feed...</p>
+    <!-- Display Area (Massege dekhabe ekhane) -->
+    <main class="flex-grow flex items-center justify-center p-6 relative z-10">
+        <div id="loading" class="flex flex-col items-center gap-3">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-500"></div>
+            <p class="text-sm text-slate-500 font-mono tracking-widest uppercase">Initializing Sync...</p>
+        </div>
+
+        <div id="broadcast-content" class="hidden w-full max-w-2xl text-center message-box">
+            <div class="bg-slate-900/80 border-2 border-pink-500/20 p-10 rounded-[2.5rem] shadow-[0_0_50px_rgba(236,72,153,0.15)] backdrop-blur-xl">
+                <div class="w-20 h-20 bg-pink-500/10 rounded-full flex items-center justify-center mb-8 mx-auto border border-pink-500/20">
+                    <i class="fa-solid fa-bolt-lightning text-4xl text-pink-500 animate-pulse"></i>
+                </div>
+                <h2 class="text-pink-400 text-xs font-black tracking-[0.4em] uppercase mb-4 opacity-70 italic">Current Announcement</h2>
+                <div id="display-msg" class="text-white text-2xl md:text-3xl font-semibold leading-relaxed italic">
+                    "Waiting for message..."
+                </div>
+                <div class="mt-10 pt-6 border-t border-white/5 flex items-center justify-center gap-3">
+                    <span id="update-time" class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Last Updated: Just now</span>
+                </div>
+            </div>
         </div>
     </main>
 
-    <!-- Admin Message Input Area (No Password) -->
-    <footer class="p-4 glass-panel border-t border-white/10 relative z-10">
-        <form id="chat-form" class="max-w-4xl mx-auto flex gap-3">
-            <input type="text" id="msg-input" autocomplete="off" 
-                class="flex-grow bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-sm text-white focus:outline-none focus:border-pink-500/70 focus:bg-black/60 transition-all placeholder-slate-500" 
-                placeholder="Write your update message here...">
-            <button type="submit" id="send-btn" disabled
-                class="bg-gradient-to-r from-pink-600 to-purple-600 px-6 py-3.5 rounded-2xl flex items-center justify-center hover:shadow-[0_0_20px_rgba(236,72,153,0.5)] active:scale-95 transition-all disabled:opacity-50">
-                <i class="fa-solid fa-paper-plane text-white text-lg"></i>
-            </button>
-        </form>
+    <!-- Admin Input Area (Password chara shorasori likhar option) -->
+    <footer class="p-6 glass-panel border-t border-white/10 relative z-10">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex gap-3">
+                <input type="text" id="admin-input" autocomplete="off" 
+                    class="flex-grow bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-pink-500/70 focus:bg-black/60 transition-all placeholder-slate-600 font-medium" 
+                    placeholder="Enter message to broadcast globally...">
+                <button id="send-btn" disabled
+                    class="bg-gradient-to-r from-pink-600 to-purple-600 px-8 py-4 rounded-2xl flex items-center justify-center hover:shadow-[0_0_30px_rgba(236,72,153,0.4)] active:scale-95 transition-all disabled:opacity-30">
+                    <i class="fa-solid fa-paper-plane text-white text-xl"></i>
+                </button>
+            </div>
+            <p class="text-[9px] text-slate-500 mt-3 text-center uppercase tracking-widest font-bold">Message will update instantly for all users connected live.</p>
+        </div>
     </footer>
 
-    <!-- Firebase Logic Section -->
+    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 Aapnar Firebase Config
+        // 🔥 Aapnar Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -85,86 +100,79 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        const chatBox = document.getElementById('chat-box');
+        const displayMsg = document.getElementById('display-msg');
+        const updateTime = document.getElementById('update-time');
+        const adminInput = document.getElementById('admin-input');
         const sendBtn = document.getElementById('send-btn');
-        const msgInput = document.getElementById('msg-input');
+        const loading = document.getElementById('loading');
+        const content = document.getElementById('broadcast-content');
 
-        // Automatic Anonymous Authentication
+        // Step 1: Login
         signInAnonymously(auth).catch(err => console.error("Auth Error", err));
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 sendBtn.disabled = false;
-                loadBroadcastFeed();
+                startRealtimeListener();
             }
         });
 
-        // 🔄 Real-time Listener Logic from index.html
-        function loadBroadcastFeed() {
-            const messagesRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'global_chat');
+        // Step 2: 🔄 HUBURU index.html Logic (onSnapshot on Single Doc)
+        function startRealtimeListener() {
+            // Document reference
+            const broadcastRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'broadcast', 'current');
             
-            // onSnapshot ensures instant updates without refresh
-            onSnapshot(messagesRef, (snapshot) => {
-                document.getElementById('loading').style.display = 'none';
-                
-                let messages = [];
-                snapshot.forEach(docSnap => {
-                    messages.push({ id: docSnap.id, ...docSnap.data() });
-                });
+            // onSnapshot direct document-er upor kaj kore, tai refres charai sathe sathe result dey
+            onSnapshot(broadcastRef, (snap) => {
+                loading.classList.add('hidden');
+                content.classList.remove('hidden');
 
-                // Sorting logic using Date.now().toString() parsing
-                messages.sort((a, b) => parseInt(a.timestamp || "0") - parseInt(b.timestamp || "0"));
-
-                chatBox.innerHTML = '';
-                
-                messages.forEach(msg => {
-                    const msgTime = parseInt(msg.timestamp || Date.now());
-                    const timeStr = new Date(msgTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                if (snap.exists()) {
+                    const data = snap.data();
                     
-                    const div = document.createElement('div');
-                    div.className = "flex flex-col items-start w-full";
+                    // UI Update
+                    displayMsg.innerHTML = `"${data.text}"`;
                     
-                    div.innerHTML = `
-                        <div class="message-bubble px-5 py-3 text-sm bg-slate-800 border border-white/10 text-slate-100 rounded-2xl rounded-tl-sm shadow-lg">
-                            ${msg.text}
-                        </div>
-                        <span class="text-[10px] text-slate-500 mt-2 px-1 font-bold tracking-widest uppercase">
-                            <i class="fa-solid fa-user-shield text-pink-600 mr-1"></i> Admin &bull; ${timeStr}
-                        </span>
-                    `;
-                    chatBox.appendChild(div);
-                });
+                    const time = data.timestamp ? new Date(parseInt(data.timestamp)).toLocaleTimeString() : 'Recently';
+                    updateTime.innerText = `Broadcast Time: ${time}`;
 
-                // Auto Scroll to the latest message
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, (error) => {
-                console.error("Firestore Sync Error:", error);
+                    // Screen-e flash animation
+                    content.style.animation = 'none';
+                    content.offsetHeight; /* trigger reflow */
+                    content.style.animation = null;
+                }
+            }, (err) => {
+                console.error("Firestore Error:", err);
             });
         }
 
-        // Send Message Handler
-        document.getElementById('chat-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const msg = msgInput.value.trim();
+        // Step 3: Send Logic (Exactly index.html Logic)
+        sendBtn.onclick = async () => {
+            const msg = adminInput.value.trim();
             if (!msg) return;
 
-            // Clear input instantly for smooth feel
-            msgInput.value = '';
-            msgInput.focus();
+            // Input clean kora
+            adminInput.value = '';
+            adminInput.placeholder = "Broadcasting...";
+            sendBtn.disabled = true;
 
             try {
-                const messagesRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'global_chat');
+                const broadcastRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'broadcast', 'current');
                 
-                // 🔥 Using Date.now().toString() logic for zero-delay synchronization
-                await addDoc(messagesRef, {
+                // 🔥 setDoc bebohar kora hoyeche jate ekta document-e shob kichu replace hoy
+                await setDoc(broadcastRef, {
                     text: msg,
-                    senderId: "Admin",
-                    timestamp: Date.now().toString() 
+                    timestamp: Date.now().toString(), // index.html er moto fast logic
+                    sender: "Admin"
                 });
 
+                adminInput.placeholder = "Write your update message here...";
+                sendBtn.disabled = false;
+                adminInput.focus();
+
             } catch (error) {
-                console.error("Error broadcasting message:", error);
-                alert("Message pathate somossa hoyeche!");
+                console.error("Error sending message:", error);
+                alert("Message pathate somossa! Firebase Rules check korun.");
             }
         };
     </script>
