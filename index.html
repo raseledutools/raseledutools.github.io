@@ -138,32 +138,48 @@
             }
         }
 
-        // Token Generation & Push Permission Setup
-        async function requestPushPermission() {
+        // Token Generation & Push Permission Setup with Service Worker
+        async function requestPushPermission(swRegistration) {
             try {
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
-                    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                    // Ekhane swRegistration pass kora hocche jate thikmoto background e kaj kore
+                    const token = await getToken(messaging, { 
+                        vapidKey: VAPID_KEY,
+                        serviceWorkerRegistration: swRegistration
+                    });
                     if (token) {
-                        console.log('FCM Token generated successfully');
-                        // আপনি চাইলে এই টোকেনটি ডাটাবেসে ইউজার আইডি হিসেবে সেভ করে রাখতে পারেন
+                        console.log('FCM Token generated successfully:', token);
                     } else {
                         console.log('No registration token available.');
                     }
+                } else {
+                    console.log('User denied push permission.');
                 }
             } catch (err) {
                 console.error('Error generating token:', err);
             }
         }
 
-        // Anonymous login
-        signInAnonymously(auth).then(() => {
-            requestPushPermission(); // লগইন হওয়ার সাথে সাথে পুশ পারমিশন চাইবে
-        }).catch(err => {
-            console.error("Auth Error:", err);
-            document.getElementById('sync-text').innerText = "Auth Failed";
-            document.getElementById('sync-dot').querySelector('span:last-child').classList.replace('bg-pink-500', 'bg-red-500');
-        });
+        // Service Worker Register korar por Firebase Auth & Permission Call kora
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./firebase-messaging-sw.js')
+            .then((registration) => {
+                console.log('Service Worker registered successfully with scope:', registration.scope);
+                
+                // Anonymous login & Permission request
+                signInAnonymously(auth).then(() => {
+                    requestPushPermission(registration); // sw registration ta ekhane pass kora hocche
+                }).catch(err => {
+                    console.error("Auth Error:", err);
+                    document.getElementById('sync-text').innerText = "Auth Failed";
+                    document.getElementById('sync-dot').querySelector('span:last-child').classList.replace('bg-pink-500', 'bg-red-500');
+                });
+
+            }).catch((err) => {
+                console.error('Service Worker registration failed:', err);
+            });
+        }
 
         // Auth State & Firestore Realtime Sync
         onAuthStateChanged(auth, (user) => {
@@ -193,6 +209,8 @@
             console.log('Foreground Push Message received: ', payload);
             if (payload.notification) {
                 showUIPopup(payload.notification.body);
+            } else if (payload.data && payload.data.message) {
+                showUIPopup(payload.data.message);
             }
         });
 
