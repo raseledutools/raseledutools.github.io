@@ -104,7 +104,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // Messaging is only initialized if supported to prevent errors
         let messaging = null;
         try { messaging = getMessaging(app); } catch (e) { console.log("Messaging not supported here."); }
 
@@ -141,7 +140,6 @@
             document.getElementById('user-badge').innerHTML = `<i class="fa-solid fa-user-check text-emerald-400"></i> <span>${name}</span>`;
         }
 
-        // SW Setup with Error Avoidance (blob: protocol fix)
         if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
             navigator.serviceWorker.register('./firebase-messaging-sw.js').then((registration) => {
                 if(messaging) {
@@ -166,7 +164,16 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Realtime Message Listener (Exact index.html Logic)
+        // 🔥 CRITICAL FIX: Safe Time Parser (Handles both old Firebase Objects and new String Numbers)
+        function getSafeTime(ts) {
+            if (!ts) return Date.now();
+            if (typeof ts === 'string' || typeof ts === 'number') return parseInt(ts) || Date.now();
+            if (typeof ts.toMillis === 'function') return ts.toMillis();
+            if (ts.seconds) return ts.seconds * 1000;
+            return Date.now();
+        }
+
+        // Realtime Message Listener
         function loadRealtimeMessages() {
             const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
             
@@ -178,18 +185,14 @@
                     messages.push({ id: doc.id, ...doc.data() });
                 });
 
-                // Exactly matching index.html time sorting logic
-                messages.sort((a, b) => {
-                    const timeA = parseInt(a.timestamp || 0);
-                    const timeB = parseInt(b.timestamp || 0);
-                    return timeA - timeB;
-                });
+                // Safely sort using the new robust time parser
+                messages.sort((a, b) => getSafeTime(a.timestamp) - getSafeTime(b.timestamp));
 
                 chatBox.innerHTML = '';
                 
                 messages.forEach(msg => {
                     const isMe = msg.senderId === currentUser.uid;
-                    const msgTime = parseInt(msg.timestamp || Date.now());
+                    const msgTime = getSafeTime(msg.timestamp);
                     const timeStr = new Date(msgTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     
                     const displayName = msg.senderName || ('User-' + msg.senderId.substring(0,4));
@@ -227,7 +230,7 @@
             try {
                 const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'global_chat');
                 
-                // Hubuhu index.html er moton Date.now().toString() use kora holo
+                // Saving time as string exactly like index.html
                 await addDoc(messagesRef, {
                     text: text,
                     senderId: currentUser.uid,
