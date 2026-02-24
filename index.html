@@ -3,6 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 🔥 Google Search & SEO Meta Tags -->
+    <meta name="description" content="Professional Web Tools Suite engineered by Rasel Mia. Access Diary, Docx Viewer, HTML Editor, Converters, Live Exam, and Global Chat all in one place.">
+    <meta name="keywords" content="Web Tools, Rasel Mia, Live Exam, HTML Editor, Docx Viewer, PDF Converter, Global Chat, Online Dashboard">
+    <meta name="author" content="Rasel Mia">
+    <meta name="robots" content="index, follow">
+    
+    <!-- 🔥 Facebook & Social Media (Open Graph) Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Web Tools Suite | Professional Workspace">
+    <meta property="og:description" content="A complete professional workspace by Rasel Mia. Use tools like Live Exam, Code IDE, Diary, and Global Chat seamlessly.">
+    <meta property="og:image" content="developer.jpg">
+    <meta property="og:url" content="https://github.com/raselmia"> <!-- Ekhane aapnar ashol website link dite paren -->
+    <meta property="og:site_name" content="Web Tools Suite">
+    
+    <!-- 🔥 Favicon Setup -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
     <title>Web Tools Suite | Professional Workspace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -40,7 +59,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.15);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-blur: 10px;
         }
 
         .solid-card:hover {
@@ -100,10 +118,10 @@
             
             <!-- Scrolling Notice -->
             <div class="max-w-3xl w-full mx-auto mt-6 bg-slate-900/50 border border-white/10 backdrop-blur-md rounded-full overflow-hidden flex items-center h-12 shadow-2xl">
-                <div class="bg-gradient-to-r from-pink-600 to-purple-600 px-4 h-full flex items-center text-[10px] font-bold uppercase tracking-widest z-10 shadow-lg">Update</div>
+                <div class="bg-gradient-to-r from-pink-600 to-purple-600 px-4 h-full flex items-center text-[10px] font-bold uppercase tracking-widest z-10 shadow-lg">Global News</div>
                 <div class="flex-grow overflow-hidden relative h-full flex items-center">
-                    <div id="ticker-text" class="animate-scroll px-4 text-sm font-medium text-slate-200">
-                        Welcome to the Professional Web Tools Workspace. Stay updated with our latest news. &nbsp;&bull;&nbsp; System Active &nbsp;&bull;&nbsp; Security integration complete. &nbsp;&bull;&nbsp; Designed by Rasel Mia.
+                    <div id="ticker-text" class="animate-scroll px-4 text-sm font-medium text-slate-200 italic">
+                        Connecting to server...
                     </div>
                 </div>
             </div>
@@ -127,7 +145,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
 
                 <!-- Card 1: Diary -->
-                <a href="diary.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-purple-600/80 to-pink-600/80 rounded-2xl p-6 group cursor-pointer block relative">
+                <a href="diary.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-purple-600/80 to-pink-600/80 rounded-2xl p-6 group cursor-pointer block relative backdrop-blur-md">
                     <div class="flex items-center justify-between mb-5">
                         <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
                             <i class="fa-solid fa-book-open text-lg text-white"></i>
@@ -139,7 +157,7 @@
                 </a>
 
                 <!-- Card 2: Docx View -->
-                <a href="docx view.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-blue-600/80 to-cyan-600/80 rounded-2xl p-6 group cursor-pointer block relative">
+                <a href="docx view.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-blue-600/80 to-cyan-600/80 rounded-2xl p-6 group cursor-pointer block relative backdrop-blur-md">
                     <div class="flex items-center justify-between mb-5">
                         <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
                             <i class="fa-solid fa-file-word text-lg text-white"></i>
@@ -151,7 +169,7 @@
                 </a>
 
                 <!-- Card 3: HTML Preview -->
-                <a href="html preview.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-orange-600/80 to-red-600/80 rounded-2xl p-6 group cursor-pointer block relative">
+                <a href="html preview.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-orange-600/80 to-red-600/80 rounded-2xl p-6 group cursor-pointer block relative backdrop-blur-md">
                     <div class="flex items-center justify-between mb-5">
                         <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
                             <i class="fa-brands fa-code text-lg text-white"></i>
@@ -163,7 +181,7 @@
                 </a>
 
                 <!-- Card 4: Converter -->
-                <a href="my converter.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-emerald-600/80 to-teal-600/80 rounded-2xl p-6 group cursor-pointer block relative">
+                <a href="my converter.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-emerald-600/80 to-teal-600/80 rounded-2xl p-6 group cursor-pointer block relative backdrop-blur-md">
                     <div class="flex items-center justify-between mb-5">
                         <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
                             <i class="fa-solid fa-arrows-rotate text-lg text-white"></i>
@@ -175,7 +193,7 @@
                 </a>
 
                 <!-- Card 5: Photo Viewer -->
-                <a href="photo viewer.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-rose-600/80 to-pink-500/80 rounded-2xl p-6 group cursor-pointer block relative">
+                <a href="photo viewer.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-rose-600/80 to-pink-500/80 rounded-2xl p-6 group cursor-pointer block relative backdrop-blur-md">
                     <div class="flex items-center justify-between mb-5">
                         <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
                             <i class="fa-solid fa-images text-lg text-white"></i>
@@ -187,7 +205,7 @@
                 </a>
 
                 <!-- Card 6: Ramadan Plan Book -->
-                <a href="Romadan plan full book.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-amber-600/80 to-orange-500/80 rounded-2xl p-6 group cursor-pointer block relative">
+                <a href="Romadan plan full book.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-amber-600/80 to-orange-500/80 rounded-2xl p-6 group cursor-pointer block relative backdrop-blur-md">
                     <div class="flex items-center justify-between mb-5">
                         <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
                             <i class="fa-solid fa-moon text-lg text-white"></i>
@@ -199,15 +217,15 @@
                 </a>
 
                 <!-- Card 7: Global Chat / Live Updates -->
-                <a href="chat.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-fuchsia-600/80 to-purple-600/80 rounded-2xl p-6 group cursor-pointer block relative">
+                <a href="chat.html" class="solid-card bg-slate-900/60 bg-gradient-to-br from-fuchsia-600/80 to-purple-600/80 rounded-2xl p-6 group cursor-pointer block relative backdrop-blur-md">
                     <div class="flex items-center justify-between mb-5">
                         <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
                             <i class="fa-solid fa-bolt-lightning text-lg text-white"></i>
                         </div>
                         <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Updates</span>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Live Notifications</h3>
-                    <p class="text-white/80 text-sm leading-relaxed">Real-time sync and global admin broadcast terminal for instant updates.</p>
+                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Global Chat</h3>
+                    <p class="text-white/80 text-sm leading-relaxed">Talk with active users and view instant admin broadcast messages.</p>
                 </a>
 
             </div>
@@ -269,23 +287,39 @@
                 <i class="fa-solid fa-bell text-3xl text-pink-500 animate-bounce"></i>
             </div>
             <h2 class="text-2xl font-black mb-2 tracking-tight text-white">NEW NOTIFICATION</h2>
-            <div class="text-pink-400 text-[10px] font-bold tracking-[0.3em] uppercase mb-6 opacity-80 italic">Recent System Update</div>
+            <div class="text-pink-400 text-[10px] font-bold tracking-[0.3em] uppercase mb-6 opacity-80 italic">Global Admin Update</div>
             <div id="notif-msg" class="bg-white/5 border border-white/5 p-5 rounded-2xl text-slate-200 text-lg leading-relaxed font-medium mb-8 italic">
                 "Message goes here..."
             </div>
             <button onclick="markAsRead()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:scale-[1.02] active:scale-95 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-pink-600/30 tracking-widest uppercase text-sm">
-                OK, GOT IT!
+                Understood
             </button>
         </div>
     </div>
 
-    <!-- Logic Script (Vanilla JS + Firebase) -->
+    <!-- Firebase Logic (Restored to exact original direct connection) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // 🔥 Aapnar ashol Firebase Config (Direct Connection)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53",
+            storageBucket: "mywebtools-f8d53.firebasestorage.app",
+            messagingSenderId: "979594414301",
+            appId: "1:979594414301:web:7048c995e56e331a85f334"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        const SYNC_APP_ID = "rasel-mia-universal-sync"; 
         const SECRET_PASSWORD = "rasel123";
+
         let lastViewedTime = localStorage.getItem('last_notif_time') || '0';
         let currentNotification = null;
         let currentUser = null;
@@ -298,7 +332,7 @@
         const adminPassInput = document.getElementById('admin-pass');
         const adminMsgInput = document.getElementById('admin-msg');
 
-        // Functions for buttons
+        // UI Controls
         window.openAdmin = () => adminModal.classList.remove('hidden');
         window.closeAdmin = () => {
             adminModal.classList.add('hidden');
@@ -307,6 +341,7 @@
             passErrorLine.classList.remove('w-full', 'opacity-100');
             passErrorLine.classList.add('w-0', 'opacity-0');
         };
+        
         window.markAsRead = () => {
             if (currentNotification) {
                 localStorage.setItem('last_notif_time', currentNotification.timestamp);
@@ -315,109 +350,64 @@
             notifModal.classList.add('hidden');
         };
 
-        // Firebase / Local Logic setup
-        try {
-            const fbConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Authenticate User
+        signInAnonymously(auth).catch(err => console.error("Auth Error", err));
 
-            if (fbConfigStr) {
-                // RUNNING IN CLOUD (Firebase Enabled)
-                const firebaseConfig = JSON.parse(fbConfigStr);
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                const db = getFirestore(app);
+        // Listen for Real-time Database Changes (Broadcast)
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                // Tracking exact broadcast document
+                const notifRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'broadcast', 'current');
+                
+                onSnapshot(notifRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        currentNotification = data;
+                        
+                        // Update Scrolling Ticker
+                        tickerText.innerHTML = `${data.message} &nbsp;&bull;&nbsp; Global Active.`;
 
-                const initAuth = async () => {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
+                        // Show Popup if it's a new message
+                        if (data.timestamp > lastViewedTime) {
+                            notifMsg.innerText = `"${data.message}"`;
+                            notifModal.classList.remove('hidden');
+                        }
                     }
-                };
-                initAuth();
-
-                onAuthStateChanged(auth, (user) => {
-                    currentUser = user;
-                    if (user) {
-                        const notifRef = doc(db, 'artifacts', appId, 'public', 'data', 'notifications', 'latest');
-                        onSnapshot(notifRef, (docSnap) => {
-                            if (docSnap.exists()) {
-                                const data = docSnap.data();
-                                currentNotification = data;
-                                tickerText.innerHTML = `${data.message} &nbsp;&bull;&nbsp; System Active &nbsp;&bull;&nbsp; Security integration complete. &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
-
-                                if (data.timestamp > lastViewedTime) {
-                                    notifMsg.innerText = `"${data.message}"`;
-                                    notifModal.classList.remove('hidden');
-                                }
-                            }
-                        });
-                    }
+                }, (error) => {
+                    console.error("Firestore Error:", error);
                 });
-
-                window.sendNotification = async () => {
-                    if (adminPassInput.value !== SECRET_PASSWORD) {
-                        passErrorLine.classList.remove('w-0', 'opacity-0');
-                        passErrorLine.classList.add('w-full', 'opacity-100');
-                        setTimeout(() => {
-                            passErrorLine.classList.add('w-0', 'opacity-0');
-                            passErrorLine.classList.remove('w-full', 'opacity-100');
-                        }, 2000);
-                        return;
-                    }
-                    const msg = adminMsgInput.value.trim();
-                    if (!msg || !currentUser) return;
-
-                    const notifRef = doc(db, 'artifacts', appId, 'public', 'data', 'notifications', 'latest');
-                    await setDoc(notifRef, {
-                        message: msg,
-                        timestamp: Date.now().toString(),
-                        sender: "Rasel Mia"
-                    });
-                    closeAdmin();
-                };
-
-            } else {
-                // LOCAL GITHUB FALLBACK (Simulation)
-                // Github e firebase database na thakle jeno error na dey tar jonno ei byabostha
-                window.sendNotification = () => {
-                    if (adminPassInput.value !== SECRET_PASSWORD) {
-                        passErrorLine.classList.remove('w-0', 'opacity-0');
-                        passErrorLine.classList.add('w-full', 'opacity-100');
-                        setTimeout(() => {
-                            passErrorLine.classList.add('w-0', 'opacity-0');
-                            passErrorLine.classList.remove('w-full', 'opacity-100');
-                        }, 2000);
-                        return;
-                    }
-                    const msg = adminMsgInput.value.trim();
-                    if (!msg) return;
-
-                    const timestamp = Date.now().toString();
-                    currentNotification = { message: msg, timestamp: timestamp };
-                    localStorage.setItem('local_notif', JSON.stringify(currentNotification));
-                    
-                    tickerText.innerHTML = `${msg} &nbsp;&bull;&nbsp; System Active &nbsp;&bull;&nbsp; Security integration complete. &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
-                    notifMsg.innerText = `"${msg}"`;
-                    notifModal.classList.remove('hidden');
-                    closeAdmin();
-                };
-
-                // Check local storage on load
-                const saved = localStorage.getItem('local_notif');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    currentNotification = data;
-                    tickerText.innerHTML = `${data.message} &nbsp;&bull;&nbsp; System Active &nbsp;&bull;&nbsp; Security integration complete. &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
-                    if (data.timestamp > lastViewedTime) {
-                        notifMsg.innerText = `"${data.message}"`;
-                        notifModal.classList.remove('hidden');
-                    }
-                }
             }
-        } catch(e) {
-            console.error("System Setup Error", e);
-        }
+        });
+
+        // Send Message Function
+        window.sendNotification = async () => {
+            if (adminPassInput.value !== SECRET_PASSWORD) {
+                passErrorLine.classList.remove('w-0', 'opacity-0');
+                passErrorLine.classList.add('w-full', 'opacity-100');
+                setTimeout(() => {
+                    passErrorLine.classList.add('w-0', 'opacity-0');
+                    passErrorLine.classList.remove('w-full', 'opacity-100');
+                }, 2000);
+                return;
+            }
+            
+            const msg = adminMsgInput.value.trim();
+            if (!msg || !currentUser) return;
+
+            try {
+                const notifRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'broadcast', 'current');
+                await setDoc(notifRef, {
+                    message: msg,
+                    timestamp: Date.now().toString(),
+                    sender: "Rasel Mia"
+                });
+                closeAdmin();
+            } catch(e) {
+                console.error("Error sending message:", e);
+                alert("Database rules issue. Message not sent.");
+            }
+        };
     </script>
 </body>
 </html>
