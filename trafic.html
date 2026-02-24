@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Analytics | Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; }
+        .bg-pattern { position: fixed; inset: 0; z-index: -1; background-image: radial-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px); background-size: 30px 30px; }
+        .glass-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); border-color: rgba(59, 130, 246, 0.4); box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+    <script>
+        // 🔒 Protection Logic: Block unauthorized access
+        if (sessionStorage.getItem('admin_logged_in') !== 'true') {
+            window.location.href = 'index.html';
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-blue-500/30">
+
+    <div class="bg-pattern"></div>
+
+    <!-- Header -->
+    <header class="p-6 border-b border-white/5 bg-slate-900/80 flex justify-between items-center sticky top-0 z-50 backdrop-blur-md">
+        <div class="flex items-center gap-4">
+            <a href="admin_dashboard.html" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-slate-300 transition-all border border-white/10">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="font-black text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400 uppercase">Traffic Analytics</h1>
+                <p class="text-[10px] text-slate-400 font-bold tracking-widest uppercase">Live Visitor Tracking</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-5xl">
+        
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="stat-card glass-panel rounded-[2rem] p-8 relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 text-blue-500/10 text-9xl"><i class="fa-solid fa-users"></i></div>
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2 relative z-10">Today's Visits</h3>
+                <div class="text-5xl font-black text-white relative z-10 flex items-baseline gap-2">
+                    <span id="today-visits">0</span>
+                    <span class="text-sm text-emerald-400 font-medium"><i class="fa-solid fa-arrow-trend-up"></i> Active</span>
+                </div>
+            </div>
+
+            <div class="stat-card glass-panel rounded-[2rem] p-8 relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 text-purple-500/10 text-9xl"><i class="fa-solid fa-globe"></i></div>
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2 relative z-10">Total Visits (All Time)</h3>
+                <div class="text-5xl font-black text-white relative z-10 flex items-baseline gap-2">
+                    <span id="total-visits">0</span>
+                    <span class="text-sm text-slate-500 font-medium">Hits</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Traffic Table -->
+        <div class="glass-panel rounded-[2rem] overflow-hidden flex flex-col max-h-[60vh]">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center bg-slate-800/30">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-blue-400"></i> Daily Record Log
+                </h3>
+            </div>
+            
+            <div class="flex-grow overflow-y-auto p-2">
+                <table class="w-full text-left border-collapse">
+                    <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-md z-10">
+                        <tr class="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] border-b border-white/5">
+                            <th class="p-5 text-center w-20">#</th>
+                            <th class="p-5">Date</th>
+                            <th class="p-5 text-right pr-8">Total Visitors</th>
+                        </tr>
+                    </thead>
+                    <tbody id="traffic-body">
+                        <tr><td colspan="3" class="p-10 text-center text-slate-500 italic"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading traffic data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // 🔥 Aapnar Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53",
+            storageBucket: "mywebtools-f8d53.firebasestorage.app",
+            messagingSenderId: "979594414301",
+            appId: "1:979594414301:web:7048c995e56e331a85f334"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const SYNC_APP_ID = "rasel-mia-universal-sync"; 
+
+        signInAnonymously(auth);
+
+        const trafficRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'traffic_stats');
+        
+        // Fetch and Display Data
+        onSnapshot(trafficRef, (snapshot) => {
+            let stats = [];
+            let totalAllTime = 0;
+            let totalToday = 0;
+            
+            // Get today's date in YYYY-MM-DD format for matching
+            const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+            const todayStr = (new Date(Date.now() - tzOffset)).toISOString().split('T')[0];
+
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                stats.push({ id: docSnap.id, ...data });
+                
+                // Calculate totals
+                const dailyVisits = parseInt(data.visits) || 0;
+                totalAllTime += dailyVisits;
+                if (docSnap.id === todayStr) {
+                    totalToday = dailyVisits;
+                }
+            });
+
+            // Update Cards
+            document.getElementById('today-visits').innerText = totalToday;
+            document.getElementById('total-visits').innerText = totalAllTime;
+
+            // Sort by date descending (Newest first)
+            stats.sort((a, b) => b.id.localeCompare(a.id));
+
+            // Render Table
+            const tbody = document.getElementById('traffic-body');
+            tbody.innerHTML = '';
+
+            if(stats.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-slate-500 italic">No traffic data recorded yet.</td></tr>';
+                return;
+            }
+
+            stats.forEach((dayStat, index) => {
+                const isToday = dayStat.id === todayStr;
+                const rowClass = isToday ? "bg-blue-600/10 border-b border-white/5" : "border-b border-white/5 hover:bg-white/5 transition-colors";
+                const badge = isToday ? '<span class="ml-2 bg-blue-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold uppercase">Today</span>' : '';
+                
+                // Formatting Date nicely
+                let displayDate = dayStat.displayDate;
+                if(!displayDate) {
+                    const d = new Date(dayStat.id);
+                    displayDate = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                }
+
+                tbody.innerHTML += `
+                    <tr class="${rowClass}">
+                        <td class="p-5 text-center text-slate-500 font-bold">${index + 1}</td>
+                        <td class="p-5 text-slate-300 font-medium">${displayDate} ${badge}</td>
+                        <td class="p-5 text-right pr-8">
+                            <span class="bg-slate-800 text-blue-400 px-3 py-1 rounded-lg font-black tracking-widest text-sm shadow-inner">${dayStat.visits}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }, (error) => {
+            console.error("Error fetching traffic:", error);
+            document.getElementById('traffic-body').innerHTML = '<tr><td colspan="3" class="p-10 text-center text-red-500 italic">Failed to load data. Database connection error.</td></tr>';
+        });
+
+    </script>
+</body>
+</html>
