@@ -5,24 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- 🔥 Google Search & SEO Meta Tags -->
-    <meta name="description" content="rasel edu tools engineered by Rasel Mia. Access Diary, Docx Viewer, HTML Editor, Converters, Live Exam, and Global Chat all in one place.">
-    <meta name="keywords" content="rasel edu tools, Rasel Mia, Live Exam, HTML Editor, Docx Viewer, PDF Converter, Global Chat, Online Dashboard">
+    <meta name="description" content="Professional Web Tools Suite engineered by Rasel Mia. Access Diary, Docx Viewer, HTML Editor, Converters, Live Exam, and Global Chat all in one place.">
+    <meta name="keywords" content="Web Tools, Rasel Mia, Live Exam, HTML Editor, Docx Viewer, PDF Converter, Global Chat, Online Dashboard">
     <meta name="author" content="Rasel Mia">
     <meta name="robots" content="index, follow">
     
     <!-- 🔥 Facebook & Social Media (Open Graph) Meta Tags -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="rasel edu tools">
+    <meta property="og:title" content="Web Tools Suite | Professional Workspace">
     <meta property="og:description" content="A complete professional workspace by Rasel Mia. Use tools like Live Exam, Code IDE, Diary, and Global Chat seamlessly.">
     <meta property="og:image" content="developer.jpg">
-    <meta property="og:url" content="https://raseledutools.github.io/"> <!-- Ekhane aapnar ashol website link dite paren -->
-    <meta property="og:site_name" content="rasel edu tools">
+    <meta property="og:url" content="https://raseledutools.github.io"> <!-- Updated to match your github pages url -->
+    <meta property="og:site_name" content="Web Tools Suite">
     
-    <!-- 🔥 Favicon Setup -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <!-- 🔥 Favicon Setup (Updated with Cache Busting and Fallbacks) -->
+    <link rel="icon" href="favicon.ico?v=2" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico?v=2" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="developer.jpg">
+    <link rel="icon" type="image/png" sizes="32x32" href="developer.jpg">
 
-    <title>Rasel edu tools</title>
+    <title>Web Tools Suite | Professional Workspace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -133,9 +135,13 @@
                     View Notice Board
                 </a>
                 
-                <a href="exam.html" class="group inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 border border-white/20 text-white font-bold tracking-wide transition-all shadow-[0_8px_20px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_25px_rgba(16,185,129,0.6)] hover:-translate-y-1">
-                    <i class="fa-solid fa-pen-to-square text-white group-hover:animate-bounce"></i>
-                    Live Exam
+                <!-- 🔥 Updated Live Exam Button with Dynamic Date -->
+                <a href="exam.html" class="group inline-flex items-center gap-4 px-6 py-2 rounded-full bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 border border-white/20 text-white transition-all shadow-[0_8px_20px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_25px_rgba(16,185,129,0.6)] hover:-translate-y-1 text-left">
+                    <i class="fa-solid fa-pen-to-square text-white text-2xl group-hover:animate-bounce"></i>
+                    <div class="flex flex-col">
+                        <span class="font-bold tracking-wide text-sm uppercase">Today's Live Exam</span>
+                        <span id="live-exam-date" class="text-[10px] text-white/90 font-bold tracking-widest italic">Loading date...</span>
+                    </div>
                 </a>
             </div>
         </header>
@@ -297,13 +303,20 @@
         </div>
     </div>
 
-    <!-- Firebase Logic (Restored to exact original direct connection) -->
+    <!-- Firebase Logic -->
     <script type="module">
+        // 🔥 Set Dynamic Date for Live Exam Button
+        const dateElement = document.getElementById('live-exam-date');
+        if (dateElement) {
+            const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+            dateElement.innerText = new Date().toLocaleDateString('en-US', options);
+        }
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 Aapnar ashol Firebase Config (Direct Connection)
+        // 🔥 Aapnar ashol Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -357,7 +370,6 @@
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
             if (user) {
-                // Tracking exact broadcast document
                 const notifRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'broadcast', 'current');
                 
                 onSnapshot(notifRef, (docSnap) => {
@@ -411,5 +423,3 @@
     </script>
 </body>
 </html>
-
-
