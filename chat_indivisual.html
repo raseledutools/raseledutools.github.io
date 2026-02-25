@@ -21,7 +21,7 @@
             width: 100%;
             margin: 0;
             padding: 0;
-            position: fixed; /* Prevents all bouncing and scrolling on mobile */
+            position: fixed; 
             touch-action: none;
         }
         
@@ -44,7 +44,7 @@
         
         .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
         
-        textarea { font-size: 16px !important; } /* 16px prevents iOS zoom, perfect for Android too */
+        textarea { font-size: 16px !important; } 
         
         .contact-active { background: linear-gradient(to right, rgba(236,72,153,0.1), rgba(168,85,247,0.1)); border-left: 4px solid #ec4899; }
 
@@ -56,6 +56,17 @@
     </style>
 </head>
 <body class="flex selection:bg-pink-500/30">
+
+    <!-- 🔥 Notification Sound Effect 🔥 -->
+    <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3" preload="auto"></audio>
+
+    <!-- 🔥 Fullscreen Image Lightbox 🔥 -->
+    <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-sm transition-opacity opacity-0" onclick="closeLightbox()">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 text-white text-xl hover:bg-pink-500 transition-colors z-50">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain p-2 md:p-8 transform scale-95 transition-transform duration-300 shadow-2xl">
+    </div>
 
     <!-- 1. Registration Modal -->
     <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
@@ -78,7 +89,7 @@
         </div>
     </div>
 
-    <!-- 🔥 PROFILE SETTINGS MODAL 🔥 -->
+    <!-- PROFILE SETTINGS MODAL -->
     <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md transition-opacity">
         <div class="bg-slate-900 border border-white/10 p-6 md:p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center relative">
             <button onclick="closeSettings()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors">
@@ -103,7 +114,6 @@
     </div>
 
     <!-- 2. Main App Container -->
-    <!-- 🔥 ANDROID FIX: Using fixed inset-0 on mobile to prevent scrolling overflow, relative on md -->
     <div id="app-container" class="hidden fixed inset-0 md:relative md:w-full md:h-full max-w-6xl mx-auto md:py-4 md:px-4 flex">
         
         <div class="w-full h-full flex bg-slate-950 shadow-2xl md:rounded-[2rem] border-white/5 md:border overflow-hidden relative">
@@ -260,7 +270,10 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 Android VisualViewport API Fix for Keyboard
+        // 🔥 App Boot Time to prevent notification sound for old messages
+        const appStartTime = Date.now();
+
+        // Android VisualViewport API Fix for Keyboard
         function setRealViewportHeight() {
             if (window.visualViewport) {
                 document.body.style.height = window.visualViewport.height + 'px';
@@ -334,6 +347,29 @@
         }
 
         if (myName && myMobile) startApp(); else joinModal.classList.remove('hidden');
+
+        // 🔥 Lightbox Methods
+        window.openLightbox = (url, e) => {
+            e.stopPropagation();
+            const lightbox = document.getElementById('image-lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = url;
+            lightbox.classList.remove('hidden');
+            setTimeout(() => {
+                lightbox.classList.remove('opacity-0');
+                img.classList.remove('scale-95');
+                img.classList.add('scale-100');
+            }, 10);
+        };
+
+        window.closeLightbox = () => {
+            const lightbox = document.getElementById('image-lightbox');
+            const img = document.getElementById('lightbox-img');
+            lightbox.classList.add('opacity-0');
+            img.classList.remove('scale-100');
+            img.classList.add('scale-95');
+            setTimeout(() => lightbox.classList.add('hidden'), 300);
+        };
 
         window.logoutPvtChat = () => {
             if(confirm("Apni ki logout korte chan?")) {
@@ -625,8 +661,21 @@
             const q = query(msgRef, orderBy('timestamp', 'desc'), limit(1));
             
             chatListeners[contactMobile] = onSnapshot(q, (snapshot) => {
-                if (!snapshot.empty) latestMessages[contactMobile] = snapshot.docs[0].data();
-                else latestMessages[contactMobile] = null;
+                if (!snapshot.empty) {
+                    const newLatest = snapshot.docs[0].data();
+                    const oldLatest = latestMessages[contactMobile];
+                    
+                    // 🔥 Play Sound if someone sends a new message (background or foreground)
+                    if (newLatest.senderMobile !== myMobile && 
+                       (!oldLatest || newLatest.timestamp > oldLatest.timestamp) && 
+                       newLatest.timestamp > appStartTime) {
+                        try { document.getElementById('notification-sound').play(); } catch(e){}
+                    }
+                    
+                    latestMessages[contactMobile] = newLatest;
+                } else {
+                    latestMessages[contactMobile] = null;
+                }
                 renderContacts();
             });
         }
@@ -860,9 +909,10 @@
                 if (data.fileType && data.fileType.startsWith('video/')) {
                     content = `<video controls class="rounded-xl mb-1 md:mb-2 max-h-48 md:max-h-64 w-full object-cover bg-black/40"><source src="${data.fileUrl}"></video>`;
                 } else if (data.fileType && data.fileType.startsWith('audio/')) {
-                    content = `<audio controls class="w-full mb-1 md:mb-2"><source src="${data.fileUrl}"></audio>`;
+                    content = `<audio controls class="w-full mb-1 md:mb-2" preload="none"><source src="${data.fileUrl}"></audio>`;
                 } else if (data.fileType && data.fileType.startsWith('image/')) {
-                    content = `<img src="${data.fileUrl}" class="rounded-xl mb-1 md:mb-2 max-h-48 md:max-h-64 w-full object-cover cursor-pointer hover:opacity-90 transition-opacity bg-black/20" onclick="window.open('${data.fileUrl}')">`;
+                    // 🔥 Lightbox logic added here
+                    content = `<img src="${data.fileUrl}" class="rounded-xl mb-1 md:mb-2 max-h-48 md:max-h-64 w-full object-cover cursor-pointer hover:opacity-90 transition-opacity bg-black/20" onclick="openLightbox('${data.fileUrl}', event)">`;
                 } else {
                     const forcedDownloadUrl = getDownloadableUrl(data.fileUrl);
                     content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="bg-black/20 p-2 md:p-3 rounded-xl flex items-center gap-2 md:gap-3 text-[11px] md:text-xs mb-1 md:mb-2 border border-white/5 hover:bg-black/40 transition-colors w-full">
