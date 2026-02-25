@@ -77,17 +77,14 @@
             </button>
         </header>
 
-        <!-- Messages Area -->
         <main id="chat-box" class="flex-grow chat-bg overflow-y-auto p-4 md:p-6 flex flex-col gap-4 custom-scroll relative z-10">
             <div id="loading-msgs" class="flex justify-center items-center py-10">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="glass-footer p-3 z-20 shrink-0 flex flex-col">
             
-            <!-- File Preview Container -->
             <div id="file-preview-container" class="hidden w-full max-w-4xl mx-auto px-1 mb-2">
                 <div class="bg-slate-800/80 border border-white/10 rounded-xl p-2.5 flex items-center justify-between shadow-xl">
                     <div class="flex items-center gap-3 overflow-hidden">
@@ -106,11 +103,10 @@
             </div>
 
             <form id="chat-form" class="flex items-end gap-2 max-w-4xl mx-auto w-full">
-                <!-- Attachment Button -->
                 <button type="button" onclick="document.getElementById('file-input').click()" class="w-12 h-12 shrink-0 text-slate-400 hover:text-pink-400 bg-slate-800/80 rounded-2xl flex items-center justify-center transition-all border border-white/10 hover:border-pink-500/50 mb-0.5">
                     <i class="fa-solid fa-paperclip text-lg"></i>
                 </button>
-                <input type="file" id="file-input" class="hidden" accept="image/*,.pdf,.txt,.html,.docx,.zip">
+                <input type="file" id="file-input" class="hidden">
 
                 <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-2xl flex items-center px-2 py-1 transition-all focus-within:border-pink-500/50">
                     <textarea id="msg-input" rows="1" placeholder="Type a message..."
@@ -125,13 +121,11 @@
         </footer>
     </div>
 
-    <!-- Firebase & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -141,7 +135,6 @@
             appId: "1:979594414301:web:7048c995e56e331a85f334"
         };
 
-        // Cloudinary Integration (As per user inputs)
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload"; 
         const CLOUDINARY_UPLOAD_PRESET = "ml_default"; 
 
@@ -162,7 +155,6 @@
         const fileInput = document.getElementById('file-input');
         const previewContainer = document.getElementById('file-preview-container');
 
-        // Initialization
         if (myUsername) startChatApp(); else joinModal.classList.remove('hidden');
 
         document.getElementById('join-form').onsubmit = (e) => {
@@ -181,7 +173,6 @@
             document.getElementById('username-input').value = myUsername;
         };
 
-        // Input Handlers
         msgInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight < 120 ? this.scrollHeight : 120) + 'px';
@@ -195,12 +186,12 @@
             }
         });
 
-        // File Selection Logic
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                if (file.size > 15 * 1024 * 1024) { 
-                    alert("File size 15MB-r beshi hote parbe na!");
+                // 🔥 Updated Limit to 30 MB to test Cloudinary capacity
+                if (file.size > 30 * 1024 * 1024) { 
+                    alert("File size 30 MB-r beshi hote parbe na!");
                     fileInput.value = '';
                     return;
                 }
@@ -230,7 +221,6 @@
             }
         }
 
-        // Sending Message Logic
         chatForm.onsubmit = async (e) => {
             e.preventDefault();
             const text = msgInput.value.trim();
@@ -242,7 +232,6 @@
             try {
                 let fileUrl = null, fileName = null, fileType = null;
                 
-                // Cloudinary Upload
                 if (selectedFile) {
                     const formData = new FormData();
                     formData.append('file', selectedFile);
@@ -256,11 +245,11 @@
                         fileName = selectedFile.name;
                         fileType = selectedFile.type;
                     } else {
-                        throw new Error(uploadResult.error?.message || "Upload failed");
+                        // Detailed error from Cloudinary
+                        throw new Error(uploadResult.error?.message || "Cloudinary upload failed");
                     }
                 }
 
-                // Firestore push
                 await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'global_messages'), {
                     text,
                     sender: myUsername,
@@ -276,14 +265,13 @@
                 msgInput.style.height = '44px';
             } catch (error) {
                 console.error(error);
-                alert("Somoshsha hoyeche! Cloudinary settings check korun.");
+                alert("Upload somoshsha: " + error.message);
             } finally {
                 sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-lg"></i>';
                 sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile;
             }
         };
 
-        // Real-time Listener
         function listenForMessages() {
             const q = query(
                 collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'global_messages'), 
@@ -297,8 +285,6 @@
                     if (change.type === "added") appendMessageToUI(change.doc.data());
                 });
                 chatBox.scrollTop = chatBox.scrollHeight;
-            }, (error) => {
-                console.error("Snapshot error:", error);
             });
         }
 
