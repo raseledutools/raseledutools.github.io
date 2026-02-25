@@ -1,32 +1,141 @@
-<!-- 💬 Universal Comment Section HTML -->
-    <div class="max-w-4xl mx-auto px-4 py-10 w-full relative z-10">
-        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-slate-100">
+// comments.js - Universal Real-time Commenting System by Rasel Mia
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+// 🔥 Firebase Config
+const firebaseConfig = {
+    apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+    authDomain: "mywebtools-f8d53.firebaseapp.com",
+    projectId: "mywebtools-f8d53",
+    storageBucket: "mywebtools-f8d53.firebasestorage.app",
+    messagingSenderId: "979594414301",
+    appId: "1:979594414301:web:7048c995e56e331a85f334"
+};
+
+const SYNC_APP_ID = "rasel-mia-universal-sync";
+
+// Firebase initialization
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Automatic Page Name Detect kora (jemon: "converter", "exam")
+let pageName = window.location.pathname.split('/').pop().replace('.html', '');
+if (!pageName || pageName === '') pageName = 'index'; // Default home page
+
+const commentsCollectionName = 'comments_' + pageName;
+const commentsRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', commentsCollectionName);
+
+// 🔥 Fix 1: Removed DOMContentLoaded wrapper because type="module" is already deferred
+signInAnonymously(auth).then(() => {
+    loadComments();
+}).catch(err => console.error("Auth Error in Comments:", err));
+
+const submitBtn = document.getElementById('submit-comment');
+const commentText = document.getElementById('comment-text');
+
+// Click kore pathanor jonno
+if (submitBtn) {
+    submitBtn.addEventListener('click', submitCommentHandler);
+}
+
+// 🔥 Fix 2: Keyboard er "Enter" chaple jate comment send hoy
+if (commentText) {
+    commentText.addEventListener('keypress', (e) => {
+        // Jodi Enter chape ebong Shift na chape, taholei send hobe
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // Enter chaple jeno notun line toiri na hoy
+            submitCommentHandler();
+        }
+    });
+}
+
+// Comment pathanor ashol logic
+async function submitCommentHandler() {
+    const nameInput = document.getElementById('comment-name').value.trim();
+    const textInput = document.getElementById('comment-text').value.trim();
+    
+    if (!textInput) {
+        alert('Doyakore apnar motamot likhun!');
+        return;
+    }
+
+    const userName = nameInput !== '' ? nameInput : 'Anonymous User';
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Pathano hocche...';
+
+    try {
+        // Formatting Date
+        const displayDateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        
+        await addDoc(commentsRef, {
+            name: userName,
+            text: textInput,
+            timestamp: Date.now(),
+            dateStr: displayDateStr
+        });
+
+        // Input field faka kora
+        document.getElementById('comment-text').value = '';
+        submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Comment Kora Hoyeche!';
+        
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-regular fa-paper-plane"></i> Pathan';
+        }, 2000);
+
+    } catch (error) {
+        console.error("Error adding comment: ", error);
+        alert("Comment pathate somoshsha hoyeche.");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-regular fa-paper-plane"></i> Pathan';
+    }
+}
+
+// Real-time Comment Loading
+function loadComments() {
+    const commentsListDiv = document.getElementById('comments-list');
+    if(!commentsListDiv) return;
+
+    onSnapshot(commentsRef, (snapshot) => {
+        let comments = [];
+        snapshot.forEach((docSnap) => {
+            comments.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        // Notun comment gulo upore dekhanor jonno sort kora
+        comments.sort((a, b) => b.timestamp - a.timestamp);
+
+        commentsListDiv.innerHTML = ''; // Clear loading text
+
+        if (comments.length === 0) {
+            commentsListDiv.innerHTML = '<p class="text-slate-400 italic text-sm text-center py-6">Ekhono kono comment nei. Apni prothom comment korun!</p>';
+            return;
+        }
+
+        comments.forEach(comment => {
+            // Getting user initials for Avatar
+            const initials = comment.name.substring(0, 2).toUpperCase();
             
-            <h2 class="text-2xl font-black mb-6 text-slate-800 flex items-center gap-3">
-                <i class="fa-regular fa-comments text-pink-500"></i>
-                Apnar Motamot
-            </h2>
-            
-            <!-- Comment Input Form -->
-            <div class="mb-8 flex flex-col gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <input type="text" id="comment-name" placeholder="Apnar Nam (Optional)" class="p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all w-full md:w-1/3 text-slate-700 font-medium text-sm">
-                
-                <div class="flex flex-col md:flex-row gap-3">
-                    <textarea id="comment-text" rows="2" placeholder="Ekhane apnar motamot ba proshno likhun..." class="p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all flex-grow text-slate-700 text-sm resize-none"></textarea>
-                    
-                    <button id="submit-comment" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-pink-500/30 active:scale-95 whitespace-nowrap flex items-center justify-center gap-2">
-                        <i class="fa-regular fa-paper-plane"></i> Pathan
-                    </button>
+            commentsListDiv.innerHTML += `
+                <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow flex gap-4 animate-[pageLoad_0.3s_ease-out]">
+                    <div class="w-10 h-10 shrink-0 bg-gradient-to-tr from-pink-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner">
+                        ${initials}
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="font-bold text-slate-800 text-sm">${comment.name}</h4>
+                            <span class="text-[10px] text-slate-400 bg-slate-200/50 px-2 py-0.5 rounded-full">${comment.dateStr}</span>
+                        </div>
+                        <p class="text-slate-600 text-sm whitespace-pre-wrap">${comment.text}</p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- List of Comments (Dynamic Load) -->
-            <div id="comments-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                <p class="text-slate-400 italic text-sm text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Comments asche...</p>
-            </div>
-            
-        </div>
-    </div>
-
-    <!-- 🔥 Comments Script Import 🔥 -->
-    <script type="module" src="comments.js"></script>
+            `;
+        });
+    }, (error) => {
+        console.error("Error fetching comments:", error);
+        commentsListDiv.innerHTML = '<p class="text-red-500 italic text-sm text-center py-4">Database theke comment anate problem hoyeche.</p>';
+    });
+}
