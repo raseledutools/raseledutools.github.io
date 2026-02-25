@@ -30,10 +30,3 @@
 
     <!-- 🔥 Comments Script Import 🔥 -->
     <script type="module" src="comments.js"></script>
-
-### 🛠️ Eita kivabe kaaj korbe?
-1. Keu jokhon nam ar comment likhe **"Pathan"** button-e click korbe, ta sathe sathei apnar Firebase database-e joma hobe.
-2. `comments.js` file-ti automatic page-er nam pore nibe (jemon `converter.html` ke se `converter` dhore nibe). Fole ek page-er comment onno page-e uki dibe na!
-3. Comment-ti ekdom live dekha jabe. Keu onno phone theke comment korle, apnar phone-e page refresh na korei instant bheshe uthbe (jeta ekdom professional apps-er moto feel dibe).
-
-Bhai, ekbar `converter.html`-e ei box-ti boshiye check korun, pochondo hole baki page guloteo just HTML tuk paste kore diben! Kono oshubidha hole amake janaben.
