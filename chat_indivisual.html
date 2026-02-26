@@ -165,7 +165,6 @@
             </div>
 
             <!-- RIGHT SIDEBAR (Chat Window) -->
-            <!-- 🔥 Fixed: Removed md:flex, we explicitly handle flex to prevent mobile layout break -->
             <div id="chat-area" class="w-full hidden flex-col bg-slate-950 relative h-full">
                 
                 <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg bg-opacity-90">
@@ -253,7 +252,6 @@
                         <input type="file" id="file-input" class="hidden">
 
                         <div class="flex-grow bg-slate-800/80 border border-white/10 rounded-3xl flex items-center px-3 py-1 transition-all focus-within:border-pink-500/50 relative">
-                            <!-- 🔥 Text area size increased for better WhatsApp feel -->
                             <textarea id="msg-input" rows="1" placeholder="Message..."
                                 class="w-full bg-transparent p-3 text-white focus:outline-none resize-none max-h-32 custom-scroll text-base" style="min-height: 52px;"></textarea>
                         </div>
@@ -271,9 +269,11 @@
         </div>
     </div>
 
-    <!-- 🔥 AUDIO CALL UI MODAL 🔥 -->
+    <!-- 🔥 AUDIO CALL UI MODAL (FIXED) 🔥 -->
     <div id="call-modal" class="hidden fixed inset-0 z-[300] flex-col items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl transition-opacity">
-        <audio id="remote-audio" autoplay></audio>
+        <!-- 🔥 playsinline and correct properties added so mobile doesn't block audio 🔥 -->
+        <audio id="remote-audio" autoplay playsinline></audio>
+        
         <div class="text-center">
             <img id="call-avatar" src="" class="w-32 h-32 rounded-full border-4 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.5)] mb-6 mx-auto object-cover animate-pulse">
             <h2 id="call-name" class="text-3xl font-black text-white mb-2">Caller Name</h2>
@@ -296,7 +296,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 🔥 CRITICAL FIX FOR ANDROID KEYBOARD OVERLAP & FLEX LAYOUT 🔥
         function setRealViewportHeight() {
             let vh = window.innerHeight;
             if (window.visualViewport) {
@@ -363,7 +362,6 @@
         const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
         let pc = null;
         let localStream = null;
-        let remoteStream = null;
         let incomingCallData = null;
 
         const appStartTime = Date.now();
@@ -392,7 +390,6 @@
 
         if (myName && myMobile) startApp(); else joinModal.classList.remove('hidden');
 
-        // Lightbox Methods
         window.openLightbox = (url, e) => {
             e.stopPropagation();
             const lightbox = document.getElementById('image-lightbox');
@@ -657,7 +654,6 @@
         function generateChatId(mob1, mob2) { return mob1 < mob2 ? `${mob1}_${mob2}` : `${mob2}_${mob1}`; }
 
         async function startApp() {
-            // 🔥 Use flex and remove hidden safely for proper CSS parsing
             appContainer.classList.remove('hidden');
             appContainer.classList.add('flex');
             
@@ -685,6 +681,23 @@
                 listenForUsers();
                 listenForIncomingCalls(); 
             } catch (err) { alert("Connection problem. Refresh page."); }
+        }
+
+        // 🔥 FIX 1: WebRTC Calling Fixes - Force Audio Playback 🔥
+        function initializePeerConnection() {
+            if (pc) pc.close();
+            pc = new RTCPeerConnection(servers);
+            
+            // Audio Stream Handler for Remote Call
+            pc.ontrack = event => {
+                const remoteAudio = document.getElementById('remote-audio');
+                if (remoteAudio.srcObject !== event.streams[0]) {
+                    remoteAudio.srcObject = event.streams[0];
+                    // Browser Auto-play Policy bypass kore force play korchi
+                    remoteAudio.play().catch(e => console.error("Audio Play Blocked by Browser:", e));
+                }
+            };
+            return pc;
         }
 
         function listenForIncomingCalls() {
@@ -724,12 +737,8 @@
 
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                remoteStream = new MediaStream();
-                document.getElementById('remote-audio').srcObject = remoteStream;
-
-                pc = new RTCPeerConnection(servers);
+                pc = initializePeerConnection();
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-                pc.ontrack = event => event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
 
                 const callId = generateChatId(myMobile, activeContactMobile);
                 const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', callId);
@@ -751,24 +760,31 @@
                     timestamp: Date.now()
                 });
 
-                onSnapshot(callDocRef, (snapshot) => {
+                // 🔥 FIX 2: Race Condition Fix - Listen for Answer Candidates ONLY AFTER Remote Description is set
+                const callUnsubscribe = onSnapshot(callDocRef, async (snapshot) => {
                     const data = snapshot.data();
                     if(!pc.currentRemoteDescription && data?.answer) {
                         document.getElementById('call-status').innerText = "In Call (Connected)";
                         const answerDescription = new RTCSessionDescription(data.answer);
-                        pc.setRemoteDescription(answerDescription);
+                        await pc.setRemoteDescription(answerDescription);
+
+                        // Start receiving ICE candidates after description is set
+                        onSnapshot(answerCandidates, (candSnapshot) => {
+                            candSnapshot.docChanges().forEach(change => {
+                                if(change.type === 'added') {
+                                    const candidate = new RTCIceCandidate(change.doc.data());
+                                    pc.addIceCandidate(candidate).catch(e => console.error(e));
+                                }
+                            });
+                        });
                     }
                 });
+                
+                // Store unsubscribe to clear if call drops
+                pc.callUnsubscribe = callUnsubscribe;
 
-                onSnapshot(answerCandidates, (snapshot) => {
-                    snapshot.docChanges().forEach(change => {
-                        if(change.type === 'added') {
-                            const candidate = new RTCIceCandidate(change.doc.data());
-                            pc.addIceCandidate(candidate);
-                        }
-                    });
-                });
             } catch (err) {
+                console.error("Mic error:", err);
                 alert("Microphone permission denied! Please allow access.");
                 resetCallUI();
             }
@@ -781,21 +797,18 @@
 
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                remoteStream = new MediaStream();
-                document.getElementById('remote-audio').srcObject = remoteStream;
-
-                pc = new RTCPeerConnection(servers);
+                pc = initializePeerConnection();
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-                pc.ontrack = event => event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
 
                 const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', incomingCallData.id);
-                const offerCandidates = collection(callDocRef, 'offerCandidates');
                 const answerCandidates = collection(callDocRef, 'answerCandidates');
+                const offerCandidates = collection(callDocRef, 'offerCandidates');
 
                 pc.onicecandidate = event => {
                     if(event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
                 };
 
+                // 🔥 FIX 3: Wait for Remote Description BEFORE generating Answer
                 const offerDescription = new RTCSessionDescription(incomingCallData.offer);
                 await pc.setRemoteDescription(offerDescription);
 
@@ -809,15 +822,17 @@
                 
                 document.getElementById('call-status').innerText = "In Call (Connected)";
 
+                // Now listen to offer ICE candidates
                 onSnapshot(offerCandidates, (snapshot) => {
                     snapshot.docChanges().forEach(change => {
                         if(change.type === 'added') {
                             const candidate = new RTCIceCandidate(change.doc.data());
-                            pc.addIceCandidate(candidate);
+                            pc.addIceCandidate(candidate).catch(e => console.error(e));
                         }
                     });
                 });
             } catch(e) {
+                console.error("Answer Error:", e);
                 alert("Could not connect the call.");
                 resetCallUI();
             }
@@ -840,6 +855,7 @@
                 localStream = null;
             }
             if (pc) {
+                if(pc.callUnsubscribe) pc.callUnsubscribe();
                 pc.close();
                 pc = null;
             }
@@ -968,17 +984,14 @@
 
         window.addEventListener('hashchange', () => { if (window.location.hash !== '#chat' && activeContactMobile) closeChatLogic(); });
 
-        // 🔥 CRITICAL FIX: Robust Mobile Navigation Logic 🔥
         function closeChatLogic() {
             document.getElementById('sidebar').classList.remove('hidden');
             document.getElementById('sidebar').classList.add('flex');
             
             if (window.innerWidth < 768) {
-                // On mobile: Hide chat area fully
                 document.getElementById('chat-area').classList.remove('flex');
                 document.getElementById('chat-area').classList.add('hidden');
             } else {
-                // On desktop: Keep chat area flex, show empty state
                 document.getElementById('empty-chat-state').classList.remove('hidden');
             }
             
@@ -997,13 +1010,12 @@
             
             document.getElementById('empty-chat-state').classList.add('hidden');
             
-            // 🔥 CRITICAL FIX: Proper CSS Class toggling for Mobile Layout 🔥
             if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.remove('flex');
                 document.getElementById('sidebar').classList.add('hidden'); 
                 
                 document.getElementById('chat-area').classList.remove('hidden');
-                document.getElementById('chat-area').classList.add('flex'); // Add flex back
+                document.getElementById('chat-area').classList.add('flex'); 
                 
                 if(window.location.hash !== '#chat') window.location.hash = 'chat';
             } else { 
