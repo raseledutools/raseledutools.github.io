@@ -96,15 +96,15 @@
     <div id="join-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-lg transition-opacity">
         <div class="bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-500 to-purple-600"></div>
-            <div class="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-pink-500/30 transform rotate-3">
-                <i class="fa-solid fa-paper-plane text-3xl text-white -rotate-3"></i>
+            <div class="w-20 h-20 bg-pink-500/20 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-pink-500/30 transform rotate-3">
+                <i class="fa-solid fa-bolt-lightning text-3xl text-pink-400 -rotate-3"></i>
             </div>
             <h2 class="text-2xl font-black mb-2 text-white tracking-tight">Nexus Messenger</h2>
             <p class="text-slate-400 text-sm mb-8 font-medium">Secure and unified private chat.</p>
             
             <form id="join-form" class="space-y-4">
-                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500 transition-all font-bold text-base shadow-inner" placeholder="Your Name">
-                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-purple-500 transition-all font-bold tracking-widest text-base shadow-inner" placeholder="Mobile Number (11 digits)">
+                <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all font-bold text-base shadow-inner" placeholder="Your Name">
+                <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white text-center focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all font-bold tracking-widest text-base shadow-inner" placeholder="Mobile Number (11 digits)">
                 
                 <button type="submit" id="join-btn" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 py-4 rounded-2xl text-white font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 text-sm mt-4">Connect Securely</button>
             </form>
@@ -120,11 +120,11 @@
             <button onclick="closeSettings()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <h2 class="text-xl font-black mb-6 text-white uppercase tracking-wider">Settings</h2>
+            <h2 class="text-xl font-black mb-6 text-white uppercase tracking-wider">Profile Settings</h2>
 
             <div class="relative w-32 h-32 mx-auto mb-6 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()">
-                <img id="settings-avatar-preview" src="" class="w-full h-full rounded-[2rem] object-cover group-hover:opacity-50 transition-opacity bg-slate-800 shadow-xl border-2 border-white/10">
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] bg-black/40">
+                <img id="settings-avatar-preview" src="" class="w-full h-full rounded-[2rem] object-cover group-hover:opacity-60 transition-opacity bg-slate-800 shadow-lg border-2 border-white/10">
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-[2rem] bg-black/50">
                     <i class="fa-solid fa-camera text-3xl text-white"></i>
                 </div>
             </div>
@@ -132,13 +132,13 @@
 
             <div class="mb-6 text-left">
                 <label class="text-pink-400 text-xs font-bold uppercase tracking-widest mb-2 block ml-1">Display Name</label>
-                <div class="flex items-center bg-black/40 rounded-2xl border border-white/10 px-4 py-2 focus-within:border-pink-500 transition-colors">
+                <div class="flex items-center bg-black/40 rounded-2xl border border-white/10 px-4 py-2 focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-500/20 transition-all">
                     <input type="text" id="settings-name-input" class="w-full bg-transparent p-2 text-white focus:outline-none text-base font-bold" placeholder="Enter your name">
                     <i class="fa-solid fa-pen text-slate-500 text-sm"></i>
                 </div>
             </div>
 
-            <button id="save-settings-btn" onclick="saveProfileSettings()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 py-4 rounded-2xl text-white font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg">
+            <button id="save-settings-btn" onclick="saveProfileSettings()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 py-4 rounded-2xl text-white font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-pink-500/30">
                 <i class="fa-solid fa-check"></i> Save Changes
             </button>
         </div>
@@ -150,6 +150,7 @@
             
             <!-- LEFT SIDEBAR (Contacts) -->
             <div id="sidebar" class="w-full md:w-[380px] lg:w-[420px] flex flex-col border-r border-white/5 glass-panel z-20 flex-shrink-0 absolute md:relative inset-0 md:inset-auto">
+                <!-- Top Header -->
                 <header class="p-4 bg-black/20 flex items-center justify-between shrink-0 border-b border-white/5" style="padding-top: max(1rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
                         <img id="my-avatar" src="" onclick="openSettings()" class="w-11 h-11 rounded-[1rem] object-cover cursor-pointer hover:opacity-80 transition-opacity border border-white/10 shadow-md bg-slate-800" title="Profile Settings">
@@ -165,7 +166,7 @@
                         <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-pink-600 hover:text-white transition-colors" title="Settings">
                             <i class="fa-solid fa-gear text-sm"></i>
                         </button>
-                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors" title="Logout">
+                        <button onclick="logoutPvtChat()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white transition-colors" title="Logout">
                             <i class="fa-solid fa-right-from-bracket text-sm"></i>
                         </button>
                     </div>
@@ -191,18 +192,18 @@
             <div id="chat-area" class="w-full hidden flex-col relative h-full bg-slate-950/50">
                 
                 <div id="empty-chat-state" class="absolute inset-0 z-40 flex flex-col items-center justify-center chat-bg backdrop-blur-sm border-l border-white/5">
-                    <div class="w-24 h-24 bg-gradient-to-br from-pink-500/20 to-purple-600/20 rounded-3xl flex items-center justify-center mb-6 border border-pink-500/20 shadow-2xl transform rotate-3">
-                        <i class="fa-solid fa-paper-plane text-4xl text-pink-400 -rotate-3"></i>
+                    <div class="w-28 h-28 bg-gradient-to-br from-pink-500/10 to-purple-600/10 rounded-[2rem] flex items-center justify-center mb-6 border border-pink-500/20 shadow-xl transform rotate-3">
+                        <i class="fa-solid fa-bolt-lightning text-5xl text-pink-400 -rotate-3"></i>
                     </div>
-                    <h2 class="text-3xl font-black text-white mb-3 tracking-tight">Nexus Chat</h2>
-                    <p class="text-slate-400 text-sm max-w-sm text-center px-4 font-medium leading-relaxed">Select a contact to start an encrypted conversation. Share media, voice notes, and make live calls.</p>
-                    <div class="mt-8 bg-black/40 border border-white/5 px-4 py-2 rounded-full text-xs text-slate-500 flex items-center gap-2 font-bold">
-                        <i class="fa-solid fa-lock text-emerald-500"></i> P2P Encryption Active
+                    <h2 class="text-3xl font-black text-white mb-3 tracking-tight">Nexus Chat Suite</h2>
+                    <p class="text-slate-400 text-sm max-w-sm text-center px-4 font-medium leading-relaxed">Select a contact to start an encrypted conversation. Experience seamless messaging.</p>
+                    <div class="mt-8 bg-black/40 border border-white/10 shadow-sm px-4 py-2 rounded-full text-xs text-slate-400 flex items-center gap-2 font-bold">
+                        <i class="fa-solid fa-shield-halved text-emerald-500"></i> P2P Encryption Active
                     </div>
                 </div>
 
                 <!-- Chat Header -->
-                <header class="p-3 md:p-4 bg-black/20 flex items-center justify-between shrink-0 relative z-30 border-b border-white/5 shadow-md" style="padding-top: max(0.5rem, env(safe-area-inset-top));">
+                <header class="p-3 md:p-4 bg-black/20 flex items-center justify-between shrink-0 relative z-30 border-b border-white/10 shadow-md" style="padding-top: max(0.5rem, env(safe-area-inset-top));">
                     <div class="flex items-center gap-3">
                         <button onclick="closeChatMobile()" class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-slate-300 hover:bg-white/10 shrink-0 transition-colors bg-white/5 border border-white/10">
                             <i class="fa-solid fa-arrow-left text-sm"></i>
@@ -224,7 +225,7 @@
                         <button onclick="toggleChatMenu(event)" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-sm"></i></button>
                         
                         <div id="chat-dropdown" class="dropdown-menu absolute top-14 right-2 bg-slate-800 border border-white/10 rounded-2xl shadow-xl py-2 w-48 z-50 overflow-hidden">
-                            <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-400 hover:bg-red-500 hover:text-white transition-colors flex items-center gap-3 font-bold">
+                            <button onclick="clearEntireChat()" class="w-full text-left px-5 py-3 text-sm text-red-400 hover:bg-red-500/20 transition-colors flex items-center gap-3 font-bold">
                                 <i class="fa-solid fa-trash-can w-4 text-center"></i> Clear Chat
                             </button>
                         </div>
@@ -298,13 +299,13 @@
         </div>
     </div>
 
-    <!-- 🔥 AUDIO & VIDEO CALL UI MODAL (CRITICAL ERROR FIXED) 🔥 -->
+    <!-- 🔥 AUDIO & VIDEO CALL UI MODAL 🔥 -->
     <div id="call-modal" class="hidden fixed inset-0 z-[300] bg-slate-950 overflow-hidden flex-col">
         <audio id="remote-audio" autoplay playsinline></audio>
         <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover hidden z-0 bg-black"></video>
         <video id="local-video" autoplay playsinline muted class="absolute top-12 right-4 md:top-8 md:right-8 w-28 h-40 md:w-40 md:h-56 bg-slate-800 rounded-2xl border-2 border-white/20 object-cover hidden z-20 shadow-2xl"></video>
 
-        <div id="call-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900/90 backdrop-blur-xl transition-opacity duration-500">
+        <div id="call-overlay" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-xl transition-opacity duration-500">
             <div class="relative mb-8">
                 <img id="call-avatar" src="" class="w-32 h-32 rounded-[2rem] object-cover z-10 relative border-4 border-pink-500 shadow-2xl shadow-pink-500/50">
                 <div class="absolute inset-0 border-4 border-pink-500 rounded-[2rem] animate-ping opacity-40 z-0"></div>
@@ -315,7 +316,7 @@
         
         <!-- Call Controls -->
         <div class="absolute bottom-10 md:bottom-12 left-1/2 -translate-x-1/2 flex items-center justify-center gap-6 z-30 w-full px-4">
-            <button id="answer-btn" onclick="answerCall()" class="hidden w-16 h-16 rounded-full bg-emerald-500 text-white text-2xl hover:bg-emerald-400 hover:scale-110 transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center">
+            <button id="answer-btn" onclick="answerCall()" class="hidden w-16 h-16 rounded-full bg-emerald-600 text-white text-2xl hover:bg-emerald-500 hover:scale-110 transition-all shadow-lg shadow-emerald-600/40 flex items-center justify-center">
                 <i class="fa-solid fa-phone"></i>
             </button>
 
@@ -340,15 +341,20 @@
         </div>
     </div>
 
-    <!-- Firebase & Chat Logic -->
+    <!-- Firebase Logic & WebRTC Import -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // 🔥 Import WebRTC Engine 🔥
+        import { setupWebRTC } from "./webrtc_core.js";
 
         function setRealViewportHeight() {
             let vh = window.innerHeight;
-            if (window.visualViewport) vh = window.visualViewport.height;
+            if (window.visualViewport) {
+                vh = window.visualViewport.height;
+            }
             document.body.style.height = vh + 'px';
             document.documentElement.style.height = vh + 'px';
             
@@ -397,22 +403,17 @@
         let audioChunks = [];
         let isRecording = false;
         let settingsSelectedFile = null;
-        
-        // 🔥 PERFECT FIX: Strict Google STUN Servers without parameters 🔥
-        const servers = { 
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-            ] 
-        };
-        let pc = null;
-        let localStream = null;
-        let incomingCallData = null;
-        let currentCallId = null; 
-        let remoteDescriptionSet = false;
-        let iceCandidateQueue = [];
 
         const appStartTime = Date.now();
+
+        // 🔥 Initialize the External WebRTC Engine 🔥
+        setupWebRTC(
+            db, 
+            SYNC_APP_ID, 
+            () => myMobile, 
+            () => activeContactMobile, 
+            () => allUsers
+        );
 
         const joinModal = document.getElementById('join-modal');
         const appContainer = document.getElementById('app-container');
@@ -503,7 +504,7 @@
             const saveBtn = document.getElementById('save-settings-btn');
             const originalText = saveBtn.innerHTML;
             saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xl"></i> Saving...';
 
             try {
                 let updatedAvatarUrl = myAvatarUrl;
@@ -731,266 +732,13 @@
                 updateMyStatus();
                 activeTrackingInterval = setInterval(updateMyStatus, 60000);
                 listenForUsers();
-                listenForIncomingCalls(); 
+                
+                // Tell WebRTC to listen for calls
+                if(window.listenForIncomingCallsWebRTC) {
+                    window.listenForIncomingCallsWebRTC();
+                }
             } catch (err) {}
         }
-
-        // 🔥 ROBUST CALL UI REBUILD 🔥
-        function initializePeerConnection() {
-            if (pc) pc.close();
-            pc = new RTCPeerConnection(servers);
-            remoteDescriptionSet = false; iceCandidateQueue = [];
-
-            const remoteVideo = document.getElementById('remote-video');
-            const remoteAudio = document.getElementById('remote-audio');
-            
-            // Clean up old streams completely
-            remoteVideo.srcObject = new MediaStream();
-            remoteAudio.srcObject = new MediaStream();
-            remoteVideo.muted = false;
-            remoteAudio.muted = false;
-
-            pc.ontrack = event => {
-                const track = event.track;
-                if (track.kind === 'video') {
-                    remoteVideo.srcObject.addTrack(track);
-                    remoteVideo.classList.remove('hidden');
-                    // Play is forced inside a promise catch
-                    setTimeout(() => remoteVideo.play().catch(e=>{}), 100);
-                } else if (track.kind === 'audio') {
-                    remoteAudio.srcObject.addTrack(track);
-                    setTimeout(() => remoteAudio.play().catch(e=>{}), 100);
-                }
-            };
-            return pc;
-        }
-
-        async function processIceCandidate(candidateData) {
-            if (remoteDescriptionSet && pc) {
-                await pc.addIceCandidate(new RTCIceCandidate(candidateData)).catch(e=>{});
-            } else { iceCandidateQueue.push(candidateData); }
-        }
-
-        function listenForIncomingCalls() {
-            const callsRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls');
-            onSnapshot(callsRef, (snapshot) => {
-                snapshot.docChanges().forEach(change => {
-                    const callData = change.doc.data();
-                    const callId = change.doc.id;
-                    
-                    if (change.type === 'added' || change.type === 'modified') {
-                        if (callData.callee === myMobile && callData.status === 'calling') {
-                            incomingCallData = { id: callId, ...callData };
-                            
-                            document.getElementById('call-modal').classList.remove('hidden');
-                            document.getElementById('call-modal').classList.add('flex');
-                            document.getElementById('call-name').innerText = "Incoming Call";
-                            
-                            const caller = allUsers.find(u => u.mobile === callData.caller);
-                            document.getElementById('call-avatar').src = caller ? getAvatarUrl(caller.name, caller.avatarUrl) : getAvatarUrl("User", "");
-                            
-                            const callTypeStr = callData.type === 'video' ? "Video Call" : "Audio Call";
-                            document.getElementById('call-status').innerText = callTypeStr;
-                            
-                            document.getElementById('answer-btn').classList.remove('hidden');
-                            document.getElementById('in-call-controls').classList.add('hidden');
-                            document.getElementById('caller-hangup-btn').classList.add('hidden');
-                            
-                            if(callData.type === 'video') document.getElementById('answer-btn').innerHTML = '<i class="fa-solid fa-video"></i>';
-                            else document.getElementById('answer-btn').innerHTML = '<i class="fa-solid fa-phone"></i>';
-                            try { document.getElementById('ringtone-sound').play(); } catch(e){}
-                        }
-                        if (callData.status === 'ended' && (currentCallId === callId || (incomingCallData && incomingCallData.id === callId))) {
-                            resetCallUI();
-                        }
-                    }
-                });
-            });
-        }
-
-        window.startCall = async (type) => {
-            if(!activeContactMobile) return;
-            
-            document.getElementById('call-modal').classList.remove('hidden');
-            document.getElementById('call-modal').classList.add('flex');
-            document.getElementById('call-name').innerText = document.getElementById('active-chat-name').innerText;
-            document.getElementById('call-avatar').src = document.getElementById('active-chat-avatar').src;
-            document.getElementById('call-status').innerText = "Calling...";
-            
-            document.getElementById('answer-btn').classList.add('hidden');
-            document.getElementById('in-call-controls').classList.add('hidden');
-            document.getElementById('caller-hangup-btn').classList.remove('hidden');
-            document.getElementById('call-overlay').classList.remove('opacity-0', 'pointer-events-none');
-
-            try {
-                // Minimum requirements for guaranteed support
-                const constraints = type === 'video' ? { video: true, audio: true } : { audio: true };
-                
-                localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                
-                if(type === 'video') {
-                    const localVid = document.getElementById('local-video');
-                    localVid.srcObject = localStream;
-                    localVid.classList.remove('hidden');
-                }
-                
-                pc = initializePeerConnection();
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-
-                currentCallId = "call_" + generateChatId(myMobile, activeContactMobile) + "_" + Date.now();
-                const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', currentCallId);
-                const offerCandidates = collection(callDocRef, 'offerCandidates');
-                const answerCandidates = collection(callDocRef, 'answerCandidates');
-
-                pc.onicecandidate = event => { if(event.candidate) addDoc(offerCandidates, event.candidate.toJSON()); };
-
-                const offerDescription = await pc.createOffer();
-                await pc.setLocalDescription(offerDescription);
-
-                await setDoc(callDocRef, {
-                    offer: { type: offerDescription.type, sdp: offerDescription.sdp },
-                    caller: myMobile, callee: activeContactMobile, type: type, status: 'calling', timestamp: Date.now()
-                });
-
-                const callUnsubscribe = onSnapshot(callDocRef, async (snapshot) => {
-                    const data = snapshot.data();
-                    if(pc && !remoteDescriptionSet && data?.answer) {
-                        const answerDescription = new RTCSessionDescription(data.answer);
-                        await pc.setRemoteDescription(answerDescription);
-                        remoteDescriptionSet = true;
-                        
-                        document.getElementById('call-status').innerText = "Connected";
-                        document.getElementById('caller-hangup-btn').classList.add('hidden');
-                        document.getElementById('in-call-controls').classList.remove('hidden');
-                        
-                        if(type === 'video') {
-                            document.getElementById('call-overlay').classList.add('opacity-0', 'pointer-events-none');
-                            document.getElementById('cam-toggle-btn').classList.remove('hidden');
-                        }
-                        
-                        for(let cand of iceCandidateQueue) await pc.addIceCandidate(new RTCIceCandidate(cand)).catch(e=>{});
-                        iceCandidateQueue = [];
-                        
-                        onSnapshot(answerCandidates, (candSnapshot) => {
-                            candSnapshot.docChanges().forEach(change => {
-                                if(change.type === 'added') processIceCandidate(change.doc.data());
-                            });
-                        });
-                    }
-                });
-                pc.callUnsubscribe = callUnsubscribe;
-
-            } catch (err) {
-                console.error("Device media error:", err);
-                alert("Please allow Camera/Microphone permissions in your browser settings to make a call.");
-                resetCallUI();
-            }
-        };
-
-        window.answerCall = async () => {
-            if(!incomingCallData) return;
-            
-            document.getElementById('ringtone-sound').pause();
-            document.getElementById('ringtone-sound').currentTime = 0;
-            
-            document.getElementById('call-status').innerText = "Connecting...";
-            document.getElementById('answer-btn').classList.add('hidden');
-
-            const type = incomingCallData.type;
-
-            try {
-                const constraints = type === 'video' ? { video: true, audio: true } : { audio: true };
-                
-                localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                
-                if(type === 'video') {
-                    const localVid = document.getElementById('local-video');
-                    localVid.srcObject = localStream;
-                    localVid.classList.remove('hidden');
-                }
-                
-                pc = initializePeerConnection();
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-
-                currentCallId = incomingCallData.id;
-                const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', currentCallId);
-                const answerCandidates = collection(callDocRef, 'answerCandidates');
-                const offerCandidates = collection(callDocRef, 'offerCandidates');
-
-                pc.onicecandidate = event => { if(event.candidate) addDoc(answerCandidates, event.candidate.toJSON()); };
-
-                const offerDescription = new RTCSessionDescription(incomingCallData.offer);
-                await pc.setRemoteDescription(offerDescription);
-                remoteDescriptionSet = true;
-
-                const answerDescription = await pc.createAnswer();
-                await pc.setLocalDescription(answerDescription);
-
-                await updateDoc(callDocRef, { answer: { type: answerDescription.type, sdp: answerDescription.sdp }, status: 'answered' });
-                
-                document.getElementById('call-status').innerText = "Connected";
-                document.getElementById('in-call-controls').classList.remove('hidden');
-                
-                if(type === 'video') {
-                    document.getElementById('call-overlay').classList.add('opacity-0', 'pointer-events-none');
-                    document.getElementById('cam-toggle-btn').classList.remove('hidden');
-                }
-                
-                onSnapshot(offerCandidates, (snapshot) => {
-                    snapshot.docChanges().forEach(change => { if(change.type === 'added') processIceCandidate(change.doc.data()); });
-                });
-            } catch(e) {
-                console.error("Answer error:", e);
-                alert("Connection failed: Please allow Camera/Mic.");
-                resetCallUI();
-            }
-        };
-
-        window.hangupCall = async () => {
-            const idToHangup = currentCallId || (incomingCallData ? incomingCallData.id : null);
-            if(idToHangup) {
-                const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', idToHangup);
-                await updateDoc(callDocRef, { status: 'ended' }).catch(()=>{});
-            }
-            resetCallUI();
-        };
-
-        function resetCallUI() {
-            document.getElementById('ringtone-sound').pause(); document.getElementById('ringtone-sound').currentTime = 0;
-            document.getElementById('call-modal').classList.remove('flex'); document.getElementById('call-modal').classList.add('hidden');
-            document.getElementById('call-overlay').classList.remove('opacity-0', 'pointer-events-none');
-            document.getElementById('local-video').classList.add('hidden'); document.getElementById('remote-video').classList.add('hidden');
-            document.getElementById('cam-toggle-btn').classList.add('hidden');
-
-            if (localStream) { localStream.getTracks().forEach(track => track.stop()); localStream = null; }
-            if (pc) { if(pc.callUnsubscribe) pc.callUnsubscribe(); pc.close(); pc = null; }
-            incomingCallData = null; currentCallId = null; remoteDescriptionSet = false; iceCandidateQueue = [];
-            const remoteVideo = document.getElementById('remote-video'); if(remoteVideo) { remoteVideo.srcObject = null; }
-            const remoteAudio = document.getElementById('remote-audio'); if(remoteAudio) { remoteAudio.srcObject = null; }
-            const localVideo = document.getElementById('local-video'); if(localVideo) localVideo.srcObject = null;
-        }
-
-        window.toggleMic = () => {
-            if(!localStream) return;
-            const audioTrack = localStream.getAudioTracks()[0];
-            if(audioTrack) {
-                audioTrack.enabled = !audioTrack.enabled;
-                const btn = document.getElementById('mic-toggle-btn');
-                if(audioTrack.enabled) { btn.innerHTML = '<i class="fa-solid fa-microphone"></i>'; btn.classList.replace('text-red-500', 'text-white'); } 
-                else { btn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i>'; btn.classList.replace('text-white', 'text-red-500'); }
-            }
-        };
-
-        window.toggleCamera = () => {
-            if(!localStream) return;
-            const videoTrack = localStream.getVideoTracks()[0];
-            if(videoTrack) {
-                videoTrack.enabled = !videoTrack.enabled;
-                const btn = document.getElementById('cam-toggle-btn');
-                if(videoTrack.enabled) { btn.innerHTML = '<i class="fa-solid fa-video"></i>'; btn.classList.replace('text-red-500', 'text-white'); } 
-                else { btn.innerHTML = '<i class="fa-solid fa-video-slash"></i>'; btn.classList.replace('text-white', 'text-red-500'); }
-            }
-        };
 
         function listenForUsers() {
             const usersRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users');
@@ -1039,7 +787,7 @@
             
             filteredUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile;
-                const activeClass = isActive ? 'contact-active' : 'hover:bg-white/5 border-l-4 border-transparent';
+                const activeClass = isActive ? 'contact-active bg-white/5' : 'hover:bg-white/5 border-l-4 border-transparent';
                 
                 const latestMsg = latestMessages[user.mobile];
                 let msgPreview = "Tap to start chatting";
@@ -1049,7 +797,7 @@
 
                 if (latestMsg) {
                     const isMe = latestMsg.senderMobile === myMobile;
-                    let tickClass = latestMsg.read ? "text-blue-400" : "text-slate-500";
+                    let tickClass = latestMsg.read ? "text-cyan-400" : "text-slate-500";
                     const prefix = isMe ? `<i class='fa-solid fa-check-double text-[11px] mr-1 ${tickClass}'></i> ` : "";
                     
                     if (latestMsg.text) msgPreview = prefix + escapeHTML(latestMsg.text);
@@ -1082,7 +830,7 @@
                 div.innerHTML = `
                     <div class="relative shrink-0 mr-4">
                         <img src="${userAvatar}" class="w-12 h-12 rounded-[1rem] object-cover bg-slate-800 border border-white/10 shadow-sm">
-                        <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 ${dotColor} border-2 border-slate-900 rounded-full"></span>
+                        <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 ${dotColor} border-2 border-[#0f172a] rounded-full"></span>
                     </div>
                     <div class="flex-grow flex flex-col justify-center overflow-hidden">
                         <div class="flex justify-between items-center mb-0.5">
@@ -1119,6 +867,11 @@
             activeContactMobile = null; renderContacts();
             if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus();
         }
+
+        window.closeChatMobile = () => { 
+            if (window.innerWidth < 768 && window.location.hash === '#chat') history.back(); 
+            else closeChatLogic(); 
+        };
 
         window.openPrivateChat = (contactName, contactMobile, contactAvatarUrl) => {
             activeContactMobile = contactMobile;
@@ -1181,8 +934,6 @@
             });
         };
 
-        window.closeChatMobile = () => { if (window.innerWidth < 768 && window.location.hash === '#chat') history.back(); else closeChatLogic(); };
-        
         window.toggleReactionMenu = (docId, e) => {
             e.stopPropagation(); if(e.target.closest('button')) return; 
             const menu = document.getElementById(`react-menu-${docId}`);
@@ -1300,7 +1051,7 @@
                     content = `
                     <div class="flex items-center gap-3 w-56 md:w-64 pt-1 pb-1">
                         <div class="relative shrink-0">
-                            <img src="${avatarForAudio}" class="w-12 h-12 rounded-[1rem] object-cover shadow-sm border-2 ${isMe ? 'border-white/30' : 'border-slate-600'} bg-slate-700">
+                            <img src="${avatarForAudio}" class="w-12 h-12 rounded-full object-cover shadow-sm border-2 ${isMe ? 'border-white/30' : 'border-slate-600'} bg-slate-700">
                             <div class="absolute -bottom-1 -right-1 ${isMe ? 'bg-purple-700 border-white/20' : 'bg-slate-800 border-slate-600'} rounded-full p-1 border-2">
                                 <i class="fa-solid fa-microphone ${micColor} text-[9px]"></i>
                             </div>
@@ -1331,7 +1082,6 @@
             }
             
             let finalHtmlText = data.text ? `<p class="text-[15px] whitespace-pre-wrap leading-relaxed px-1 ${textColor} font-medium mt-1">${escapeHTML(data.text)}</p>` : '';
-            
             let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-slate-900 border border-white/10 rounded-full px-2 py-0.5 text-[11px] shadow-lg z-10 hover:bg-slate-800 transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
 
             let popupMenu = `
