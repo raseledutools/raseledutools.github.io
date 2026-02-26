@@ -12,6 +12,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
+        /* 🔥 Android Display & Keyboard Fixes 🔥 */
         html, body { 
             font-family: 'Inter', sans-serif; 
             background-color: #020617; 
@@ -46,6 +47,7 @@
         
         .glass-panel { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); }
         
+        /* Stop auto-zoom on mobile */
         textarea, input { font-size: 16px !important; } 
         
         .contact-active { background: linear-gradient(to right, rgba(236,72,153,0.1), rgba(168,85,247,0.1)); border-left: 4px solid #ec4899; }
@@ -348,16 +350,16 @@
         let isRecording = false;
         let settingsSelectedFile = null;
         
-        // 🔥 IMPROVED WEBRTC VARIABLES WITH STUN FALLBACKS 🔥
+        // 🔥 IMPROVED WEBRTC VARIABLES (Race Condition Fixed) 🔥
         const servers = { 
             iceServers: [
-                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
-                { urls: 'stun:global.stun.twilio.com:3478?transport=udp' }
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
             ] 
         };
         let pc = null;
         let localStream = null;
         let incomingCallData = null;
+        let currentCallId = null; // <- Eitai call kete jaoya thekabe!
 
         const appStartTime = Date.now();
 
@@ -679,13 +681,12 @@
             } catch (err) { alert("Connection problem. Refresh page."); }
         }
 
-        // 🔥 FIX 1: WebRTC Audio Connection Setup 🔥
+        // 🔥 FIX 1: Correct Audio Initiation for Call 🔥
         function initializePeerConnection() {
             if (pc) pc.close();
             pc = new RTCPeerConnection(servers);
             
             const remoteAudio = document.getElementById('remote-audio');
-            // Force reset audio state
             remoteAudio.srcObject = null;
             remoteAudio.volume = 1.0;
             remoteAudio.muted = false;
@@ -693,8 +694,7 @@
             pc.ontrack = event => {
                 if (remoteAudio.srcObject !== event.streams[0]) {
                     remoteAudio.srcObject = event.streams[0];
-                    // Play must be explicitly called to bypass mobile security policies
-                    remoteAudio.play().catch(e => console.error("Audio blocked by browser, wait for interaction.", e));
+                    remoteAudio.play().catch(e => console.error("Audio blocked by browser, interaction needed.", e));
                 }
             };
             return pc;
@@ -718,8 +718,11 @@
                             document.getElementById('answer-btn').classList.remove('hidden');
                             try { document.getElementById('notification-sound').play(); } catch(e){}
                         }
-                        if ((callData.caller === myMobile || callData.callee === myMobile) && callData.status === 'ended') {
-                            resetCallUI();
+                        // 🔥 Only reset if THIS specific call ended
+                        if (callData.status === 'ended') {
+                            if (currentCallId === callId || (incomingCallData && incomingCallData.id === callId)) {
+                                resetCallUI();
+                            }
                         }
                     }
                 });
@@ -736,20 +739,15 @@
             document.getElementById('answer-btn').classList.add('hidden');
 
             try {
-                // Pre-play silent audio to unlock audio context on mobile
-                const remoteAudio = document.getElementById('remote-audio');
-                remoteAudio.play().catch(e => {});
-
-                // Added echo cancellation & noise suppression to prevent howling
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
-                });
+                // 🔥 Android OverconstrainedError Fix: Shudhu basic audio call kora holo
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 
                 pc = initializePeerConnection();
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
-                const callId = generateChatId(myMobile, activeContactMobile);
-                const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', callId);
+                // 🔥 Unique Call ID to prevent Database Mix-up
+                currentCallId = "call_" + generateChatId(myMobile, activeContactMobile) + "_" + Date.now();
+                const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', currentCallId);
                 const offerCandidates = collection(callDocRef, 'offerCandidates');
                 const answerCandidates = collection(callDocRef, 'answerCandidates');
 
@@ -768,7 +766,6 @@
                     timestamp: Date.now()
                 });
 
-                // 🔥 FIX 2: Prevent ICE Race Conditions
                 const callUnsubscribe = onSnapshot(callDocRef, async (snapshot) => {
                     const data = snapshot.data();
                     if(!pc.currentRemoteDescription && data?.answer) {
@@ -777,7 +774,6 @@
                         
                         document.getElementById('call-status').innerText = "In Call (Connected)";
 
-                        // Start receiving ICE candidates AFTER remote description is set
                         onSnapshot(answerCandidates, (candSnapshot) => {
                             candSnapshot.docChanges().forEach(change => {
                                 if(change.type === 'added') {
@@ -792,7 +788,7 @@
 
             } catch (err) {
                 console.error("Mic error:", err);
-                alert("Microphone permission denied! Please allow access.");
+                alert("Call Failed: " + err.message + "\n\n(Microphone access is required)");
                 resetCallUI();
             }
         };
@@ -803,18 +799,14 @@
             document.getElementById('answer-btn').classList.add('hidden');
 
             try {
-                // Force play to satisfy browser policies
-                const remoteAudio = document.getElementById('remote-audio');
-                remoteAudio.play().catch(e => {});
-
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
-                });
+                // 🔥 Basic audio call request
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 
                 pc = initializePeerConnection();
                 localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
-                const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', incomingCallData.id);
+                currentCallId = incomingCallData.id;
+                const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', currentCallId);
                 const answerCandidates = collection(callDocRef, 'answerCandidates');
                 const offerCandidates = collection(callDocRef, 'offerCandidates');
 
@@ -822,7 +814,6 @@
                     if(event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
                 };
 
-                // Wait for Remote Description BEFORE answering
                 const offerDescription = new RTCSessionDescription(incomingCallData.offer);
                 await pc.setRemoteDescription(offerDescription);
 
@@ -836,7 +827,6 @@
                 
                 document.getElementById('call-status').innerText = "In Call (Connected)";
 
-                // Now listen to offer ICE candidates
                 onSnapshot(offerCandidates, (snapshot) => {
                     snapshot.docChanges().forEach(change => {
                         if(change.type === 'added') {
@@ -847,15 +837,15 @@
                 });
             } catch(e) {
                 console.error("Answer Error:", e);
-                alert("Could not connect the call.");
+                alert("Could not connect the call: " + e.message);
                 resetCallUI();
             }
         };
 
         window.hangupCall = async () => {
-            const currentCallId = incomingCallData ? incomingCallData.id : (activeContactMobile ? generateChatId(myMobile, activeContactMobile) : null);
-            if(currentCallId) {
-                const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', currentCallId);
+            const idToHangup = currentCallId || (incomingCallData ? incomingCallData.id : null);
+            if(idToHangup) {
+                const callDocRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'calls', idToHangup);
                 await updateDoc(callDocRef, { status: 'ended' }).catch(()=>console.log("Call ended"));
             }
             resetCallUI();
@@ -874,6 +864,7 @@
                 pc = null;
             }
             incomingCallData = null;
+            currentCallId = null;
             const remoteAudio = document.getElementById('remote-audio');
             if(remoteAudio) {
                 remoteAudio.srcObject = null;
@@ -1000,10 +991,9 @@
 
         searchInput.addEventListener('input', () => renderContacts());
 
-        // 🔥 FIX 3: Robust Hardware Back Button Handling with PopState 🔥
+        // 🔥 FIX 2: Android Hardware Back Button Fix (PopState) 🔥
         window.addEventListener('popstate', (event) => {
             if (activeContactMobile && window.innerWidth < 768) {
-                // If back button pressed on mobile while chat is open, close chat visually
                 document.getElementById('sidebar').classList.remove('hidden');
                 document.getElementById('sidebar').classList.add('flex');
                 document.getElementById('chat-area').classList.remove('flex');
@@ -1024,8 +1014,9 @@
             if (window.innerWidth < 768) {
                 document.getElementById('chat-area').classList.remove('flex');
                 document.getElementById('chat-area').classList.add('hidden');
+                // Clean URL hash without triggering popstate
                 if (window.location.hash === '#chat') {
-                    history.replaceState(null, null, ' '); // Clean URL silently
+                    history.replaceState(null, null, ' '); 
                 }
             } else {
                 document.getElementById('empty-chat-state').classList.remove('hidden');
@@ -1047,14 +1038,11 @@
             document.getElementById('empty-chat-state').classList.add('hidden');
             
             if (window.innerWidth < 768) {
-                // Push state so Android Back Button works correctly
                 if (!document.getElementById('sidebar').classList.contains('hidden')) {
                     history.pushState({ chatOpen: true }, "Chat", "#chat");
                 }
-
                 document.getElementById('sidebar').classList.remove('flex');
                 document.getElementById('sidebar').classList.add('hidden'); 
-                
                 document.getElementById('chat-area').classList.remove('hidden');
                 document.getElementById('chat-area').classList.add('flex'); 
             } else { 
@@ -1109,8 +1097,9 @@
         };
 
         window.closeChatMobile = () => { 
+            // Phone er hardware back button ba Arrow duitoi ekoi kaj korbe
             if (window.innerWidth < 768 && window.location.hash === '#chat') {
-                history.back(); // Triggers popstate listener
+                history.back(); 
             } else {
                 closeChatLogic();
             }
