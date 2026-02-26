@@ -570,6 +570,7 @@
             }
         }
 
+        // 🔥 Fix: Update old accounts with new password 🔥
         document.getElementById('join-form').onsubmit = async (e) => {
             e.preventDefault();
             const n = document.getElementById('reg-name').value.trim(); 
@@ -577,24 +578,34 @@
             const p = document.getElementById('reg-password').value.trim();
             const joinBtn = document.getElementById('join-btn');
 
-            if (n && m.length === 11 && p.length === 6) {
+            if (n && m.length === 11 && p.length >= 4) {
                 const originalText = joinBtn.innerHTML; joinBtn.disabled = true; joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
                 try {
                     await signInAnonymously(auth);
                     const userRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', m);
                     const userSnap = await getDoc(userRef);
+                    
                     if (userSnap.exists()) {
                         const dbData = userSnap.data();
-                        if (dbData.password !== p) { alert("Wrong password for this mobile number."); joinBtn.disabled = false; joinBtn.innerHTML = originalText; return; }
+                        
+                        // If DB user doesn't have a password yet (old account), set it now.
+                        if (!dbData.password) {
+                            await updateDoc(userRef, { password: p, name: n }); 
+                        } else if (dbData.password !== p) { 
+                            alert("Wrong password for this mobile number."); 
+                            joinBtn.disabled = false; joinBtn.innerHTML = originalText; return; 
+                        }
+                        
                         if(dbData.avatarUrl) { myAvatarUrl = dbData.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); }
                     } else { 
                         await setDoc(userRef, { name: n, mobile: m, password: p, lastActive: Date.now(), typingTo: null, avatarUrl: '', statusVisible: true }); 
                     }
+                    
                     myName = n; myMobile = m; myPassword = p;
                     localStorage.setItem('pvt_chat_name', n); localStorage.setItem('pvt_chat_mobile', m); localStorage.setItem('pvt_chat_password', p);
                     joinModal.classList.add('hidden'); startApp();
-                } catch (err) { alert("Connection error!"); joinBtn.disabled = false; joinBtn.innerHTML = originalText; }
-            } else alert("Please fill all details correctly (6-digit password).");
+                } catch (err) { alert("Connection error! " + err.message); joinBtn.disabled = false; joinBtn.innerHTML = originalText; }
+            } else alert("Please fill all details correctly.");
         };
 
         // --- Active Status Toggle ---
@@ -973,13 +984,11 @@
                     if (!mData.read && mData.senderMobile !== myMobile) updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true });
                     
                     if(cachedChat) {
-                        // If cached, only append new or replace modified
                         const oldNode = document.getElementById(`msg-${change.doc.id}`);
                         if(change.type === "added" && !oldNode) msgBox.appendChild(createMessageElement(change.doc.id, mData, contactName));
                         else if(change.type === "modified" && oldNode) oldNode.replaceWith(createMessageElement(change.doc.id, mData, contactName));
                         else if(change.type === "removed" && oldNode) oldNode.remove();
                     } else {
-                        // Fresh render
                         msgBox.appendChild(createMessageElement(change.doc.id, mData, contactName));
                     }
                 });
