@@ -94,7 +94,7 @@
 </head>
 <body class="flex selection:bg-[#00a884]/30">
 
-    <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="notification-sound" src="https://assets.mixkit.co/active_storage/sfx/2854/2854-preview.mp3" preload="auto"></audio>
     <audio id="ringtone-sound" src="https://assets.mixkit.co/active_storage/sfx/2803/2803-preview.mp3" preload="auto" loop></audio>
 
     <div id="image-lightbox" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-md transition-opacity opacity-0 overflow-auto" style="touch-action: pan-x pan-y pinch-zoom;" onclick="closeLightbox()">
@@ -116,20 +116,6 @@
                 <input type="password" id="reg-password" required autocomplete="off" minlength="6" maxlength="6" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] transition-colors font-medium tracking-widest text-center text-lg" placeholder="Create 6-digit Password">
                 
                 <button type="submit" id="join-btn" class="w-full bg-[#00a884] hover:bg-[#029071] py-3 rounded-lg text-[#111b21] font-bold uppercase tracking-wide transition-colors mt-4">Create & Login</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="unlock-modal" class="hidden fixed inset-0 z-[105] flex items-center justify-center p-4 bg-[#111b21] transition-opacity">
-        <div class="bg-[#202c33] p-8 rounded-2xl w-full max-w-sm shadow-2xl text-center transform scale-100 transition-transform relative fade-in-anim border border-[#222d34]">
-            <img id="unlock-avatar" src="" class="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-2 border-[#00a884] shadow-lg">
-            <h2 class="text-xl font-bold mb-2 text-white" id="unlock-name-display">Welcome Back</h2>
-            <p class="text-[#8696a0] text-sm mb-6 font-medium">Enter password to decrypt chats.</p>
-            
-            <form id="unlock-form" class="space-y-4">
-                <input type="password" id="unlock-password" required autocomplete="off" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] transition-colors font-bold tracking-[0.5em] text-center text-2xl" placeholder="••••••">
-                <button type="submit" id="unlock-btn" class="w-full bg-[#00a884] hover:bg-[#029071] py-3 rounded-lg text-[#111b21] font-bold uppercase tracking-wide transition-colors mt-4"><i class="fa-solid fa-lock-open mr-2"></i> Unlock</button>
-                <button type="button" onclick="logoutPvtChat()" class="text-sm text-[#f15c6d] hover:underline mt-4 inline-block">Log in as another user</button>
             </form>
         </div>
     </div>
@@ -535,7 +521,6 @@
         );
 
         const joinModal = document.getElementById('join-modal');
-        const unlockModal = document.getElementById('unlock-modal');
         const appContainer = document.getElementById('app-container');
         const contactsContainer = document.getElementById('contacts-container');
         const searchInput = document.getElementById('search-input');
@@ -555,27 +540,13 @@
         }
 
         // --- AUTH FLOW ---
+        // 🔥 Now it bypasses login automatically if already logged in! 🔥
         if (myName && myMobile && myPassword) {
-            document.getElementById('unlock-avatar').src = getAvatarUrl(myName, myAvatarUrl);
-            document.getElementById('unlock-name-display').innerText = `Welcome Back, ${myName.split(' ')[0]}`;
-            unlockModal.classList.remove('hidden');
+            startApp();
         } else {
             joinModal.classList.remove('hidden');
         }
 
-        document.getElementById('unlock-form').onsubmit = (e) => {
-            e.preventDefault();
-            const pw = document.getElementById('unlock-password').value;
-            if(pw === myPassword) {
-                unlockModal.classList.add('hidden');
-                startApp();
-            } else {
-                alert("Incorrect password!");
-                document.getElementById('unlock-password').value = '';
-            }
-        }
-
-        // 🔥 Fix: Update old accounts with new password 🔥
         document.getElementById('join-form').onsubmit = async (e) => {
             e.preventDefault();
             const n = document.getElementById('reg-name').value.trim(); 
@@ -592,14 +563,12 @@
                     
                     if (userSnap.exists()) {
                         const dbData = userSnap.data();
-                        
                         if (!dbData.password) {
                             await updateDoc(userRef, { password: p, name: n }); 
                         } else if (dbData.password !== p) { 
                             alert("Wrong password for this mobile number."); 
                             joinBtn.disabled = false; joinBtn.innerHTML = originalText; return; 
                         }
-                        
                         if(dbData.avatarUrl) { myAvatarUrl = dbData.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); }
                     } else { 
                         await setDoc(userRef, { name: n, mobile: m, password: p, lastActive: Date.now(), typingTo: null, avatarUrl: '', statusVisible: true }); 
@@ -611,6 +580,19 @@
                 } catch (err) { alert("Connection error! " + err.message); joinBtn.disabled = false; joinBtn.innerHTML = originalText; }
             } else alert("Please fill all details correctly.");
         };
+
+        // --- Push Notification Helper ---
+        function sendPushNotification(title, body) {
+            if (!("Notification" in window)) return;
+            if (Notification.permission === "granted" && document.visibilityState !== "visible") {
+                const notif = new Notification(title, {
+                    body: body,
+                    icon: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg',
+                    vibrate: [200, 100, 200]
+                });
+                notif.onclick = () => { window.focus(); notif.close(); };
+            }
+        }
 
         // --- Active Status Toggle ---
         function updateStatusUI() {
@@ -805,6 +787,11 @@
         function generateChatId(mob1, mob2) { return mob1 < mob2 ? `${mob1}_${mob2}` : `${mob2}_${mob1}`; }
 
         async function startApp() {
+            // 🔥 Request Notification Permission 🔥
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission();
+            }
+
             appContainer.classList.remove('hidden'); appContainer.classList.add('flex'); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
             updateStatusUI();
 
@@ -844,7 +831,14 @@
             chatListeners[contactMobile] = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'desc'), limit(1)), (snapshot) => {
                 if (!snapshot.empty) {
                     const newLatest = snapshot.docs[0].data(); const oldLatest = latestMessages[contactMobile];
-                    if (newLatest.senderMobile !== myMobile && (!oldLatest || newLatest.timestamp > oldLatest.timestamp) && newLatest.timestamp > appStartTime) { try { document.getElementById('notification-sound').play(); } catch(e){} }
+                    if (newLatest.senderMobile !== myMobile && (!oldLatest || newLatest.timestamp > oldLatest.timestamp) && newLatest.timestamp > appStartTime) { 
+                        // 🔥 Play Sound & Send Push Notification 🔥
+                        try { document.getElementById('notification-sound').play(); } catch(e){} 
+                        const u = allUsers.find(x => x.mobile === contactMobile);
+                        const pushName = u ? u.name : 'WhatsApp';
+                        const pushBody = newLatest.isCallLog ? "Missed Call" : (newLatest.text || "Sent an attachment");
+                        sendPushNotification(pushName, pushBody);
+                    }
                     latestMessages[contactMobile] = newLatest;
                 } else latestMessages[contactMobile] = null;
                 localStorage.setItem('cached_latest_msgs', JSON.stringify(latestMessages));
