@@ -264,9 +264,8 @@
     </div>
 
     <!-- 🔥 AUDIO & VIDEO CALL UI MODAL (ROCK SOLID WEBRTC) 🔥 -->
-    <div id="call-modal" class="hidden fixed inset-0 z-[300] bg-slate-950 overflow-hidden flex-col">
-        <!-- Remote Media Audio explicitly added -->
-        <audio id="remote-audio" autoplay playsinline></audio>
+    <div id="call-modal" class="hidden fixed inset-0 z-[300] bg-slate-950 overflow-hidden flex flex-col">
+        <!-- Remote Media (Video/Audio) -->
         <video id="remote-video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover hidden z-0"></video>
         
         <!-- Local Video PiP -->
@@ -286,7 +285,7 @@
                 <i class="fa-solid fa-phone"></i>
             </button>
 
-            <!-- In Call Controls -->
+            <!-- In Call Controls (Hidden initially) -->
             <div id="in-call-controls" class="hidden flex items-center gap-4 bg-slate-900/50 backdrop-blur-md p-2 rounded-full border border-white/10 shadow-2xl">
                 <button id="mic-toggle-btn" onclick="toggleMic()" class="w-12 h-12 rounded-full bg-white/10 text-white text-lg hover:bg-white/20 transition-colors">
                     <i class="fa-solid fa-microphone"></i>
@@ -302,6 +301,7 @@
                 </button>
             </div>
             
+            <!-- Hangup only (While ringing for caller) -->
             <button id="caller-hangup-btn" onclick="hangupCall()" class="hidden w-16 h-16 rounded-full bg-red-500 text-white text-2xl hover:bg-red-400 hover:scale-110 transition-all shadow-lg shadow-red-500/30">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -371,19 +371,20 @@
         let isRecording = false;
         let settingsSelectedFile = null;
         
-        // 🔥 ULTIMATE WEBRTC FIX VARIABLES 🔥
+        // 🔥 ROCK SOLID WEBRTC VARIABLES & QUEUE 🔥
         const servers = { 
             iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:global.stun.twilio.com:3478?transport=udp' }
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
             ] 
         };
         let pc = null;
         let localStream = null;
         let incomingCallData = null;
         let currentCallId = null; 
+        
+        // Anti-Race Condition Queue
+        let remoteDescriptionSet = false;
+        let iceCandidateQueue = [];
 
         const appStartTime = Date.now();
 
@@ -705,31 +706,34 @@
             } catch (err) { alert("Connection problem. Refresh page."); }
         }
 
-        // 🔥 ULTIMATE WEBRTC FIX: Split Video & Audio Handling Properly 🔥
+        // 🔥 ROCK SOLID WEBRTC INITIALIZATION 🔥
         function initializePeerConnection() {
             if (pc) pc.close();
             pc = new RTCPeerConnection(servers);
             
+            remoteDescriptionSet = false;
+            iceCandidateQueue = [];
+
             const remoteVideo = document.getElementById('remote-video');
-            const remoteAudio = document.getElementById('remote-audio');
-            
-            // Ensure clean state
-            remoteVideo.srcObject = new MediaStream();
-            remoteAudio.srcObject = new MediaStream();
+            remoteVideo.srcObject = null;
 
             pc.ontrack = event => {
-                const track = event.track;
-                if (track.kind === 'video') {
-                    remoteVideo.srcObject.addTrack(track);
+                if (remoteVideo.srcObject !== event.streams[0]) {
+                    remoteVideo.srcObject = event.streams[0];
                     remoteVideo.classList.remove('hidden');
-                    remoteVideo.play().catch(e => console.error("Video error:", e));
-                } else if (track.kind === 'audio') {
-                    remoteAudio.srcObject.addTrack(track);
-                    // Explicitly trigger play to bypass mobile block
-                    remoteAudio.play().catch(e => console.error("Audio error:", e));
+                    // Force play bypasses mobile autoplay restrictions when triggered by user click
+                    remoteVideo.play().catch(e => console.error("Media play blocked:", e));
                 }
             };
             return pc;
+        }
+
+        async function processIceCandidate(candidateData) {
+            if (remoteDescriptionSet) {
+                await pc.addIceCandidate(new RTCIceCandidate(candidateData)).catch(e => console.error(e));
+            } else {
+                iceCandidateQueue.push(candidateData);
+            }
         }
 
         function listenForIncomingCalls() {
@@ -743,6 +747,7 @@
                         if (callData.callee === myMobile && callData.status === 'calling') {
                             incomingCallData = { id: callId, ...callData };
                             
+                            // UI Setup for incoming call
                             document.getElementById('call-modal').classList.remove('hidden');
                             document.getElementById('call-modal').classList.add('flex');
                             document.getElementById('call-name').innerText = "Incoming Call...";
@@ -753,12 +758,14 @@
                             document.getElementById('in-call-controls').classList.add('hidden');
                             document.getElementById('caller-hangup-btn').classList.add('hidden');
                             
+                            // Visuals
                             if(callData.type === 'video') {
                                 document.getElementById('answer-btn').innerHTML = '<i class="fa-solid fa-video"></i>';
                             } else {
                                 document.getElementById('answer-btn').innerHTML = '<i class="fa-solid fa-phone"></i>';
                             }
                             
+                            // Play Ringtone
                             try { document.getElementById('ringtone-sound').play(); } catch(e){}
                         }
                         
@@ -772,9 +779,11 @@
             });
         }
 
+        // START CALL (Audio or Video)
         window.startCall = async (type) => {
             if(!activeContactMobile) return;
             
+            // Setup Caller UI
             document.getElementById('call-modal').classList.remove('hidden');
             document.getElementById('call-modal').classList.add('flex');
             document.getElementById('call-name').innerText = document.getElementById('active-chat-name').innerText;
@@ -787,14 +796,15 @@
             document.getElementById('call-overlay').classList.remove('opacity-0', 'pointer-events-none');
 
             try {
-                // Guaranteed Mic permission using simplified constraint
+                // Determine Media Needs
                 const constraints = { 
-                    audio: true, 
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
                     video: type === 'video' ? { facingMode: "user" } : false 
                 };
 
                 localStream = await navigator.mediaDevices.getUserMedia(constraints);
                 
+                // Show local video if video call
                 if(type === 'video') {
                     const localVid = document.getElementById('local-video');
                     localVid.srcObject = localStream;
@@ -825,11 +835,13 @@
                     timestamp: Date.now()
                 });
 
+                // Listen for Answer
                 const callUnsubscribe = onSnapshot(callDocRef, async (snapshot) => {
                     const data = snapshot.data();
-                    if(pc && !pc.currentRemoteDescription && data?.answer) {
+                    if(!remoteDescriptionSet && data?.answer) {
                         const answerDescription = new RTCSessionDescription(data.answer);
                         await pc.setRemoteDescription(answerDescription);
+                        remoteDescriptionSet = true;
                         
                         document.getElementById('call-status').innerText = "Connected";
                         document.getElementById('caller-hangup-btn').classList.add('hidden');
@@ -840,12 +852,16 @@
                             document.getElementById('cam-toggle-btn').classList.remove('hidden');
                         }
 
-                        // Listen ONLY AFTER Remote Description is successfully set
+                        // Process Queued Candidates
+                        for(let cand of iceCandidateQueue) {
+                            await pc.addIceCandidate(new RTCIceCandidate(cand));
+                        }
+                        iceCandidateQueue = [];
+
+                        // Listen for future candidates
                         onSnapshot(answerCandidates, (candSnapshot) => {
                             candSnapshot.docChanges().forEach(change => {
-                                if(change.type === 'added') {
-                                    pc.addIceCandidate(new RTCIceCandidate(change.doc.data())).catch(e => console.error(e));
-                                }
+                                if(change.type === 'added') processIceCandidate(change.doc.data());
                             });
                         });
                     }
@@ -853,11 +869,12 @@
                 pc.callUnsubscribe = callUnsubscribe;
 
             } catch (err) {
-                alert("Hardware access failed. Please grant permission.");
+                alert("Hardware access failed: " + err.message);
                 resetCallUI();
             }
         };
 
+        // ANSWER INCOMING CALL
         window.answerCall = async () => {
             if(!incomingCallData) return;
             
@@ -871,7 +888,7 @@
 
             try {
                 const constraints = { 
-                    audio: true,
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
                     video: type === 'video' ? { facingMode: "user" } : false 
                 };
 
@@ -895,10 +912,12 @@
                     if(event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
                 };
 
-                // SET REMOTE BEFORE ANSWERING
+                // SET REMOTE FIRST
                 const offerDescription = new RTCSessionDescription(incomingCallData.offer);
                 await pc.setRemoteDescription(offerDescription);
+                remoteDescriptionSet = true;
 
+                // CREATE AND SET LOCAL ANSWER
                 const answerDescription = await pc.createAnswer();
                 await pc.setLocalDescription(answerDescription);
 
@@ -915,16 +934,14 @@
                     document.getElementById('cam-toggle-btn').classList.remove('hidden');
                 }
 
-                // Wait for existing candidates to process
+                // Process Offer Candidates
                 onSnapshot(offerCandidates, (snapshot) => {
                     snapshot.docChanges().forEach(change => {
-                        if(change.type === 'added') {
-                            pc.addIceCandidate(new RTCIceCandidate(change.doc.data())).catch(e => console.error(e));
-                        }
+                        if(change.type === 'added') processIceCandidate(change.doc.data());
                     });
                 });
             } catch(e) {
-                alert("Connection failed.");
+                alert("Connection failed: " + e.message);
                 resetCallUI();
             }
         };
@@ -961,13 +978,14 @@
             }
             incomingCallData = null;
             currentCallId = null;
+            remoteDescriptionSet = false;
+            iceCandidateQueue = [];
 
             const remoteVideo = document.getElementById('remote-video');
-            if(remoteVideo) { remoteVideo.srcObject = null; remoteVideo.pause(); }
-            
-            const remoteAudio = document.getElementById('remote-audio');
-            if(remoteAudio) { remoteAudio.srcObject = null; remoteAudio.pause(); }
-
+            if(remoteVideo) {
+                remoteVideo.srcObject = null;
+                remoteVideo.pause();
+            }
             const localVideo = document.getElementById('local-video');
             if(localVideo) localVideo.srcObject = null;
         }
@@ -1005,6 +1023,8 @@
             }
         };
 
+
+        // --- CHAT LOGIC CONTINUES BELOW ---
         function listenForUsers() {
             const usersRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users');
             onSnapshot(usersRef, (snapshot) => {
