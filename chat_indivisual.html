@@ -36,6 +36,7 @@
             margin: 0; padding: 0;
             position: fixed; 
             top: 0; left: 0; touch-action: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         
         /* Chat Background */
@@ -45,7 +46,32 @@
             background-repeat: repeat;
             background-blend-mode: overlay;
             opacity: 0.95;
+            transition: all 0.3s ease;
         }
+
+        /* ☀️ Light Mode Overrides ☀️ */
+        body.light-mode { background-color: #f0f2f5 !important; color: #111b21 !important; }
+        body.light-mode .bg-\[\#111b21\] { background-color: #f0f2f5 !important; transition: background-color 0.3s ease; }
+        body.light-mode .bg-\[\#202c33\] { background-color: #ffffff !important; transition: background-color 0.3s ease; }
+        body.light-mode .bg-\[\#222d34\] { background-color: #efeae2 !important; transition: background-color 0.3s ease; }
+        body.light-mode .bg-\[\#233138\] { background-color: #ffffff !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        body.light-mode .bg-\[\#2a3942\] { background-color: #ffffff !important; }
+        body.light-mode .bg-\[\#182229\] { background-color: #ffeecd !important; color: #54656f !important;}
+        body.light-mode .bg-\[\#005c4b\] { background-color: #d9fdd3 !important; }
+        
+        body.light-mode .text-white { color: #111b21 !important; }
+        body.light-mode .text-\[\#e9edef\] { color: #111b21 !important; }
+        body.light-mode .text-\[\#8696a0\] { color: #667781 !important; }
+        body.light-mode .text-\[\#aebac1\] { color: #54656f !important; }
+        body.light-mode .text-\[\#d1d7db\] { color: #3b4a54 !important; }
+        
+        body.light-mode .border-\[\#222d34\] { border-color: #e9edef !important; }
+        
+        body.light-mode .hover\:bg-\[\#202c33\]:hover { background-color: #f5f6f6 !important; }
+        body.light-mode .hover\:bg-\[\#111b21\]:hover { background-color: #f0f2f5 !important; }
+        body.light-mode .contact-active { background-color: #f0f2f5 !important; }
+        
+        body.light-mode .chat-bg { background-color: #efeae2 !important; opacity: 0.6 !important; }
 
         /* 🌟 Smooth Animations 🌟 */
         @keyframes popIn {
@@ -66,8 +92,8 @@
 
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(134, 150, 160, 0.3); border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(134, 150, 160, 0.5); }
         
         .glass-panel { background: var(--wa-panel); border-right: 1px solid var(--wa-border); }
         
@@ -230,7 +256,10 @@
                                 <button onclick="openSettings()" class="w-full text-left px-5 py-3 text-[16px] text-[#d1d7db] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium">
                                     <i class="fa-solid fa-gear w-5 text-center text-[#8696a0]"></i> Settings
                                 </button>
-                                <button onclick="toggleActiveStatus()" class="w-full text-left px-5 py-3 text-[16px] text-[#d1d7db] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium">
+                                <button onclick="toggleTheme()" class="w-full text-left px-5 py-3 text-[16px] text-[#d1d7db] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium border-t border-[#222d34]">
+                                    <i id="theme-icon" class="fa-solid fa-sun w-5 text-center text-[#8696a0]"></i> <span id="theme-text">Light Mode</span>
+                                </button>
+                                <button onclick="toggleActiveStatus()" class="w-full text-left px-5 py-3 text-[16px] text-[#d1d7db] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium border-t border-[#222d34]">
                                     <i id="status-icon" class="fa-solid fa-eye-slash w-5 text-center text-[#8696a0]"></i> <span id="status-toggle-text">Turn off Active Status</span>
                                 </button>
                                 <button onclick="openLockedChats()" class="w-full text-left px-5 py-3 text-[16px] text-[#d1d7db] hover:bg-[#111b21] transition-colors flex items-center gap-3 font-medium border-t border-[#222d34]">
@@ -294,7 +323,7 @@
                         <div class="flex items-center gap-4 cursor-pointer">
                             <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-[#111b21]">
                             <div class="flex flex-col justify-center">
-                                <h2 id="active-chat-name" class="font-semibold text-white text-[17px] leading-tight">Contact</h2>
+                                <h2 id="active-chat-name" class="font-bold text-white text-[17.5px] leading-tight tracking-[0.3px]">Contact</h2>
                                 <p id="active-chat-status" class="text-[13px] text-[#8696a0] mt-0.5">...</p>
                             </div>
                         </div>
@@ -442,6 +471,29 @@
         if (window.visualViewport) window.visualViewport.addEventListener('resize', setRealViewportHeight);
         setRealViewportHeight();
 
+        // ☀️ Theme Logic ☀️
+        let isLightMode = localStorage.getItem('theme') === 'light';
+        function applyTheme() {
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            if (isLightMode) {
+                document.body.classList.add('light-mode');
+                if(icon) icon.className = "fa-solid fa-moon w-5 text-center text-[#8696a0]";
+                if(text) text.innerText = "Dark Mode";
+            } else {
+                document.body.classList.remove('light-mode');
+                if(icon) icon.className = "fa-solid fa-sun w-5 text-center text-[#8696a0]";
+                if(text) text.innerText = "Light Mode";
+            }
+        }
+        window.toggleTheme = () => {
+            isLightMode = !isLightMode;
+            localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+            applyTheme();
+            closeAllMenus();
+        };
+        applyTheme(); // Apply saved theme immediately on load
+
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
@@ -464,7 +516,6 @@
         let myAvatarUrl = localStorage.getItem('pvt_chat_avatar') || ''; 
         let myPassword = localStorage.getItem('pvt_chat_password') || ''; 
         
-        // Active Status
         let isStatusVisible = localStorage.getItem('status_visible') !== 'false';
         
         let activeContactMobile = null;
@@ -472,7 +523,6 @@
         let latestMessages = {}; 
         let chatListeners = {};  
 
-        // Lock Chat variables
         let lockedContacts = JSON.parse(localStorage.getItem('locked_contacts') || '[]');
         let userPin = localStorage.getItem('nexus_pin') || null;
         let isViewingLocked = false;
@@ -482,14 +532,13 @@
         let activeTrackingInterval = null;
         let selectedFile = null;
         let typingTimeout = null; 
-        let isTyping = false; // 🔥 Optimized Typing Tracker 🔥
+        let isTyping = false; 
 
         let mediaRecorder;
         let audioChunks = [];
         let isRecording = false;
         let settingsSelectedFile = null;
 
-        // --- Call Timer Logic ---
         let callTimerInterval = null;
         let callSeconds = 0;
         let currentCallType = 'voice';
@@ -533,7 +582,6 @@
 
         const appStartTime = Date.now();
 
-        // 🔥 Initialize WebRTC 🔥
         setupWebRTC(
             db, SYNC_APP_ID, 
             () => myMobile, () => activeContactMobile, () => allUsers
@@ -559,8 +607,6 @@
             const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        // --- AUTH FLOW ---
-        // 🔥 Now it bypasses login automatically if already logged in! 🔥
         if (myName && myMobile && myPassword) {
             startApp();
         } else {
@@ -601,7 +647,6 @@
             } else alert("Please fill all details correctly.");
         };
 
-        // --- Push Notification Helper ---
         function sendPushNotification(title, body) {
             if (!("Notification" in window)) return;
             if (Notification.permission === "granted" && document.visibilityState !== "visible") {
@@ -614,7 +659,6 @@
             }
         }
 
-        // --- Active Status Toggle ---
         function updateStatusUI() {
             const icon = document.getElementById('status-icon');
             const text = document.getElementById('status-toggle-text');
@@ -635,7 +679,6 @@
             try { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { statusVisible: isStatusVisible }, { merge: true }); } catch(e){}
         }
 
-        // Lightbox
         window.openLightbox = (url, e) => {
             e.stopPropagation(); const lightbox = document.getElementById('image-lightbox'); const img = document.getElementById('lightbox-img');
             img.src = url; img.classList.remove('scale-150', 'cursor-zoom-out'); img.classList.add('scale-95', 'cursor-zoom-in');
@@ -647,7 +690,6 @@
             setTimeout(() => lightbox.classList.add('hidden'), 300);
         };
 
-        // Menus
         window.toggleChatMenu = (e) => { e.stopPropagation(); closeAllMenus(); document.getElementById('chat-dropdown').classList.toggle('show'); }
         window.toggleSidebarMenu = (e) => { e.stopPropagation(); closeAllMenus(); document.getElementById('sidebar-dropdown').classList.toggle('show'); }
         window.toggleContactMenu = (mobile, e) => { e.stopPropagation(); const menu = document.getElementById(`contact-menu-${mobile}`); const isHidden = !menu.classList.contains('show'); closeAllMenus(); if(isHidden) menu.classList.add('show'); }
@@ -656,7 +698,6 @@
 
         window.logoutPvtChat = () => { if(confirm("Are you sure you want to log out?")) { localStorage.clear(); location.reload(); } };
 
-        // Group Modal Logic
         window.openGroupModal = () => { closeAllMenus(); document.getElementById('group-modal').classList.remove('hidden'); renderGroupContacts(); }
         window.closeGroupModal = () => document.getElementById('group-modal').classList.add('hidden');
         window.renderGroupContacts = () => {
@@ -675,7 +716,6 @@
             alert(`Group '${name}' created successfully with ${selected.length} members!`); closeGroupModal();
         }
 
-        // Locked Chats Logic
         window.openLockedChats = () => {
             closeAllMenus(); document.getElementById('pin-input').value = "";
             if(!userPin) { document.getElementById('pin-title').innerText = "Create a PIN"; document.getElementById('pin-desc').innerText = "Set a 4-digit PIN for locked chats."; document.getElementById('pin-action-btn').innerText = "Set PIN"; } 
@@ -719,7 +759,6 @@
         }
         window.toggleLockCurrentChat = (e) => toggleLockContact(activeContactMobile, e);
 
-        // Profile Settings
         window.openSettings = () => { document.getElementById('settings-modal').classList.remove('hidden'); document.getElementById('settings-avatar-preview').src = getAvatarUrl(myName, myAvatarUrl); document.getElementById('settings-name-input').value = myName; settingsSelectedFile = null; }
         window.closeSettings = () => { document.getElementById('settings-modal').classList.add('hidden'); document.getElementById('profile-pic-input').value = ''; }
         window.previewProfilePic = (event) => { const file = event.target.files[0]; if(file && file.type.startsWith('image/')) { if(file.size > 5 * 1024 * 1024) return alert("Max size 5MB allowed"); settingsSelectedFile = file; const reader = new FileReader(); reader.onload = (e) => document.getElementById('settings-avatar-preview').src = e.target.result; reader.readAsDataURL(file); } }
@@ -760,7 +799,6 @@
 
         msgInput.addEventListener('focus', () => { setTimeout(() => setRealViewportHeight(), 150); });
         
-        // 🔥 Optimized Typing Listener 🔥
         msgInput.addEventListener('input', function() {
             this.style.height = 'auto'; 
             this.style.height = (this.scrollHeight < 100 ? this.scrollHeight : 100) + 'px'; 
@@ -820,7 +858,6 @@
         function generateChatId(mob1, mob2) { return mob1 < mob2 ? `${mob1}_${mob2}` : `${mob2}_${mob1}`; }
 
         async function startApp() {
-            // 🔥 Request Notification Permission 🔥
             if ("Notification" in window && Notification.permission === "default") {
                 Notification.requestPermission();
             }
@@ -828,7 +865,6 @@
             appContainer.classList.remove('hidden'); appContainer.classList.add('flex'); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
             updateStatusUI();
 
-            // 🔥 Instant Load from Cache 🔥
             const cachedUsers = localStorage.getItem('cached_users');
             if (cachedUsers) allUsers = JSON.parse(cachedUsers);
             const cachedMsgs = localStorage.getItem('cached_latest_msgs');
@@ -865,7 +901,6 @@
                 if (!snapshot.empty) {
                     const newLatest = snapshot.docs[0].data(); const oldLatest = latestMessages[contactMobile];
                     if (newLatest.senderMobile !== myMobile && (!oldLatest || newLatest.timestamp > oldLatest.timestamp) && newLatest.timestamp > appStartTime) { 
-                        // 🔥 Play Sound & Send Push Notification 🔥
                         try { document.getElementById('notification-sound').play(); } catch(e){} 
                         const u = allUsers.find(x => x.mobile === contactMobile);
                         const pushName = u ? u.name : 'RasGram';
@@ -924,13 +959,15 @@
                 const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
                 const div = document.createElement('div');
                 div.className = `flex items-center cursor-pointer transition-colors p-3.5 border-b border-[#222d34] ${activeClass} group relative`;
+                
+                // 🔥 Name format updated here for professional look 🔥
                 div.innerHTML = `
                     <div class="relative shrink-0 mr-4" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
                         <img src="${userAvatar}" class="w-12 h-12 rounded-full object-cover bg-[#111b21]">
                     </div>
                     <div class="flex-grow flex flex-col justify-center overflow-hidden" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
                         <div class="flex justify-between items-center mb-1">
-                            <h3 class="text-[17px] text-white truncate pr-2">${user.name}</h3>
+                            <h3 class="text-[17.5px] font-bold text-white truncate pr-2 tracking-[0.3px]">${user.name}</h3>
                             <span class="text-[12px] ${isUnread ? 'text-[#00a884] font-medium' : 'text-[#8696a0]'} shrink-0">${timeString}</span>
                         </div>
                         <div class="flex justify-between items-center gap-2">
@@ -964,7 +1001,6 @@
             if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus();
         }
         
-        // 🔥 Optimized Back Button Logic 🔥
         window.closeChatMobile = () => { if (window.innerWidth < 768 && window.location.hash === '#chat') history.back(); else closeChatLogic(); };
         window.addEventListener('popstate', (e) => {
             if (window.location.hash !== '#chat') {
@@ -988,7 +1024,6 @@
             msgBox.classList.remove('fade-in-anim'); void msgBox.offsetWidth; msgBox.classList.add('fade-in-anim');
             renderContacts(); document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
 
-            // 🔥 Instant Load Single Chat from Cache 🔥
             const chatId = generateChatId(myMobile, contactMobile);
             const cachedChat = localStorage.getItem(`chat_cache_${chatId}`);
             if(cachedChat) {
@@ -1015,7 +1050,7 @@
             if (currentChatUnsubscribe) currentChatUnsubscribe();
             currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc'), limit(200)), (snapshot) => {
                 let cacheArray = [];
-                if(!cachedChat) msgBox.innerHTML = ''; // Clear if it was empty
+                if(!cachedChat) msgBox.innerHTML = ''; 
 
                 snapshot.docChanges().forEach(change => {
                     const mData = change.doc.data(); mData.id = change.doc.id;
