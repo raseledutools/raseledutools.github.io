@@ -465,8 +465,9 @@
 
         // --- Dexie.js (Offline Database) Setup ---
         const localDB = new Dexie("RasGramDB");
-        localDB.version(1).stores({
-            chatHistory: 'chatId, messages' // চ্যাটগুলো সেভ করার জন্য
+        localDB.version(2).stores({
+            chatHistory: 'chatId, messages',
+            outbox: '++id, chatId, text, senderMobile, timestamp, timeString, fileUrl, fileName, fileType, reaction, read, isPending'
         });
 
         // --- Service Worker Register for PWA ---
@@ -513,7 +514,7 @@
             applyTheme();
             closeAllMenus();
         };
-        applyTheme(); // Apply saved theme immediately on load
+        applyTheme();
 
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
@@ -981,7 +982,6 @@
                 const div = document.createElement('div');
                 div.className = `flex items-center cursor-pointer transition-colors p-3.5 border-b border-[#222d34] ${activeClass} group relative`;
                 
-                // 🔥 Name format updated here for professional look 🔥
                 div.innerHTML = `
                     <div class="relative shrink-0 mr-4" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
                         <img src="${userAvatar}" class="w-12 h-12 rounded-full object-cover bg-[#111b21]">
@@ -1116,16 +1116,46 @@
             });
         }
 
+        // --- Offline Send System Updated ---
         chatForm.onsubmit = async (e) => {
             e.preventDefault(); const text = msgInput.value.trim(); if ((!text && !selectedFile) || !activeContactMobile) return;
             sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[22px] text-[#00a884]"></i>';
             setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: null }, { merge: true });
+            
+            const chatId = generateChatId(myMobile, activeContactMobile);
+            const msgData = {
+                text: text, senderMobile: myMobile, timestamp: Date.now(), 
+                timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
+                fileUrl: null, fileName: null, fileType: null, reaction: null, read: false
+            };
+
             try {
-                let fileUrl = null, fileName = null, fileType = null;
-                if (selectedFile) { const uploadResult = await uploadFileWithProgress(selectedFile); if(uploadResult.secure_url) { fileUrl = uploadResult.secure_url; fileName = selectedFile.name; fileType = selectedFile.type || 'audio/mp3'; } else throw new Error("Cloudinary failed"); }
-                await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`), { text: text, senderMobile: myMobile, timestamp: Date.now(), timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), fileUrl: fileUrl, fileName: fileName, fileType: fileType, reaction: null, read: false });
+                if (selectedFile) { 
+                    if(!navigator.onLine) {
+                        alert("অফলাইনে ফাইল বা ছবি সেন্ড করা যাবে না। দয়া করে নেট কানেকশন চালু করুন।");
+                        throw new Error("Offline file upload blocked");
+                    }
+                    const uploadResult = await uploadFileWithProgress(selectedFile); 
+                    if(uploadResult.secure_url) { msgData.fileUrl = uploadResult.secure_url; msgData.fileName = selectedFile.name; msgData.fileType = selectedFile.type || 'audio/mp3'; } else throw new Error("Cloudinary failed"); 
+                }
+
+                if (navigator.onLine) {
+                    await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), msgData);
+                } else {
+                    // নেট না থাকলে Dexie.js এর Outbox এ জমা হবে
+                    msgData.chatId = chatId;
+                    msgData.isPending = true;
+                    await localDB.outbox.add(msgData);
+                    
+                    const tempId = 'temp_' + Date.now();
+                    msgData.id = tempId;
+                    msgBox.appendChild(createMessageElement(tempId, msgData, document.getElementById('active-chat-name').innerText));
+                    msgBox.scrollTop = msgBox.scrollHeight;
+                }
+
                 msgInput.value = ''; clearFile(); msgInput.style.height = '24px'; toggleInputButtons(); localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
-            } catch (error) { alert("Message failed."); } finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-[22px] ml-1"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
+            } catch (error) { console.error("Message failed:", error); } 
+            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-[22px] ml-1"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
 
         window.toggleCustomAudio = (id, btn) => {
@@ -1161,11 +1191,54 @@
             let finalHtmlText = data.text ? `<p class="text-[16px] whitespace-pre-wrap leading-snug px-1 ${textColor} mt-1">${escapeHTML(data.text)}</p>` : '';
             let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-[#202c33] border border-[#222d34] rounded-full px-2.5 py-0.5 text-[14px] shadow-sm z-10 hover:bg-[#2a3942] transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
             let popupMenu = `<div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-14 bg-[#233138] border border-[#222d34] rounded-full flex items-center gap-2 px-3 py-1.5 shadow-xl z-[60] min-w-max"><button onclick="addReaction('${docId}', '👍', event)" class="hover:scale-125 transition-all text-2xl">👍</button><button onclick="addReaction('${docId}', '❤️', event)" class="hover:scale-125 transition-all text-2xl">❤️</button><button onclick="addReaction('${docId}', '😂', event)" class="hover:scale-125 transition-all text-2xl">😂</button><button onclick="addReaction('${docId}', '😢', event)" class="hover:scale-125 transition-all text-2xl">😢</button>${isMe ? `<div class="w-[1px] h-6 bg-[#374045] mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 transition-all text-[#f15c6d] text-xl"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`;
-            let tickColor = data.read ? "text-[#53bdeb]" : "text-[#8696a0]"; let ticksHtml = isMe ? `<i class="fa-solid fa-check-double text-[12px] ${tickColor} ml-1"></i>` : '';
+            
+            // --- Clock icon for pending messages ---
+            let tickColor = data.read ? "text-[#53bdeb]" : "text-[#8696a0]"; 
+            let ticksHtml = isMe ? (data.isPending ? `<i class="fa-regular fa-clock text-[12px] text-[#8696a0] ml-1"></i>` : `<i class="fa-solid fa-check-double text-[12px] ${tickColor} ml-1"></i>`) : '';
+            
             let timeMargin = (data.text || !data.fileUrl || (data.fileType && data.fileType.startsWith('audio/'))) ? "mt-1 float-right inline-block pl-4" : `absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md backdrop-blur-sm bg-black/40`;
             msgDiv.innerHTML = `${popupMenu}${content}<div class="relative"><span style="display:inline-block; max-width: calc(100% - 65px); vertical-align:top;">${finalHtmlText}</span><div class="inline-flex items-center justify-end ${timeMargin} relative top-[3px]"><span class="text-[11.5px] text-[#8696a0]">${data.timeString}</span>${ticksHtml}</div></div>${reactionBadge}`; return msgDiv;
         }
         function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
+
+        // --- Offline Message Auto-Sync System ---
+        async function processOutboxMsgs() {
+            if (!navigator.onLine) return; // নেট না থাকলে রিটার্ন করবে
+            
+            try {
+                const pendingMsgs = await localDB.outbox.toArray();
+                if (pendingMsgs.length === 0) return; // পেন্ডিং মেসেজ না থাকলে কিছু করবে না
+
+                console.log(`${pendingMsgs.length} টি পেন্ডিং মেসেজ সেন্ড হচ্ছে...`);
+                
+                for (const msg of pendingMsgs) {
+                    const outboxId = msg.id;
+                    const targetChatId = msg.chatId;
+
+                    // লোকাল ডেটাগুলো মুছে ফেলি ফায়ারবেসে পাঠানোর আগে
+                    delete msg.id;
+                    delete msg.chatId;
+                    delete msg.isPending;
+
+                    await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${targetChatId}`), msg);
+                    await localDB.outbox.delete(outboxId); // সেন্ড সফল হলে Outbox থেকে ডিলিট
+                    console.log("পেন্ডিং মেসেজ সফলভাবে সেন্ড হয়েছে!");
+                }
+            } catch (e) {
+                console.error("পেন্ডিং মেসেজ সেন্ড হতে ব্যর্থ:", e);
+            }
+        }
+
+        // যখনই ইন্টারনেট কানেকশন ফিরে আসবে, এই ইভেন্ট কল হবে
+        window.addEventListener('online', () => {
+            processOutboxMsgs();
+        });
+
+        // অ্যাপ চালু হওয়ার সময় একবার চেক করে নেবে কোনো পেন্ডিং মেসেজ আছে কি না
+        window.addEventListener('load', () => {
+            setTimeout(processOutboxMsgs, 3000); 
+        });
+
     </script>
 </body>
 </html>
