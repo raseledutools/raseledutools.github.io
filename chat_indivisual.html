@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#111b21">
+    <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>RasGram | Secure Messenger</title>
@@ -12,7 +12,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
-        /* 🔥 RasGram Dark Theme 🔥 */
+        /* 🔥 Premium Deep Slate Dark Theme 🔥 */
         :root {
             --wa-bg: #0f172a;          
             --wa-panel: #1e293b;       
@@ -36,7 +36,7 @@
             top: 0; left: 0; touch-action: none;
         }
         
-        /* Chat Background */
+        /* Premium Chat Background */
         .chat-bg {
             background-color: #0b1120;
             background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
@@ -264,8 +264,7 @@
 
                 <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative bg-[#0f172a]" style="touch-action: pan-y;">
                     <div id="contacts-container">
-                        <div class="text-center text-[#94a3b8] p-8 text-[16px] font-medium"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading chats...</div>
-                    </div>
+                        </div>
                 </div>
             </div>
 
@@ -418,10 +417,10 @@
     </div>
 
     <script type="module">
-        // 🔥 Using Firebase V11 & enable Firestore Offline Persistence for True Instant Load 🔥
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Reverted to live db to fix the cache loading block
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         import { setupWebRTC } from "./webrtc_core.js";
 
@@ -454,18 +453,13 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        
-        // 🔥 Initialize Firestore with Offline Persistence enabled 🔥
-        const db = initializeFirestore(app, {
-            localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
-        });
+        const db = getFirestore(app);
 
         let myName = localStorage.getItem('pvt_chat_name') || '';
         let myMobile = localStorage.getItem('pvt_chat_mobile') || '';
         let myAvatarUrl = localStorage.getItem('pvt_chat_avatar') || ''; 
         let myPassword = localStorage.getItem('pvt_chat_password') || ''; 
         
-        // Active Status
         let isStatusVisible = localStorage.getItem('status_visible') !== 'false';
         
         let activeContactMobile = null;
@@ -473,7 +467,6 @@
         let latestMessages = {}; 
         let chatListeners = {};  
 
-        // Lock Chat variables
         let lockedContacts = JSON.parse(localStorage.getItem('locked_contacts') || '[]');
         let userPin = localStorage.getItem('nexus_pin') || null;
         let isViewingLocked = false;
@@ -489,7 +482,6 @@
         let isRecording = false;
         let settingsSelectedFile = null;
 
-        // --- Call Timer Logic ---
         let callTimerInterval = null;
         let callSeconds = 0;
         let currentCallType = 'voice';
@@ -515,8 +507,7 @@
             clearInterval(callTimerInterval);
             if(callSeconds === 0 && activeContactMobile) {
                 const status = document.getElementById('call-status').innerText.toLowerCase();
-                const isRinging = status.includes('calling') || status.includes('ringing');
-                if(isRinging) {
+                if(status.includes('calling') || status.includes('ringing')) {
                     addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`), {
                         text: `Missed ${currentCallType} call`, senderMobile: myMobile, timestamp: Date.now(),
                         timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -524,16 +515,13 @@
                     }).catch(e=>{});
                 }
             }
-            callSeconds = 0;
-            if(typeof window.hangupCall === 'function') window.hangupCall();
+            callSeconds = 0; if(typeof window.hangupCall === 'function') window.hangupCall();
         }
 
         const originalStartCall = window.startCall;
         window.startCall = (type) => { currentCallType = type; if(typeof originalStartCall === 'function') originalStartCall(type); }
 
         const appStartTime = Date.now();
-
-        // 🔥 Initialize WebRTC 🔥
         setupWebRTC(db, SYNC_APP_ID, () => myMobile, () => activeContactMobile, () => allUsers);
 
         const joinModal = document.getElementById('join-modal');
@@ -555,9 +543,9 @@
             const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        // --- AUTH FLOW ---
+        // 🔥 Auto bypass login if credentials exist 🔥
         if (myName && myMobile && myPassword) {
-            initOfflineAndOnline();
+            startApp();
         } else {
             joinModal.classList.remove('hidden');
         }
@@ -578,12 +566,8 @@
                     
                     if (userSnap.exists()) {
                         const dbData = userSnap.data();
-                        if (!dbData.password) {
-                            await updateDoc(userRef, { password: p, name: n }); 
-                        } else if (dbData.password !== p) { 
-                            alert("Wrong password for this mobile number."); 
-                            joinBtn.disabled = false; joinBtn.innerHTML = originalText; return; 
-                        }
+                        if (!dbData.password) { await updateDoc(userRef, { password: p, name: n }); } 
+                        else if (dbData.password !== p) { alert("Wrong password for this mobile number."); joinBtn.disabled = false; joinBtn.innerHTML = originalText; return; }
                         if(dbData.avatarUrl) { myAvatarUrl = dbData.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); }
                     } else { 
                         await setDoc(userRef, { name: n, mobile: m, password: p, lastActive: Date.now(), typingTo: null, avatarUrl: '', statusVisible: true }); 
@@ -591,46 +575,30 @@
                     
                     myName = n; myMobile = m; myPassword = p;
                     localStorage.setItem('pvt_chat_name', n); localStorage.setItem('pvt_chat_mobile', m); localStorage.setItem('pvt_chat_password', p);
-                    joinModal.classList.add('hidden'); initOfflineAndOnline();
+                    joinModal.classList.add('hidden'); startApp();
                 } catch (err) { alert("Connection error! " + err.message); joinBtn.disabled = false; joinBtn.innerHTML = originalText; }
             } else alert("Please fill all details correctly.");
         };
 
-        // --- Push Notification Helper ---
         function sendPushNotification(title, body) {
             if (!("Notification" in window)) return;
             if (Notification.permission === "granted" && document.visibilityState !== "visible") {
-                const notif = new Notification(title, {
-                    body: body,
-                    icon: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg',
-                    vibrate: [200, 100, 200]
-                });
+                const notif = new Notification(title, { body: body, icon: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg', vibrate: [200, 100, 200] });
                 notif.onclick = () => { window.focus(); notif.close(); };
             }
         }
 
-        // --- Active Status Toggle ---
         function updateStatusUI() {
-            const icon = document.getElementById('status-icon');
-            const text = document.getElementById('status-toggle-text');
-            if(isStatusVisible) {
-                icon.className = "fa-solid fa-eye-slash w-5 text-center text-[#94a3b8]";
-                text.innerText = "Turn off Active Status";
-            } else {
-                icon.className = "fa-solid fa-eye w-5 text-center text-[#10b981]";
-                text.innerText = "Turn on Active Status";
-            }
+            const icon = document.getElementById('status-icon'); const text = document.getElementById('status-toggle-text');
+            if(isStatusVisible) { icon.className = "fa-solid fa-eye-slash w-5 text-center text-[#94a3b8]"; text.innerText = "Turn off Active Status"; } 
+            else { icon.className = "fa-solid fa-eye w-5 text-center text-[#10b981]"; text.innerText = "Turn on Active Status"; }
         }
         
         window.toggleActiveStatus = async () => {
-            isStatusVisible = !isStatusVisible;
-            localStorage.setItem('status_visible', isStatusVisible);
-            updateStatusUI();
-            closeAllMenus();
+            isStatusVisible = !isStatusVisible; localStorage.setItem('status_visible', isStatusVisible); updateStatusUI(); closeAllMenus();
             try { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { statusVisible: isStatusVisible }, { merge: true }); } catch(e){}
         }
 
-        // Lightbox
         window.openLightbox = (url, e) => {
             e.stopPropagation(); const lightbox = document.getElementById('image-lightbox'); const img = document.getElementById('lightbox-img');
             img.src = url; img.classList.remove('scale-150', 'cursor-zoom-out'); img.classList.add('scale-95', 'cursor-zoom-in');
@@ -642,7 +610,6 @@
             setTimeout(() => lightbox.classList.add('hidden'), 300);
         };
 
-        // Menus
         window.toggleChatMenu = (e) => { e.stopPropagation(); closeAllMenus(); document.getElementById('chat-dropdown').classList.toggle('show'); }
         window.toggleSidebarMenu = (e) => { e.stopPropagation(); closeAllMenus(); document.getElementById('sidebar-dropdown').classList.toggle('show'); }
         window.toggleContactMenu = (mobile, e) => { e.stopPropagation(); const menu = document.getElementById(`contact-menu-${mobile}`); const isHidden = !menu.classList.contains('show'); closeAllMenus(); if(isHidden) menu.classList.add('show'); }
@@ -651,7 +618,6 @@
 
         window.logoutPvtChat = () => { if(confirm("Are you sure you want to log out?")) { localStorage.clear(); location.reload(); } };
 
-        // Group Modal Logic
         window.openGroupModal = () => { closeAllMenus(); document.getElementById('group-modal').classList.remove('hidden'); renderGroupContacts(); }
         window.closeGroupModal = () => document.getElementById('group-modal').classList.add('hidden');
         window.renderGroupContacts = () => {
@@ -670,7 +636,6 @@
             alert(`Group '${name}' created successfully!`); closeGroupModal();
         }
 
-        // Locked Chats Logic
         window.openLockedChats = () => {
             closeAllMenus(); document.getElementById('pin-input').value = "";
             if(!userPin) { document.getElementById('pin-title').innerText = "Create a PIN"; document.getElementById('pin-desc').innerText = "Set a 4-digit PIN for locked chats."; document.getElementById('pin-action-btn').innerText = "Set PIN"; } 
@@ -714,7 +679,6 @@
         }
         window.toggleLockCurrentChat = (e) => toggleLockContact(activeContactMobile, e);
 
-        // Profile Settings
         window.openSettings = () => { document.getElementById('settings-modal').classList.remove('hidden'); document.getElementById('settings-avatar-preview').src = getAvatarUrl(myName, myAvatarUrl); document.getElementById('settings-name-input').value = myName; settingsSelectedFile = null; }
         window.closeSettings = () => { document.getElementById('settings-modal').classList.add('hidden'); document.getElementById('profile-pic-input').value = ''; }
         window.previewProfilePic = (event) => { const file = event.target.files[0]; if(file && file.type.startsWith('image/')) { if(file.size > 5 * 1024 * 1024) return alert("Max size 5MB allowed"); settingsSelectedFile = file; const reader = new FileReader(); reader.onload = (e) => document.getElementById('settings-avatar-preview').src = e.target.result; reader.readAsDataURL(file); } }
@@ -747,7 +711,7 @@
             }
         }
 
-        // 🔥 FIX: Mobile Hardware Back Button Logic 🔥
+        // 🔥 Perfect SPA Back Button for Phone 🔥
         window.addEventListener('popstate', (event) => {
             if (window.innerWidth < 768 && window.location.hash !== '#chat' && activeContactMobile) {
                 closeChatLogic(); 
@@ -755,98 +719,19 @@
         });
 
         function closeChatLogic() {
-            document.getElementById('sidebar').classList.remove('hidden'); 
-            document.getElementById('sidebar').classList.add('flex');
-            
+            document.getElementById('sidebar').classList.remove('hidden'); document.getElementById('sidebar').classList.add('flex');
             if (window.innerWidth < 768) {
-                document.getElementById('chat-area').classList.remove('flex'); 
-                document.getElementById('chat-area').classList.add('hidden');
+                document.getElementById('chat-area').classList.remove('flex'); document.getElementById('chat-area').classList.add('hidden');
                 if(window.location.hash === '#chat') history.replaceState(null, null, window.location.pathname);
-            } else { 
-                document.getElementById('empty-chat-state').classList.remove('hidden'); 
-            }
-            
-            activeContactMobile = null; 
-            renderContacts(); 
-            
-            if(currentChatUnsubscribe) currentChatUnsubscribe(); 
-            if(userStatusUnsubscribe) userStatusUnsubscribe(); 
-            closeAllMenus();
+            } else { document.getElementById('empty-chat-state').classList.remove('hidden'); }
+            activeContactMobile = null; renderContacts();
+            if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus();
         }
 
         window.closeChatMobile = () => { 
             if (window.innerWidth < 768 && window.location.hash === '#chat') {
-                history.back(); 
-            } else { 
-                closeChatLogic(); 
-            } 
-        };
-
-        window.openPrivateChat = (contactName, contactMobile, contactAvatarUrl) => {
-            activeContactMobile = contactMobile; localStorage.setItem(`read_${contactMobile}`, Date.now());
-            document.getElementById('active-chat-name').innerText = contactName; document.getElementById('active-chat-avatar').src = contactAvatarUrl;
-            document.getElementById('empty-chat-state').classList.add('hidden');
-            document.getElementById('lock-chat-btn').innerText = lockedContacts.includes(contactMobile) ? "Unlock chat" : "Lock chat";
-            
-            const chatArea = document.getElementById('chat-area');
-            if (window.innerWidth < 768) {
-                if (window.location.hash !== '#chat') {
-                    history.pushState(null, null, "#chat");
-                }
-                document.getElementById('sidebar').classList.remove('flex'); document.getElementById('sidebar').classList.add('hidden'); 
-                chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); 
-            } else { chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); }
-
-            msgBox.classList.remove('fade-in-anim'); void msgBox.offsetWidth; msgBox.classList.add('fade-in-anim');
-            renderContacts(); document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
-
-            const chatId = generateChatId(myMobile, contactMobile);
-            const cachedChat = localStorage.getItem(`chat_cache_${chatId}`);
-            if(cachedChat) {
-                const msgs = JSON.parse(cachedChat);
-                msgs.forEach(mData => msgBox.appendChild(createMessageElement(mData.id, mData, contactName)));
-                msgBox.scrollTop = msgBox.scrollHeight;
-            }
-
-            if(userStatusUnsubscribe) userStatusUnsubscribe();
-            userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
-                const statusElem = document.getElementById('active-chat-status');
-                if(docSnap.exists()){
-                    const uData = docSnap.data(); if(uData.avatarUrl) document.getElementById('active-chat-avatar').src = getAvatarUrl(contactName, uData.avatarUrl);
-                    if(uData.typingTo === myMobile) { statusElem.innerText = 'typing...'; statusElem.className = 'text-[14px] text-[#10b981] font-bold mt-0.5 tracking-wide'; } 
-                    else {
-                        const onlineVisible = uData.statusVisible !== false;
-                        const isOnline = onlineVisible && (Date.now() - uData.lastActive) < 120000;
-                        statusElem.innerText = isOnline ? 'Online' : 'Click here for contact info';
-                        statusElem.className = 'text-[13px] text-[#94a3b8] font-medium mt-0.5';
-                    }
-                }
-            });
-
-            if (currentChatUnsubscribe) currentChatUnsubscribe();
-            currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc'), limit(200)), (snapshot) => {
-                let cacheArray = [];
-                if(!cachedChat) msgBox.innerHTML = ''; 
-
-                snapshot.docChanges().forEach(change => {
-                    const mData = change.doc.data(); mData.id = change.doc.id;
-                    if (!mData.read && mData.senderMobile !== myMobile) updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true });
-                    
-                    if(cachedChat) {
-                        const oldNode = document.getElementById(`msg-${change.doc.id}`);
-                        if(change.type === "added" && !oldNode) msgBox.appendChild(createMessageElement(change.doc.id, mData, contactName));
-                        else if(change.type === "modified" && oldNode) oldNode.replaceWith(createMessageElement(change.doc.id, mData, contactName));
-                        else if(change.type === "removed" && oldNode) oldNode.remove();
-                    } else {
-                        msgBox.appendChild(createMessageElement(change.doc.id, mData, contactName));
-                    }
-                });
-
-                snapshot.docs.forEach(doc => { let d = doc.data(); d.id = doc.id; cacheArray.push(d); });
-                localStorage.setItem(`chat_cache_${chatId}`, JSON.stringify(cacheArray));
-
-                localStorage.setItem(`read_${activeContactMobile}`, Date.now()); renderContacts(); setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 100);
-            });
+                history.back(); // This triggers popstate
+            } else { closeChatLogic(); } 
         };
 
         function toggleInputButtons() {
@@ -901,24 +786,177 @@
             isRecording = false; document.getElementById('recording-ui').classList.add('hidden'); msgInput.parentElement.classList.remove('hidden'); micBtn.classList.remove('hidden');
         }
 
-        // 🔥 Instant Offline Initialization Function 🔥
-        function initOfflineAndOnline() {
+        async function startApp() {
             if ("Notification" in window && Notification.permission === "default") { Notification.requestPermission(); }
-            appContainer.classList.remove('hidden'); appContainer.classList.add('flex'); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
+            
+            appContainer.classList.remove('hidden'); appContainer.classList.add('flex'); 
+            document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
             updateStatusUI();
+            contactsContainer.innerHTML = ''; // Start clean
 
-            const cachedUsers = localStorage.getItem('cached_users'); if (cachedUsers) allUsers = JSON.parse(cachedUsers);
-            const cachedMsgs = localStorage.getItem('cached_latest_msgs'); if (cachedMsgs) latestMessages = JSON.parse(cachedMsgs);
-            if(allUsers.length > 0) renderContacts();
-
-            listenForUsers();
-            if(window.listenForIncomingCallsWebRTC) window.listenForIncomingCallsWebRTC();
-
-            signInAnonymously(auth).then(() => {
+            try {
+                await signInAnonymously(auth);
+                const myRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile); const mySnap = await getDoc(myRef);
+                if(mySnap.exists()) {
+                    const d = mySnap.data();
+                    if(d.avatarUrl) { myAvatarUrl = d.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl); }
+                    if(d.name && d.name !== myName) { myName = d.name; localStorage.setItem('pvt_chat_name', myName); }
+                }
                 const updateMyStatus = async () => { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { name: myName, mobile: myMobile, lastActive: Date.now(), statusVisible: isStatusVisible }, { merge: true }); };
-                updateMyStatus(); activeTrackingInterval = setInterval(updateMyStatus, 60000);
-            }).catch(err => { console.log("App is running in offline mode. Sync will resume when online."); });
+                updateMyStatus(); activeTrackingInterval = setInterval(updateMyStatus, 60000); 
+                
+                listenForUsers(); // Fetch live data instantly
+                if(window.listenForIncomingCallsWebRTC) window.listenForIncomingCallsWebRTC();
+            } catch (err) {}
         }
+
+        function listenForUsers() {
+            onSnapshot(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users'), (snapshot) => {
+                allUsers = [];
+                snapshot.forEach(doc => { const data = doc.data(); if (data.mobile !== myMobile) { allUsers.push(data); setupLastMessageListener(data.mobile); } });
+                renderContacts();
+            });
+        }
+
+        function setupLastMessageListener(contactMobile) {
+            if (chatListeners[contactMobile]) return; 
+            const chatId = generateChatId(myMobile, contactMobile);
+            chatListeners[contactMobile] = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'desc'), limit(1)), (snapshot) => {
+                if (!snapshot.empty) {
+                    const newLatest = snapshot.docs[0].data(); const oldLatest = latestMessages[contactMobile];
+                    if (newLatest.senderMobile !== myMobile && (!oldLatest || newLatest.timestamp > oldLatest.timestamp) && newLatest.timestamp > appStartTime) { 
+                        try { document.getElementById('notification-sound').play(); } catch(e){} 
+                        const u = allUsers.find(x => x.mobile === contactMobile);
+                        const pushName = u ? u.name : 'RasGram';
+                        const pushBody = newLatest.isCallLog ? "Missed Call" : (newLatest.text || "Sent an attachment");
+                        sendPushNotification(pushName, pushBody);
+                    }
+                    latestMessages[contactMobile] = newLatest;
+                } else latestMessages[contactMobile] = null;
+                renderContacts();
+            });
+        }
+
+        function renderContacts() {
+            const term = searchInput.value.toLowerCase();
+            if(lockedContacts.length > 0 && !isViewingLocked) document.getElementById('locked-indicator').classList.remove('hidden');
+            else document.getElementById('locked-indicator').classList.add('hidden');
+
+            let displayUsers = allUsers.filter(u => isViewingLocked ? lockedContacts.includes(u.mobile) : !lockedContacts.includes(u.mobile));
+            displayUsers = displayUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
+            displayUsers.sort((a, b) => { return (latestMessages[b.mobile]?.timestamp || parseInt(b.lastActive) || 0) - (latestMessages[a.mobile]?.timestamp || parseInt(a.lastActive) || 0); });
+
+            contactsContainer.innerHTML = '';
+            if (displayUsers.length === 0) { contactsContainer.innerHTML = `<p class="text-center text-[#94a3b8] text-[16px] mt-10 p-6 font-medium">No chats found.</p>`; return; }
+            
+            displayUsers.forEach(user => {
+                const isActive = activeContactMobile === user.mobile;
+                const activeClass = isActive ? 'contact-active' : 'hover:bg-[#1e293b]';
+                const latestMsg = latestMessages[user.mobile];
+                let msgPreview = "Tap to chat..."; let timeString = ""; let isUnread = false; let previewClass = "text-[#94a3b8]";
+
+                if (latestMsg) {
+                    const isMe = latestMsg.senderMobile === myMobile;
+                    let tickClass = latestMsg.read ? "text-[#38bdf8]" : "text-[#94a3b8]";
+                    const prefix = isMe ? `<i class='fa-solid fa-check-double text-[12px] mr-1 ${tickClass}'></i> ` : "";
+                    
+                    if(latestMsg.isCallLog) {
+                        const icon = latestMsg.callType === 'video' ? 'fa-video' : 'fa-phone';
+                        const color = latestMsg.callStatus === 'missed' ? 'text-[#f43f5e]' : 'text-[#94a3b8]';
+                        msgPreview = `<i class='fa-solid ${icon} ${color} mr-1'></i> ${latestMsg.text}`;
+                    }
+                    else if (latestMsg.text) msgPreview = prefix + escapeHTML(latestMsg.text);
+                    else if (latestMsg.fileUrl) {
+                        if (latestMsg.fileType?.startsWith('image/')) msgPreview = prefix + "<i class='fa-solid fa-camera mr-1'></i> Photo";
+                        else if (latestMsg.fileType?.startsWith('video/')) msgPreview = prefix + "<i class='fa-solid fa-video mr-1'></i> Video";
+                        else if (latestMsg.fileType?.startsWith('audio/')) msgPreview = prefix + "<i class='fa-solid fa-microphone mr-1'></i> Voice message";
+                        else msgPreview = prefix + "<i class='fa-solid fa-file mr-1'></i> Document";
+                    }
+                    timeString = latestMsg.timeString || "";
+                    if (!isMe && latestMsg.timestamp > parseInt(localStorage.getItem(`read_${user.mobile}`) || '0') && !latestMsg.read) { isUnread = true; previewClass = "text-white font-bold"; }
+                }
+
+                let unreadBadge = isUnread ? `<span class="bg-[#10b981] text-white text-[12px] font-bold px-2 py-0.5 rounded-full ml-2 shadow-sm">New</span>` : ``;
+                if(user.typingTo === myMobile) { msgPreview = "<span class='text-[#10b981] font-bold text-[14px]'>typing...</span>"; previewClass = ""; unreadBadge = ""; }
+
+                const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
+                const div = document.createElement('div');
+                div.className = `flex items-center cursor-pointer transition-colors p-3.5 border-b border-[#334155] ${activeClass} group relative`;
+                div.innerHTML = `
+                    <div class="relative shrink-0 mr-4" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
+                        <img src="${userAvatar}" class="w-12 h-12 rounded-full object-cover bg-[#0f172a] shadow-sm">
+                    </div>
+                    <div class="flex-grow flex flex-col justify-center overflow-hidden" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-[18px] font-bold text-white tracking-wide truncate pr-2 drop-shadow-sm">${user.name}</h3>
+                            <span class="text-[12px] ${isUnread ? 'text-[#10b981] font-bold' : 'text-[#94a3b8] font-medium'} shrink-0">${timeString}</span>
+                        </div>
+                        <div class="flex justify-between items-center gap-2">
+                            <p class="text-[14px] ${previewClass} truncate w-full tracking-wide">${msgPreview}</p>
+                            ${unreadBadge}
+                        </div>
+                    </div>
+                    <div class="shrink-0 relative ml-1">
+                        <button onclick="toggleContactMenu('${user.mobile}', event)" class="text-[#94a3b8] hover:text-white px-2 py-3 transition-colors">
+                            <i class="fa-solid fa-ellipsis-vertical text-[17px]"></i>
+                        </button>
+                        <div id="contact-menu-${user.mobile}" class="dropdown-menu absolute top-full right-0 mt-1 bg-[#1e293b] border border-[#334155] rounded-xl shadow-2xl py-1.5 w-44 z-[60]">
+                            <button onclick="toggleLockContact('${user.mobile}', event)" class="w-full text-left px-5 py-3 text-[16px] font-semibold text-white hover:bg-[#334155] transition-colors flex items-center">
+                                <i class="fa-solid ${isViewingLocked ? 'fa-unlock' : 'fa-lock'} text-[#10b981] w-6 text-center mr-2"></i> 
+                                ${isViewingLocked ? 'Unlock Chat' : 'Lock Chat'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                contactsContainer.appendChild(div);
+            });
+        }
+
+        window.openPrivateChat = (contactName, contactMobile, contactAvatarUrl) => {
+            activeContactMobile = contactMobile; localStorage.setItem(`read_${contactMobile}`, Date.now());
+            document.getElementById('active-chat-name').innerText = contactName; document.getElementById('active-chat-avatar').src = contactAvatarUrl;
+            document.getElementById('empty-chat-state').classList.add('hidden');
+            document.getElementById('lock-chat-btn').innerText = lockedContacts.includes(contactMobile) ? "Unlock chat" : "Lock chat";
+            
+            const chatArea = document.getElementById('chat-area');
+            if (window.innerWidth < 768) {
+                if (window.location.hash !== '#chat') { history.pushState(null, null, "#chat"); }
+                document.getElementById('sidebar').classList.remove('flex'); document.getElementById('sidebar').classList.add('hidden'); 
+                chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); 
+            } else { chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); }
+
+            msgBox.classList.remove('fade-in-anim'); void msgBox.offsetWidth; msgBox.classList.add('fade-in-anim');
+            renderContacts(); document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
+
+            if(userStatusUnsubscribe) userStatusUnsubscribe();
+            userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
+                const statusElem = document.getElementById('active-chat-status');
+                if(docSnap.exists()){
+                    const uData = docSnap.data(); if(uData.avatarUrl) document.getElementById('active-chat-avatar').src = getAvatarUrl(contactName, uData.avatarUrl);
+                    if(uData.typingTo === myMobile) { statusElem.innerText = 'typing...'; statusElem.className = 'text-[14px] text-[#10b981] font-bold mt-0.5 tracking-wide'; } 
+                    else {
+                        const onlineVisible = uData.statusVisible !== false;
+                        const isOnline = onlineVisible && (Date.now() - uData.lastActive) < 120000;
+                        statusElem.innerText = isOnline ? 'Online' : 'Click here for contact info';
+                        statusElem.className = 'text-[13px] text-[#94a3b8] font-medium mt-0.5';
+                    }
+                }
+            });
+
+            if (currentChatUnsubscribe) currentChatUnsubscribe();
+            const chatId = generateChatId(myMobile, contactMobile);
+            currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc'), limit(200)), (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    const mData = change.doc.data(); mData.id = change.doc.id;
+                    if (!mData.read && mData.senderMobile !== myMobile) updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true });
+                    const oldNode = document.getElementById(`msg-${change.doc.id}`);
+                    if(change.type === "added" && !oldNode) msgBox.appendChild(createMessageElement(change.doc.id, mData, contactName));
+                    else if(change.type === "modified" && oldNode) oldNode.replaceWith(createMessageElement(change.doc.id, mData, contactName));
+                    else if(change.type === "removed" && oldNode) oldNode.remove();
+                });
+                localStorage.setItem(`read_${activeContactMobile}`, Date.now()); renderContacts(); setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 100);
+            });
+        };
 
         window.toggleReactionMenu = (docId, e) => {
             e.stopPropagation(); if(e.target.closest('button')) return; 
@@ -948,16 +986,6 @@
                 msgInput.value = ''; clearFile(); msgInput.style.height = '24px'; toggleInputButtons(); localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
             } catch (error) { alert("Message failed."); } finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-[20px] ml-1"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
-
-        window.toggleCustomAudio = (id, btn) => {
-            const audio = document.getElementById(id); const icon = btn.querySelector('i');
-            if (audio.paused) { document.querySelectorAll('audio').forEach(a => { if(a.id !== id && a.id.startsWith('audio_pvt_')) { a.pause(); const ob = document.getElementById('btn_'+a.id); if(ob) ob.querySelector('i').className = 'fa-solid fa-play'; } }); audio.play(); icon.className = 'fa-solid fa-pause'; } 
-            else { audio.pause(); icon.className = 'fa-solid fa-play'; }
-        };
-        window.updateAudioProgress = (id, audio) => { const s = document.getElementById('slider_'+id); const t = document.getElementById('time_'+id); if(audio.duration && s) { s.value = (audio.currentTime / audio.duration) * 100; t.innerText = formatTime(audio.currentTime); } };
-        window.seekAudio = (id, slider) => { const a = document.getElementById(id); if(a.duration) a.currentTime = (slider.value / 100) * a.duration; };
-        window.audioEnded = (id, audio) => { const b = document.getElementById('btn_'+id); if(b) b.querySelector('i').className = 'fa-solid fa-play'; const s = document.getElementById('slider_'+id); if(s) s.value = 0; const t = document.getElementById('time_'+id); if(t) t.innerText = formatTime(audio.duration || 0); };
-        window.initAudioDuration = (id, audio) => { const t = document.getElementById('time_'+id); if(t) t.innerText = formatTime(audio.duration); };
 
         function getDownloadableUrl(originalUrl) { return originalUrl && originalUrl.includes('/upload/') ? originalUrl.replace('/upload/', '/upload/fl_attachment/') : originalUrl; }
 
