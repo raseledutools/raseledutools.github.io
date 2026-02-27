@@ -5,19 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Professional Web Tools Suite engineered by Rasel Mia. Access Diary, Docx Viewer, HTML Editor, Converters, Live Exam, and Global Chat.">
     <title>Web Tools Suite | Professional Workspace</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href='data:application/json,{"name":"Web Tools Suite","short_name":"Tools","start_url":".","display":"standalone","background_color":"#020617","theme_color":"#020617"}'>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
         body { font-family: 'Inter', sans-serif; color: #f8fafc; background-color: #020617; overflow-x: hidden; }
-        .bg-overlay { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.4), rgba(2, 6, 23, 0.95)), url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2500'); background-size: cover; background-position: center; background-attachment: fixed; }
-        .solid-card { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); backdrop-blur: md; }
-        .solid-card:hover { transform: translateY(-8px) scale(1.02); border-color: rgba(255, 255, 255, 0.4); }
+        
+        .bg-overlay { 
+            position: fixed; inset: 0; z-index: 0; 
+            background-image: linear-gradient(to bottom, rgba(2, 6, 23, 0.4), rgba(2, 6, 23, 0.95)), url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=2500'); 
+            background-size: cover; background-position: center; background-attachment: fixed; 
+        }
+        
+        .solid-card { 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            backdrop-filter: blur(12px); 
+        }
+        
+        .solid-card:hover { 
+            transform: translateY(-8px) scale(1.02); 
+            border-color: rgba(255, 255, 255, 0.4); 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .icon-box { transition: all 0.4s ease; }
+        .solid-card:hover .icon-box { transform: scale(1.15) rotate(-10deg); }
+
         @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         .animate-scroll { display: inline-block; white-space: nowrap; animation: scroll 25s linear infinite; }
+        
+        @keyframes pageLoad { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { animation: pageLoad 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(3, 7, 18, 0.8); }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen selection:bg-pink-500/30">
+<body class="flex flex-col min-h-screen selection:bg-pink-500/30 animate-enter">
 
     <div class="bg-overlay"></div>
 
@@ -45,7 +79,13 @@
                 <i class="fa-solid fa-comments text-blue-400"></i> <span class="text-sm">Global Chat</span>
             </a>
             <a href="diary.html" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-slate-200">
-                <i class="fa-solid fa-book-open text-purple-400"></i> <span class="text-sm">Diary</span>
+                <i class="fa-solid fa-book-open text-purple-400"></i> <span class="text-sm">Professional Diary</span>
+            </a>
+            <a href="converter.html" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-slate-200">
+                <i class="fa-solid fa-arrows-rotate text-emerald-400"></i> <span class="text-sm">All Converters</span>
+            </a>
+            <a href="noise.html" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-slate-200">
+                <i class="fa-solid fa-headphones text-pink-400"></i> <span class="text-sm">Focus Noise</span>
             </a>
             <a href="about.html" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-slate-200">
                 <i class="fa-solid fa-circle-info text-indigo-400"></i> <span class="text-sm">About Us</span>
@@ -56,17 +96,37 @@
     <!-- Main Content -->
     <div class="relative z-10 flex flex-col min-h-screen">
         <header class="pt-16 pb-10 text-center px-4 flex flex-col items-center">
-            <img src="developer.jpg" class="w-24 h-24 rounded-full object-cover border-2 border-white/30 shadow-2xl mb-6" onerror="this.src='https://ui-avatars.com/api/?name=Rasel+Mia'">
-            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 text-white drop-shadow-lg tracking-tight">Web Tools Suite</h1>
             
+            <!-- Developer Profile Image (Clickable for Admin) -->
+            <div class="mb-6 relative group cursor-pointer" onclick="openAdminLogin()">
+                <div class="absolute -inset-1.5 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 rounded-full blur opacity-60 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
+                <img src="developer.jpg" alt="Developer Rasel" class="relative w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-2 border-white/30 shadow-2xl group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://ui-avatars.com/api/?name=Rasel+Mia&background=db2777&color=fff'">
+            </div>
+
+            <!-- Welcome Badge -->
+            <div class="mb-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold tracking-wider uppercase backdrop-blur-md shadow-lg">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+                </span>
+                System Online
+            </div>
+
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-pink-100 to-purple-200 drop-shadow-lg">
+                Web Tools Suite
+            </h1>
+            
+            <!-- Scrolling Notice -->
             <div class="max-w-3xl w-full mx-auto mt-6 bg-slate-900/50 border border-white/10 backdrop-blur-md rounded-full overflow-hidden flex items-center h-12 shadow-2xl">
-                <div class="bg-gradient-to-r from-pink-600 to-purple-600 px-4 h-full flex items-center text-[10px] font-bold uppercase z-10">Live Line</div>
-                <div class="flex-grow overflow-hidden h-full flex items-center">
-                    <div id="ticker-text" class="animate-scroll px-4 text-sm font-medium text-slate-200">Loading update...</div>
+                <div class="bg-gradient-to-r from-pink-600 to-purple-600 px-4 h-full flex items-center text-[10px] font-bold uppercase tracking-widest z-10 shadow-lg">Update</div>
+                <div class="flex-grow overflow-hidden relative h-full flex items-center">
+                    <div id="ticker-text" class="animate-scroll px-4 text-sm font-medium text-slate-200">
+                        Welcome to the Professional Web Tools Workspace. Stay updated with our latest news. &nbsp;&bull;&nbsp; Designed by Rasel Mia.
+                    </div>
                 </div>
             </div>
 
-            <!-- 🔥 THE THREE BUTTONS 🔥 -->
+            <!-- 🔥 THE THREE MAIN BUTTONS 🔥 -->
             <div class="flex flex-wrap justify-center gap-4 mt-10 px-4 w-full max-w-4xl mx-auto">
                 
                 <!-- Button 1: Notice -->
@@ -75,7 +135,7 @@
                     <span class="text-sm">Notice Board</span>
                 </a>
 
-                <!-- Button 2: Exam (With Subtitle Style) -->
+                <!-- Button 2: Exam -->
                 <a href="exam.html" class="group flex items-center gap-3 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border border-white/10 text-white font-bold tracking-wide transition-all shadow-[0_8px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_12px_25px_rgba(16,185,129,0.5)] hover:-translate-y-1 w-full sm:w-auto justify-center">
                     <i class="fa-solid fa-pen-to-square text-white group-hover:rotate-12 transition-transform"></i>
                     <div class="text-left">
@@ -84,7 +144,7 @@
                     </div>
                 </a>
 
-                <!-- Button 3: Global Chat (Blue Theme) -->
+                <!-- Button 3: Global Chat -->
                 <a href="chat.html" class="group flex items-center gap-3 px-7 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border border-white/10 text-white font-bold tracking-wide transition-all shadow-[0_8px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_12px_25px_rgba(37,99,235,0.5)] hover:-translate-y-1 w-full sm:w-auto justify-center">
                     <i class="fa-solid fa-comments text-white group-hover:scale-110 transition-transform"></i>
                     <span class="text-sm">Global Chat</span>
@@ -93,32 +153,104 @@
             </div>
         </header>
 
-        <main class="flex-grow container mx-auto px-4 py-10">
+        <!-- Main Grid Section (6 Cards) -->
+        <main class="flex-grow container mx-auto px-4 py-6 pb-20">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                <a href="diary.html" class="solid-card bg-gradient-to-br from-purple-600/80 to-pink-600/80 rounded-2xl p-6">
-                    <h3 class="text-xl font-bold mb-2 text-white">Professional Diary</h3>
-                    <p class="text-white/80 text-sm">Secure daily journal and task logger.</p>
+
+                <!-- Card 1: Diary -->
+                <a href="diary.html" class="solid-card bg-gradient-to-br from-purple-600/80 to-pink-600/80 rounded-2xl p-6 group cursor-pointer block relative">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
+                            <i class="fa-solid fa-book-open text-lg text-white"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Personal</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Professional Diary</h3>
+                    <p class="text-white/80 text-sm leading-relaxed">Encrypted daily journal. Track tasks, log thoughts, and preserve records securely.</p>
                 </a>
-                <a href="exam.html" class="solid-card bg-gradient-to-br from-emerald-600/80 to-teal-600/80 rounded-2xl p-6">
-                    <h3 class="text-xl font-bold mb-2 text-white">Exam Center</h3>
-                    <p class="text-white/80 text-sm">Live MCQ examinations and practice papers.</p>
+
+                <!-- Card 2: Docx View -->
+                <a href="docx view.html" class="solid-card bg-gradient-to-br from-blue-600/80 to-cyan-600/80 rounded-2xl p-6 group cursor-pointer block relative">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
+                            <i class="fa-solid fa-file-word text-lg text-white"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Document</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Docx Viewer</h3>
+                    <p class="text-white/80 text-sm leading-relaxed">Native browser rendering for Microsoft Word documents. Fast and secure.</p>
                 </a>
-                <a href="pdf_merger_tool.html" class="solid-card bg-gradient-to-br from-blue-600/80 to-cyan-600/80 rounded-2xl p-6">
-                    <h3 class="text-xl font-bold mb-2 text-white">PDF Merger</h3>
-                    <p class="text-white/80 text-sm">Combine and reorder multiple PDFs easily.</p>
+
+                <!-- Card 3: HTML Preview -->
+                <a href="html preview.html" class="solid-card bg-gradient-to-br from-orange-600/80 to-red-600/80 rounded-2xl p-6 group cursor-pointer block relative">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
+                            <i class="fa-brands fa-code text-lg text-white"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Developer</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Code Workspace</h3>
+                    <p class="text-white/80 text-sm leading-relaxed">Live IDE environment. Write, debug, and execute HTML/CSS/JS components.</p>
                 </a>
+
+                <!-- Card 4: Converter -->
+                <a href="converter.html" class="solid-card bg-gradient-to-br from-emerald-600/80 to-teal-600/80 rounded-2xl p-6 group cursor-pointer block relative">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
+                            <i class="fa-solid fa-arrows-rotate text-lg text-white"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Utility</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Universal Converter</h3>
+                    <p class="text-white/80 text-sm leading-relaxed">Precision tools for format conversion, image resizing, and PDF management.</p>
+                </a>
+
+                <!-- Card 5: PDF Merger -->
+                <a href="pdf_merger_tool.html" class="solid-card bg-gradient-to-br from-rose-600/80 to-pink-500/80 rounded-2xl p-6 group cursor-pointer block relative">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
+                            <i class="fa-solid fa-layer-group text-lg text-white"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Tools</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Advanced PDF Merger</h3>
+                    <p class="text-white/80 text-sm leading-relaxed">Combine and reorder multiple PDFs easily without any upload limits.</p>
+                </a>
+
+                <!-- Card 6: Noise Generator -->
+                <a href="noise.html" class="solid-card bg-gradient-to-br from-indigo-600/80 to-blue-500/80 rounded-2xl p-6 group cursor-pointer block relative">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-xl icon-box bg-black/20 group-hover:bg-white/20 border border-white/10">
+                            <i class="fa-solid fa-headphones text-lg text-white"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-white uppercase tracking-widest bg-black/20 py-1 px-3 rounded-full border border-white/10">Focus</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-white drop-shadow-md">Focus Noise Generator</h3>
+                    <p class="text-white/80 text-sm leading-relaxed">Enhance concentration with soothing nature sounds and deep focus frequencies.</p>
+                </a>
+
             </div>
         </main>
 
-        <footer class="py-6 border-t border-white/10 bg-black/40 backdrop-blur-xl">
-            <div class="container mx-auto px-6 flex justify-between items-center max-w-6xl">
-                <p class="text-slate-400 text-xs">© 2024 Web Tools Suite.</p>
-                <button onclick="openAdminLogin()" class="flex items-center gap-2 bg-white/5 px-3 py-1 rounded-full hover:bg-white/10 transition-all group">
-                    <img src="my_image.jpg" class="w-6 h-6 rounded-full border border-slate-500" onerror="this.style.display='none'">
-                    <span class="text-white text-xs font-bold group-hover:text-pink-400">Rasel Mia</span>
-                </button>
+        <!-- Footer Section -->
+        <footer class="py-6 mt-auto border-t border-white/10 bg-black/40 backdrop-blur-xl relative z-10">
+            <div class="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 max-w-6xl">
+                <p class="text-slate-300 text-sm font-medium">
+                    &copy; 2026 Web Tools Suite.
+                </p>
+                <div class="flex items-center gap-3">
+                    <span class="text-slate-400 text-[10px] tracking-widest uppercase font-bold">Engineered by</span>
+                    <div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full pl-1 pr-3 py-1">
+                        <img src="my_image.jpg" alt="Developer" class="w-6 h-6 rounded-full object-cover border border-slate-400" onerror="this.style.display='none'">
+                        <span class="text-white font-semibold text-xs tracking-wide">Rasel Mia</span>
+                    </div>
+                </div>
+                <a href="tel:01566054963" class="flex items-center gap-2 text-slate-300 hover:text-pink-400 transition-colors text-sm font-medium bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
+                    <i class="fa-solid fa-phone text-xs"></i> 01566054963
+                </a>
             </div>
         </footer>
+
     </div>
 
     <!-- Admin Modal -->
@@ -133,25 +265,43 @@
         </div>
     </div>
 
+    <!-- Notification Modal (Popup for visitors) -->
+    <div id="notification-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
+        <div class="bg-gradient-to-br from-slate-900 to-black border-2 border-pink-500/30 p-8 rounded-3xl w-full max-w-lg shadow-[0_20px_50px_rgba(236,72,153,0.3)] relative overflow-hidden text-center transform scale-100 transition-transform">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500"></div>
+            <div class="w-16 h-16 bg-pink-500/20 rounded-full flex items-center justify-center mb-6 border border-pink-500/30 mx-auto">
+                <i class="fa-solid fa-bell text-3xl text-pink-500 animate-bounce"></i>
+            </div>
+            <h2 class="text-2xl font-black mb-2 tracking-tight text-white">NEW NOTIFICATION</h2>
+            <div class="text-pink-400 text-[10px] font-bold tracking-[0.3em] uppercase mb-6 opacity-80 italic">Recent System Update</div>
+            <div id="notif-msg" class="bg-white/5 border border-white/5 p-5 rounded-2xl text-slate-200 text-lg leading-relaxed font-medium mb-8 italic">
+                "Message goes here..."
+            </div>
+            <button onclick="markAsRead()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:scale-[1.02] active:scale-95 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-pink-600/30 tracking-widest uppercase text-sm">
+                OK, GOT IT!
+            </button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        const firebaseConfig = { apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY", projectId: "mywebtools-f8d53", appId: "1:979594414301:web:7048c995e56e331a85f334" };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY", 
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53", 
+            storageBucket: "mywebtools-f8d53.firebasestorage.app",
+            messagingSenderId: "979594414301",
+            appId: "1:979594414301:web:7048c995e56e331a85f334" 
+        };
+        
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
 
-        onSnapshot(doc(db, 'artifacts', 'rasel-mia-universal-sync', 'public', 'data', 'broadcast', 'current'), (snap) => {
-            if (snap.exists()) document.getElementById('ticker-text').innerHTML = `${snap.data().message} &nbsp;&bull;&nbsp; Global Active.`;
-        });
-
-        window.openAdminLogin = () => document.getElementById('admin-modal').classList.remove('hidden');
-        window.verifyAdmin = () => {
-            if (document.getElementById('admin-pass').value === 'rasel123') {
-                sessionStorage.setItem('admin_logged_in', 'true');
-                window.location.href = 'admin_dashboard.html';
-            } else { alert('Wrong Password!'); }
-        };
+        // Sidebar logic
         window.toggleSidebar = () => {
             const sb = document.getElementById('sidebar');
             const ov = document.getElementById('sidebar-overlay');
@@ -159,7 +309,65 @@
             ov.classList.toggle('hidden');
             setTimeout(() => ov.classList.toggle('opacity-0'), 10);
         };
+
+        // Admin login logic
+        window.openAdminLogin = () => document.getElementById('admin-modal').classList.remove('hidden');
+        window.verifyAdmin = () => {
+            if (document.getElementById('admin-pass').value === 'rasel123') {
+                sessionStorage.setItem('admin_logged_in', 'true');
+                window.location.href = 'admin_dashboard.html';
+            } else { 
+                alert('Wrong Password!'); 
+            }
+        };
+
+        // Notification & Ticker Logic
+        let lastViewedTime = localStorage.getItem('last_notif_time') || '0';
+        let currentNotification = null;
+
+        window.markAsRead = () => {
+            if (currentNotification) {
+                localStorage.setItem('last_notif_time', currentNotification.timestamp);
+                lastViewedTime = currentNotification.timestamp;
+            }
+            document.getElementById('notification-modal').classList.add('hidden');
+        };
+
+        // Request Browser Notification Permission
+        if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+
+        signInAnonymously(auth).catch(e => console.error("Auth error", e));
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Read Live Ticker & Notification Broadcast
+                onSnapshot(doc(db, 'artifacts', 'rasel-mia-universal-sync', 'public', 'data', 'broadcast', 'current'), (snap) => {
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        currentNotification = data;
+                        document.getElementById('ticker-text').innerHTML = `${data.message} &nbsp;&bull;&nbsp; Global Active &nbsp;&bull;&nbsp; Designed by Rasel Mia.`;
+                        
+                        // Show modal if it's a new notification
+                        if (data.timestamp && data.timestamp > lastViewedTime) {
+                            document.getElementById('notif-msg').innerText = `"${data.message}"`;
+                            document.getElementById('notification-modal').classList.remove('hidden');
+                        }
+                    }
+                });
+            }
+        });
     </script>
+    
+    <!-- Traffic Tracker -->
     <script type="module" src="tracker.js"></script>
+    
+    <!-- Register Service Worker for Background Push -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('firebase-messaging-sw.js').catch(err => console.warn('SW issue:', err));
+        }
+    </script>
 </body>
 </html>
