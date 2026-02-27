@@ -10,14 +10,15 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// 1. Service Worker Register kora (GitHub Pages er root folder e thakte hobe)
+// 1. Service Worker Register kora (PWA Cache + Notification er jonno)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./firebase-messaging-sw.js')
+    // amra offline er jonno sw.js register korchi
+    navigator.serviceWorker.register('./sw.js')
       .then((registration) => {
         console.log('Service Worker registered successfully with scope:', registration.scope);
         // Registration sfol hole permission chaoar function call hobe
-        initNotification();
+        initNotification(registration);
       })
       .catch((err) => {
         console.error('Service Worker registration failed:', err);
@@ -26,16 +27,17 @@ if ('serviceWorker' in navigator) {
 }
 
 // 2. Permission ebong Token Generator Function
-function initNotification() {
+function initNotification(registration) {
   console.log('Requesting notification permission...');
   
   Notification.requestPermission().then((permission) => {
     if (permission === 'granted') {
       console.log('Notification permission granted.');
       
-      // 3. VAPID Key diye Token neya
+      // 3. VAPID Key ebong amader Service Worker diye Token neya
       messaging.getToken({ 
-        vapidKey: 'BOVXtUUCRy2p5-QqB1orahGTjdc1FGVIMJBf76hArZMnoWAtTpFodxPs1FjyX1gefbKB08RTUUbqDit2XeKc0DU' 
+        vapidKey: 'BOVXtUUCRy2p5-QqB1orahGTjdc1FGVIMJBf76hArZMnoWAtTpFodxPs1FjyX1gefbKB08RTUUbqDit2XeKc0DU',
+        serviceWorkerRegistration: registration 
       }).then((currentToken) => {
         if (currentToken) {
           console.log('User Token (Copy this for testing):', currentToken);
