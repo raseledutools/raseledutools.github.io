@@ -482,6 +482,7 @@
         let activeTrackingInterval = null;
         let selectedFile = null;
         let typingTimeout = null; 
+        let isTyping = false; // 🔥 Optimized Typing Tracker 🔥
 
         let mediaRecorder;
         let audioChunks = [];
@@ -758,14 +759,27 @@
         }
 
         msgInput.addEventListener('focus', () => { setTimeout(() => setRealViewportHeight(), 150); });
+        
+        // 🔥 Optimized Typing Listener 🔥
         msgInput.addEventListener('input', function() {
-            this.style.height = 'auto'; this.style.height = (this.scrollHeight < 100 ? this.scrollHeight : 100) + 'px'; toggleInputButtons();
+            this.style.height = 'auto'; 
+            this.style.height = (this.scrollHeight < 100 ? this.scrollHeight : 100) + 'px'; 
+            toggleInputButtons();
+            
             if (activeContactMobile) {
-                setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: activeContactMobile }, { merge: true });
+                if (!isTyping) {
+                    isTyping = true;
+                    setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: activeContactMobile }, { merge: true });
+                }
+                
                 clearTimeout(typingTimeout);
-                typingTimeout = setTimeout(() => { setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: null }, { merge: true }); }, 2000);
+                typingTimeout = setTimeout(() => {
+                    isTyping = false;
+                    setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { typingTo: null }, { merge: true });
+                }, 2000);
             }
         });
+        
         msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if(!sendBtn.disabled) chatForm.dispatchEvent(new Event('submit')); } });
 
         fileInput.addEventListener('change', (e) => {
@@ -949,7 +963,14 @@
             activeContactMobile = null; renderContacts();
             if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus();
         }
+        
+        // 🔥 Optimized Back Button Logic 🔥
         window.closeChatMobile = () => { if (window.innerWidth < 768 && window.location.hash === '#chat') history.back(); else closeChatLogic(); };
+        window.addEventListener('popstate', (e) => {
+            if (window.location.hash !== '#chat') {
+                closeChatLogic();
+            }
+        });
 
         window.openPrivateChat = (contactName, contactMobile, contactAvatarUrl) => {
             activeContactMobile = contactMobile; localStorage.setItem(`read_${contactMobile}`, Date.now());
