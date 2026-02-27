@@ -7,8 +7,14 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>RasGram | Secure Messenger</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
@@ -456,6 +462,21 @@
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         import { setupWebRTC } from "./webrtc_core.js";
+
+        // --- Dexie.js (Offline Database) Setup ---
+        const localDB = new Dexie("RasGramDB");
+        localDB.version(1).stores({
+            chatHistory: 'chatId, messages' // চ্যাটগুলো সেভ করার জন্য
+        });
+
+        // --- Service Worker Register for PWA ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker registered!', reg))
+                .catch(err => console.error('Service Worker failed!', err));
+            });
+        }
 
         function setRealViewportHeight() {
             let vh = window.innerHeight;
@@ -1008,7 +1029,7 @@
             }
         });
 
-        window.openPrivateChat = (contactName, contactMobile, contactAvatarUrl) => {
+        window.openPrivateChat = async (contactName, contactMobile, contactAvatarUrl) => {
             activeContactMobile = contactMobile; localStorage.setItem(`read_${contactMobile}`, Date.now());
             document.getElementById('active-chat-name').innerText = contactName; document.getElementById('active-chat-avatar').src = contactAvatarUrl;
             document.getElementById('empty-chat-state').classList.add('hidden');
@@ -1025,12 +1046,16 @@
             renderContacts(); document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
 
             const chatId = generateChatId(myMobile, contactMobile);
-            const cachedChat = localStorage.getItem(`chat_cache_${chatId}`);
-            if(cachedChat) {
-                const msgs = JSON.parse(cachedChat);
-                msgs.forEach(mData => msgBox.appendChild(createMessageElement(mData.id, mData, contactName)));
-                msgBox.scrollTop = msgBox.scrollHeight;
+            
+            // --- Dexie.js (অফলাইন থেকে চ্যাট লোড করা) ---
+            let msgs = [];
+            const cachedRecord = await localDB.chatHistory.get(chatId);
+            if(cachedRecord && cachedRecord.messages) {
+                 msgs = cachedRecord.messages;
+                 msgs.forEach(mData => msgBox.appendChild(createMessageElement(mData.id, mData, contactName)));
+                 msgBox.scrollTop = msgBox.scrollHeight;
             }
+            const cachedChat = msgs.length > 0;
 
             if(userStatusUnsubscribe) userStatusUnsubscribe();
             userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
@@ -1048,7 +1073,7 @@
             });
 
             if (currentChatUnsubscribe) currentChatUnsubscribe();
-            currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc'), limit(200)), (snapshot) => {
+            currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc'), limit(500)), (snapshot) => {
                 let cacheArray = [];
                 if(!cachedChat) msgBox.innerHTML = ''; 
 
@@ -1066,8 +1091,9 @@
                     }
                 });
 
+                // --- Dexie.js (অফলাইনের জন্য নতুন মেসেজ সেভ করা) ---
                 snapshot.docs.forEach(doc => { let d = doc.data(); d.id = doc.id; cacheArray.push(d); });
-                localStorage.setItem(`chat_cache_${chatId}`, JSON.stringify(cacheArray));
+                localDB.chatHistory.put({ chatId: chatId, messages: cacheArray });
 
                 localStorage.setItem(`read_${activeContactMobile}`, Date.now()); renderContacts(); setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 100);
             });
