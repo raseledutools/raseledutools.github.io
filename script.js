@@ -1,4 +1,4 @@
-// Firebase configuration
+// Firebase configuration (আপনার দেওয়া আগের কনফিগারেশন)
 const firebaseConfig = {
   apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
   projectId: "mywebtools-f8d53",
@@ -8,63 +8,77 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const messaging = firebase.messaging();
+const db = firebase.database(); 
+const auth = firebase.auth();
 
-// 1. Service Worker Register kora (PWA Cache + Notification er jonno)
+// ১. সার্ভিস ওয়ার্কার রেজিস্টার (আপনার sw.js আগের মতোই থাকবে)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // amra offline er jonno sw.js register korchi
     navigator.serviceWorker.register('./sw.js')
       .then((registration) => {
-        console.log('Service Worker registered successfully with scope:', registration.scope);
-        // Registration sfol hole permission chaoar function call hobe
-        initNotification(registration);
+        console.log('Service Worker for Cache registered!');
       })
       .catch((err) => {
-        console.error('Service Worker registration failed:', err);
+        console.error('SW registration failed:', err);
       });
   });
 }
 
-// 2. Permission ebong Token Generator Function
-function initNotification(registration) {
-  console.log('Requesting notification permission...');
-  
-  Notification.requestPermission().then((permission) => {
-    if (permission === 'granted') {
-      console.log('Notification permission granted.');
-      
-      // 3. VAPID Key ebong amader Service Worker diye Token neya
-      messaging.getToken({ 
-        vapidKey: 'BOVXtUUCRy2p5-QqB1orahGTjdc1FGVIMJBf76hArZMnoWAtTpFodxPs1FjyX1gefbKB08RTUUbqDit2XeKc0DU',
-        serviceWorkerRegistration: registration 
-      }).then((currentToken) => {
-        if (currentToken) {
-          console.log('User Token (Copy this for testing):', currentToken);
-          // Ekhane apni chaile token-ti server-e save korte paren
-        } else {
-          console.warn('No registration token available. Request permission to generate one.');
+// ২. OneSignal ইউজার আইডি হ্যান্ডেল করা
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal) {
+    
+    // ইউজার যখন নোটিফিকেশন পারমিশন দেবে বা আইডি পরিবর্তন হবে
+    OneSignal.User.PushSubscription.addEventListener("change", (event) => {
+        const oneSignalUserId = event.current.id;
+        if (oneSignalUserId) {
+            saveOneSignalIdToFirebase(oneSignalUserId);
         }
-      }).catch((err) => {
-        console.error('An error occurred while retrieving token: ', err);
-      });
-    } else {
-      console.warn('User denied notification permission.');
+    });
+
+    // বর্তমান আইডি চেক করা
+    const currentId = OneSignal.User.PushSubscription.id;
+    if (currentId) {
+        saveOneSignalIdToFirebase(currentId);
     }
-  });
+});
+
+// ৩. Firebase-এ OneSignal Player ID সেভ করার ফাংশন
+// এটি আপনার ডাটাবেসের 'users/ইউজার_আইডি/onesignal_id' তে সেভ হবে
+function saveOneSignalIdToFirebase(playerId) {
+    auth.onAuthStateChanged((user) => {
+        if (user && playerId) {
+            db.ref('users/' + user.uid).update({
+                onesignal_id: playerId
+            }).then(() => {
+                console.log('OneSignal ID saved to Firebase:', playerId);
+            });
+        }
+    });
 }
 
-// 4. Foreground Message (Jokhon website khola thakbe)
-messaging.onMessage((payload) => {
-  console.log('Message received in foreground: ', payload);
-  
-  // Browser-e website cholakalin alert dekhabe
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: 'developer.jpg'
-  };
-
-  // Custom alert ba notification dekhano
-  alert(`${notificationTitle}: ${notificationOptions.body}`);
-});
+// ৪. পুশ নোটিফিকেশন পাঠানোর মেইন ফাংশন
+// targetOneSignalId = যাকে পাঠাবেন তার আইডি, messageText = মেসেজ বডি
+function sendPushNotification(targetOneSignalId, messageText) {
+    // OneSignal Dashboard > Settings > Keys & IDs থেকে REST API Key টি এখানে বসান
+    const restApiKey = "os_v2_app_kivtcnwbnvg6xbbdotnmhvsffzag6wdfng7ufmfb7dtdwn2k4nr43uy5xgi6zvzqfyttgujh3yhn4eghuttyixea2o7dopgljwgq3uq"; 
+    
+    fetch("https://onesignal.com/api/v1/notifications", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            "Authorization": "Basic " + restApiKey
+        },
+        body: JSON.stringify({
+            app_id: "522b3136-c16d-4deb-8423-74dac3d6452e",
+            include_player_ids: [targetOneSignalId],
+            contents: {"en": messageText},
+            headings: {"en": "RasGram-এ নতুন মেসেজ"},
+            android_channel_id: "PUSH_CHANNEL_ID", // OneSignal-এ চ্যানেল থাকলে দিতে পারেন
+            priority: 10
+        })
+    })
+    .then(response => response.json())
+    .then(data => console.log("Success:", data))
+    .catch(error => console.error("Error:", error));
+}
