@@ -145,6 +145,15 @@
             background: #fff; cursor: pointer; box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
     </style>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "522b3136-c16d-4deb-8423-74dac3d6452e", // আপনার আইডি সেট করা আছে
+    });
+  });
+</script>
 </head>
 <body class="flex selection:bg-[#00a884]/30">
 
