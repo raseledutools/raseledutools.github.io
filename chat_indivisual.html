@@ -935,6 +935,21 @@
                 const updateMyStatus = async () => { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { name: myName, mobile: myMobile, lastActive: Date.now(), statusVisible: isStatusVisible }, { merge: true }); };
                 updateMyStatus(); activeTrackingInterval = setInterval(updateMyStatus, 60000); listenForUsers();
                 if(window.listenForIncomingCallsWebRTC) window.listenForIncomingCallsWebRTC();
+
+                // 🔔 OneSignal ID Database e Save Kora
+                window.OneSignalDeferred.push(async function(OneSignal) {
+                    OneSignal.User.PushSubscription.addEventListener("change", async (event) => {
+                        const oneSignalUserId = event.current.id;
+                        if (oneSignalUserId && myMobile) {
+                            await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { onesignal_id: oneSignalUserId }, { merge: true });
+                        }
+                    });
+                    const currentId = OneSignal.User.PushSubscription.id;
+                    if (currentId && myMobile) {
+                        await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { onesignal_id: currentId }, { merge: true });
+                    }
+                });
+
             } catch (err) {}
         }
 
@@ -1147,6 +1162,38 @@
             });
         }
 
+        // ==========================================
+        // 🔔 OneSignal Push Notification Function 🔔
+        // ==========================================
+        async function triggerOneSignalPush(receiverMobile, messageText) {
+            try {
+                const receiverRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', receiverMobile);
+                const receiverSnap = await getDoc(receiverRef);
+                if (receiverSnap.exists()) {
+                    const rData = receiverSnap.data();
+                    if (rData.onesignal_id) {
+                        const restApiKey = "os_v2_app_kivtcnwbnvg6xbbdotnmhvsffzag6wdfng7ufmfb7dtdwn2k4nr43uy5xgi6zvzqfyttgujh3yhn4eghuttyixea2o7dopgljwgq3uq";
+                        fetch("https://onesignal.com/api/v1/notifications", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json; charset=utf-8",
+                                "Authorization": "Basic " + restApiKey
+                            },
+                            body: JSON.stringify({
+                                app_id: "522b3136-c16d-4deb-8423-74dac3d6452e",
+                                include_player_ids: [rData.onesignal_id],
+                                contents: {"en": messageText},
+                                headings: {"en": myName + " থেকে মেসেজ"},
+                                priority: 10
+                            })
+                        }).catch(e => console.log("Push Error:", e));
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching onesignal id:", error);
+            }
+        }
+
         // --- Offline Send System Updated ---
         chatForm.onsubmit = async (e) => {
             e.preventDefault(); const text = msgInput.value.trim(); if ((!text && !selectedFile) || !activeContactMobile) return;
@@ -1172,6 +1219,11 @@
 
                 if (navigator.onLine) {
                     await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), msgData);
+                    
+                    // 🔔 মেসেজ সেভ হওয়ার পর নোটিফিকেশন কল করা হলো
+                    let pushText = msgData.text ? msgData.text : (msgData.fileUrl ? "একটি ফাইল পাঠিয়েছে" : "নতুন মেসেজ");
+                    triggerOneSignalPush(activeContactMobile, pushText);
+
                 } else {
                     // নেট না থাকলে Dexie.js এর Outbox এ জমা হবে
                     msgData.chatId = chatId;
