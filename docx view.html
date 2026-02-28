@@ -1,306 +1,161 @@
-<script type="module">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RasBook | Social Media</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; }
+        .fb-blue { color: #1877f2; }
+        .bg-fb-blue { background-color: #1877f2; }
+        .story-card { min-width: 110px; height: 180px; border-radius: 10px; background-size: cover; position: relative; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="login-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#f0f2f5]">
+        <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-xl border border-gray-200">
+            <h1 class="text-4xl font-bold fb-blue text-center mb-6">RasBook</h1>
+            <form id="auth-form" class="space-y-4">
+                <input type="text" id="reg-name" required class="w-full border p-3 rounded-md" placeholder="Full Name">
+                <input type="tel" id="reg-mobile" required class="w-full border p-3 rounded-md" placeholder="Mobile (11 digits)">
+                <input type="password" id="reg-password" required class="w-full border p-3 rounded-md" placeholder="6-digit PIN">
+                <button type="submit" id="auth-btn" class="w-full bg-fb-blue text-white font-bold py-3 rounded-md">Log In</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="app-container" class="hidden flex-col h-screen overflow-hidden">
+        <nav class="bg-white shadow-sm h-[56px] fixed top-0 w-full z-50 flex items-center justify-between px-4">
+            <div class="text-3xl font-bold fb-blue">RasBook</div>
+            <div class="flex gap-4">
+                <img id="nav-avatar" class="w-10 h-10 rounded-full cursor-pointer" onclick="logoutApp()">
+            </div>
+        </nav>
+
+        <div class="flex justify-center pt-[70px] h-full overflow-y-auto">
+            <div class="w-full max-w-[600px] px-2">
+                <div class="flex gap-2 overflow-x-auto mb-4 pb-2">
+                    <div id="story-my-avatar-card" class="story-card bg-gray-200 flex flex-col justify-end items-center pb-2">
+                        <span class="text-xs font-bold">Add Story</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm mb-4">
+                    <div class="flex gap-2">
+                        <img id="post-input-avatar" class="w-10 h-10 rounded-full">
+                        <button onclick="openPostModal()" class="bg-gray-100 flex-grow text-left px-4 rounded-full text-gray-500">What's on your mind?</button>
+                    </div>
+                </div>
+
+                <div id="posts-container" class="space-y-4 pb-20">
+                    <p class="text-center text-gray-500">Loading feed...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="create-post-modal" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/50">
+        <div class="bg-white rounded-xl w-full max-w-[500px] p-4">
+            <div class="flex justify-between mb-4 border-b pb-2">
+                <h2 class="font-bold text-xl">Create Post</h2>
+                <button onclick="closePostModal()">✕</button>
+            </div>
+            <textarea id="post-text" class="w-full h-32 outline-none text-xl" placeholder="What's on your mind?"></textarea>
+            <button onclick="submitPost()" id="post-btn" class="w-full bg-fb-blue text-white py-2 rounded-lg font-bold">Post</button>
+        </div>
+    </div>
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, onSnapshot, query, orderBy, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, addDoc, updateDoc, onSnapshot, query, orderBy, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // === Firebase Config ===
         const firebaseConfig = {
             apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
             authDomain: "mywebtools-f8d53.firebaseapp.com",
             projectId: "mywebtools-f8d53",
             storageBucket: "mywebtools-f8d53.firebasestorage.app"
         };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const SYNC_APP_ID = "rasel-fb-clone-app"; 
+        const DB_PATH = ['artifacts', 'rasel-fb-clone-app', 'public', 'data'];
 
-        // Cloudinary for Image Uploads
-        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload"; 
-        const CLOUDINARY_UPLOAD_PRESET = "ml_default"; 
-
-        // State variables
-        let myName = localStorage.getItem('fb_name') || '';
-        let myMobile = localStorage.getItem('fb_mobile') || '';
-        let myPassword = localStorage.getItem('fb_pass') || '';
+        let myName = localStorage.getItem('fb_name');
+        let myMobile = localStorage.getItem('fb_mobile');
         let myAvatar = '';
-        let allUsers = [];
-        let selectedPostImage = null;
 
-        function getAvatarUrl(name) { return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1877f2&color=fff&bold=true`; }
-        function hashPassword(password) { return CryptoJS.SHA256(password).toString(); }
-
-        // === Auth & Init ===
-        if (myName && myMobile && myPassword) {
-            myAvatar = getAvatarUrl(myName);
+        if (myName && myMobile) {
+            myAvatar = `https://ui-avatars.com/api/?name=${myName}&background=1877f2&color=fff`;
             startApp();
         }
 
         document.getElementById('auth-form').onsubmit = async (e) => {
             e.preventDefault();
-            const n = document.getElementById('reg-name').value.trim();
-            const m = document.getElementById('reg-mobile').value.trim();
-            const p = document.getElementById('reg-password').value.trim();
-            const btn = document.getElementById('auth-btn');
-
-            if (n && m.length === 11 && p.length >= 6) {
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
-                const hashedPass = hashPassword(p);
-                try {
-                    await signInAnonymously(auth);
-                    // FIXED: Added 'data' to make the path even
-                    const userRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'users', m);
-                    const userSnap = await getDoc(userRef);
-                    
-                    if (userSnap.exists()) {
-                        const dbData = userSnap.data();
-                        if (!dbData.password) await updateDoc(userRef, { password: hashedPass, name: n });
-                        else if (dbData.password !== hashedPass) { alert("Wrong password!"); btn.innerHTML = 'Log In / Sign Up'; return; }
-                    } else {
-                        await setDoc(userRef, { name: n, mobile: m, password: hashedPass, lastActive: Date.now() });
-                    }
-                    
-                    myName = n; myMobile = m; myPassword = hashedPass; myAvatar = getAvatarUrl(n);
-                    localStorage.setItem('fb_name', n); localStorage.setItem('fb_mobile', m); localStorage.setItem('fb_pass', hashedPass);
-                    document.getElementById('login-modal').classList.add('hidden');
-                    startApp();
-                } catch(err) { alert("Error connecting: " + err.message); btn.innerHTML = 'Log In / Sign Up'; }
-            }
+            const n = document.getElementById('reg-name').value;
+            const m = document.getElementById('reg-mobile').value;
+            const p = document.getElementById('reg-password').value;
+            
+            await signInAnonymously(auth);
+            const userRef = doc(db, ...DB_PATH, 'users', m);
+            await setDoc(userRef, { name: n, mobile: m, password: p });
+            
+            localStorage.setItem('fb_name', n);
+            localStorage.setItem('fb_mobile', m);
+            location.reload();
         };
 
-        async function startApp() {
-            document.getElementById('login-modal').classList.add('hidden');
+        function startApp() {
+            document.getElementById('login-modal').style.display = 'none';
             document.getElementById('app-container').classList.remove('hidden');
             document.getElementById('app-container').classList.add('flex');
-            
-            // Set Avatars
             document.getElementById('nav-avatar').src = myAvatar;
-            document.getElementById('sidebar-avatar').src = myAvatar;
-            document.getElementById('story-my-avatar').src = myAvatar;
-            document.getElementById('create-post-avatar').src = myAvatar;
-            document.getElementById('modal-avatar').src = myAvatar;
-            document.getElementById('sidebar-name').innerText = myName;
-            document.getElementById('mind-name').innerText = myName.split(' ')[0];
-            document.getElementById('modal-name').innerText = myName;
+            document.getElementById('post-input-avatar').src = myAvatar;
 
-            await signInAnonymously(auth);
-            
-            // Active Status Update (FIXED Path)
-            setInterval(() => updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'users', myMobile), { lastActive: Date.now() }).catch(()=>{}), 60000);
-
-            // Listen to Users (FIXED Path)
-            onSnapshot(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'users'), (snap) => {
-                allUsers = [];
-                const contactsList = document.getElementById('contacts-list');
-                contactsList.innerHTML = '';
-                snap.forEach(d => {
-                    const u = d.data();
-                    if(u.mobile !== myMobile) {
-                        allUsers.push(u);
-                        const isOnline = (Date.now() - (u.lastActive || 0)) < 120000;
-                        contactsList.innerHTML += `
-                            <div class="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors relative">
-                                <div class="relative">
-                                    <img src="${getAvatarUrl(u.name)}" class="w-9 h-9 rounded-full">
-                                    ${isOnline ? '<div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>' : ''}
-                                </div>
-                                <span class="font-medium text-[15px]">${u.name}</span>
-                            </div>`;
-                    }
-                });
-            });
-
-            // Listen to Posts
-            listenToPosts();
-        }
-
-        window.logoutApp = () => { if(confirm("Are you sure you want to log out?")) { localStorage.clear(); location.reload(); } }
-
-        // === Post Creation Logic ===
-        window.openPostModal = () => { document.getElementById('create-post-modal').classList.remove('hidden'); document.getElementById('post-text').focus(); }
-        window.closePostModal = () => { document.getElementById('create-post-modal').classList.add('hidden'); document.getElementById('post-form').reset(); removePostImage(); }
-        
-        document.getElementById('post-image-input').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if(file) {
-                selectedPostImage = file;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    document.getElementById('post-image-preview').src = ev.target.result;
-                    document.getElementById('image-preview-container').classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        window.removePostImage = () => {
-            selectedPostImage = null; document.getElementById('post-image-input').value = '';
-            document.getElementById('image-preview-container').classList.add('hidden'); document.getElementById('post-image-preview').src = '';
-        }
-
-        async function uploadImage(file) {
-            const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-            const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-            const data = await res.json();
-            return data.secure_url;
-        }
-
-        document.getElementById('post-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const text = document.getElementById('post-text').value.trim();
-            if(!text && !selectedPostImage) return;
-
-            const btn = document.getElementById('post-submit-btn');
-            const ogText = btn.innerHTML; btn.disabled = true; btn.innerHTML = 'Posting...';
-
-            let imgUrl = null;
-            if(selectedPostImage) {
-                try { imgUrl = await uploadImage(selectedPostImage); } catch(err) { alert("Image upload failed"); btn.disabled = false; btn.innerHTML = ogText; return; }
-            }
-
-            const newPost = {
-                authorName: myName, authorMobile: myMobile, authorAvatar: myAvatar,
-                content: text, imageUrl: imgUrl, timestamp: Date.now(),
-                likes: [], comments: []
-            };
-
-            try {
-                // FIXED Path
-                await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'posts'), newPost);
-                closePostModal();
-            } catch(e) { alert("Failed to post"); }
-            finally { btn.disabled = false; btn.innerHTML = ogText; }
-        };
-
-        // === Feed Logic ===
-        function timeAgo(timestamp) {
-            const seconds = Math.floor((new Date() - timestamp) / 1000);
-            let interval = seconds / 31536000; if (interval > 1) return Math.floor(interval) + " y";
-            interval = seconds / 2592000; if (interval > 1) return Math.floor(interval) + " m";
-            interval = seconds / 86400; if (interval > 1) return Math.floor(interval) + " d";
-            interval = seconds / 3600; if (interval > 1) return Math.floor(interval) + " h";
-            interval = seconds / 60; if (interval > 1) return Math.floor(interval) + " min";
-            return "Just now";
-        }
-
-        function listenToPosts() {
-            // FIXED Path
-            onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'posts'), orderBy('timestamp', 'desc')), (snap) => {
+            // Load Posts
+            onSnapshot(query(collection(db, ...DB_PATH, 'posts'), orderBy('timestamp', 'desc')), (snap) => {
                 const container = document.getElementById('posts-container');
                 container.innerHTML = '';
-                
-                if(snap.empty) { container.innerHTML = '<p class="text-center text-gray-500 mt-10">No posts yet. Be the first to post!</p>'; return; }
-
-                snap.forEach(docSnap => {
-                    const post = docSnap.data();
-                    const postId = docSnap.id;
-                    const hasLiked = post.likes && post.likes.includes(myMobile);
-                    const likeIconColor = hasLiked ? 'text-blue-600' : 'text-gray-500';
-                    const likeText = hasLiked ? 'text-blue-600 font-semibold' : 'text-gray-500 font-semibold';
-
-                    // Comments HTML
-                    let commentsHtml = '';
-                    if(post.comments && post.comments.length > 0) {
-                        commentsHtml = `<div class="mt-3 border-t border-gray-200 pt-3 space-y-2">`;
-                        post.comments.slice(-3).forEach(c => {
-                            commentsHtml += `
-                                <div class="flex gap-2">
-                                    <img src="${getAvatarUrl(c.name)}" class="w-8 h-8 rounded-full">
-                                    <div class="bg-gray-100 rounded-2xl px-3 py-1.5 max-w-[85%]">
-                                        <h4 class="font-semibold text-[13px] leading-tight">${c.name}</h4>
-                                        <p class="text-[14px] leading-tight text-gray-800">${c.text}</p>
-                                    </div>
-                                </div>`;
-                        });
-                        commentsHtml += `</div>`;
-                    }
-
-                    const postEl = document.createElement('div');
-                    postEl.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden';
-                    postEl.innerHTML = `
-                        <div class="flex justify-between items-center p-4 pb-2">
-                            <div class="flex gap-2 items-center">
-                                <img src="${post.authorAvatar || getAvatarUrl(post.authorName)}" class="w-10 h-10 rounded-full cursor-pointer">
-                                <div>
-                                    <h3 class="font-semibold text-[15px] hover:underline cursor-pointer">${post.authorName}</h3>
-                                    <div class="flex items-center text-gray-500 text-[12px] gap-1">
-                                        <span>${timeAgo(post.timestamp)}</span> • <i class="fa-solid fa-earth-americas"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors"><i class="fa-solid fa-ellipsis"></i></button>
+                snap.forEach(d => {
+                    const post = d.data();
+                    const el = document.createElement('div');
+                    el.className = "bg-white rounded-xl shadow-sm border p-4";
+                    el.innerHTML = `
+                        <div class="flex gap-2 mb-2">
+                            <img src="${post.authorAvatar}" class="w-10 h-10 rounded-full">
+                            <div><p class="font-bold">${post.authorName}</p><p class="text-xs text-gray-500">Just now</p></div>
                         </div>
-                        
-                        ${post.content ? `<div class="px-4 pb-2 text-[15px] whitespace-pre-wrap">${post.content}</div>` : ''}
-                        ${post.imageUrl ? `<img src="${post.imageUrl}" class="w-full max-h-[500px] object-cover border-y border-gray-200 cursor-pointer">` : ''}
-                        
-                        <div class="px-4 py-2 flex justify-between items-center text-gray-500 text-[13px] border-b border-gray-200 mx-2">
-                            <div class="flex items-center gap-1">
-                                <div class="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center text-white text-[10px]"><i class="fa-solid fa-thumbs-up"></i></div>
-                                <span>${post.likes ? post.likes.length : 0}</span>
-                            </div>
-                            <div>
-                                <span class="cursor-pointer hover:underline">${post.comments ? post.comments.length : 0} comments</span>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-between px-4 py-1">
-                            <button onclick="toggleLike('${postId}', ${hasLiked})" class="flex-1 flex justify-center items-center gap-2 py-1.5 hover:bg-gray-100 rounded-lg transition-colors">
-                                <i class="fa-solid fa-thumbs-up ${likeIconColor} text-xl"></i> <span class="${likeText}">Like</span>
-                            </button>
-                            <button onclick="focusComment('${postId}')" class="flex-1 flex justify-center items-center gap-2 py-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 font-semibold">
-                                <i class="fa-regular fa-message text-xl"></i> Comment
-                            </button>
-                            <button class="flex-1 flex justify-center items-center gap-2 py-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 font-semibold">
-                                <i class="fa-solid fa-share text-xl"></i> Share
-                            </button>
-                        </div>
-
-                        <div class="px-4 pb-3">
-                            ${commentsHtml}
-                            <form onsubmit="postComment(event, '${postId}')" class="flex gap-2 mt-3">
-                                <img src="${myAvatar}" class="w-8 h-8 rounded-full">
-                                <div class="flex-grow relative">
-                                    <input type="text" id="comment-input-${postId}" required placeholder="Write a comment..." class="w-full bg-gray-100 hover:bg-gray-200 focus:bg-gray-100 transition-colors rounded-full px-4 py-1.5 outline-none text-[15px]">
-                                    <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 text-blue-500 hover:text-blue-700 p-1"><i class="fa-solid fa-paper-plane"></i></button>
-                                </div>
-                            </form>
+                        <p class="mb-3">${post.content}</p>
+                        <div class="border-t pt-2 flex justify-around text-gray-500 font-semibold">
+                            <span>Like</span><span>Comment</span><span>Share</span>
                         </div>
                     `;
-                    container.appendChild(postEl);
+                    container.appendChild(el);
                 });
             });
         }
 
-        // === Actions Logic ===
-        window.toggleLike = async (postId, currentlyLiked) => {
-            // FIXED Path
-            const postRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'posts', postId);
-            if(currentlyLiked) {
-                await updateDoc(postRef, { likes: arrayRemove(myMobile) });
-            } else {
-                await updateDoc(postRef, { likes: arrayUnion(myMobile) });
-            }
+        window.openPostModal = () => document.getElementById('create-post-modal').classList.remove('hidden');
+        window.closePostModal = () => document.getElementById('create-post-modal').classList.add('hidden');
+        window.logoutApp = () => { localStorage.clear(); location.reload(); };
+
+        window.submitPost = async () => {
+            const txt = document.getElementById('post-text').value;
+            if(!txt) return;
+            document.getElementById('post-btn').disabled = true;
+            await addDoc(collection(db, ...DB_PATH, 'posts'), {
+                authorName: myName, authorMobile: myMobile, authorAvatar: myAvatar,
+                content: txt, timestamp: Date.now()
+            });
+            closePostModal();
+            document.getElementById('post-text').value = '';
+            document.getElementById('post-btn').disabled = false;
         };
-
-        window.focusComment = (postId) => {
-            document.getElementById(`comment-input-${postId}`).focus();
-        };
-
-        window.postComment = async (e, postId) => {
-            e.preventDefault();
-            const input = document.getElementById(`comment-input-${postId}`);
-            const text = input.value.trim();
-            if(!text) return;
-
-            input.value = ''; 
-            const newComment = {
-                name: myName, mobile: myMobile, text: text, timestamp: Date.now()
-            };
-
-            // FIXED Path
-            const postRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'posts', postId);
-            await updateDoc(postRef, { comments: arrayUnion(newComment) });
-        };
-
     </script>
+</body>
+</html>
