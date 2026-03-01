@@ -70,6 +70,18 @@
         audio { height: 40px; outline: none; border-radius: 20px; width: 100%; }
         .audio-slider { -webkit-appearance: none; background: rgba(255,255,255,0.2); height: 4px; border-radius: 5px; outline: none; }
         .audio-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; }
+
+        /* 🔥 Added Custom Spinner CSS 🔥 */
+        .loader-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid var(--wa-green);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        body.light-mode .loader-spinner { border: 3px solid rgba(0, 0, 0, 0.1); border-top: 3px solid var(--wa-green); }
     </style>
     
    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -170,7 +182,12 @@
                 </div>
 
                 <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative bg-[#111b21]" style="touch-action: pan-y;">
-                    <div id="contacts-container"><div class="text-center text-[#8696a0] p-6 text-sm"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div></div>
+                    <div id="contacts-container">
+                        <div class="text-center text-[#8696a0] p-8">
+                            <div class="loader-spinner"></div>
+                            <p class="text-sm mt-3 font-medium">Loading chats...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -298,6 +315,7 @@
         let selectedMsgs = new Set();
         let pressTimer;
         let currentReplyContext = null;
+        let isDataLoading = true; // 🔥 Track initial load state 🔥
 
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); }
         function setRealViewportHeight() { let vh = window.innerHeight; if (window.visualViewport) vh = window.visualViewport.height; document.body.style.height = vh + 'px'; document.documentElement.style.height = vh + 'px'; const appContainer = document.getElementById('app-container'); if (appContainer) appContainer.style.height = vh + 'px'; const msgBox = document.getElementById('messages-box'); if(msgBox) setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 50); }
@@ -398,7 +416,7 @@
             if ("Notification" in window && Notification.permission === "default") { Notification.requestPermission(); }
             appContainer.classList.remove('hidden'); appContainer.classList.add('flex'); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl); updateStatusUI();
 
-            const cachedUsers = localStorage.getItem('cached_users'); if (cachedUsers) allUsers = JSON.parse(cachedUsers);
+            const cachedUsers = localStorage.getItem('cached_users'); if (cachedUsers) { allUsers = JSON.parse(cachedUsers); isDataLoading = false; }
             const cachedMsgs = localStorage.getItem('cached_latest_msgs'); if (cachedMsgs) latestMessages = JSON.parse(cachedMsgs);
             if(allUsers.length > 0) renderContacts();
 
@@ -420,6 +438,7 @@
         function listenForUsers() {
             onSnapshot(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users'), (snapshot) => {
                 allUsers = []; snapshot.forEach(doc => { const data = doc.data(); if (data.mobile !== myMobile) { allUsers.push(data); setupLastMessageListener(data.mobile); } });
+                isDataLoading = false; // Data is loaded
                 localStorage.setItem('cached_users', JSON.stringify(allUsers)); renderContacts();
             });
         }
@@ -440,7 +459,17 @@
             });
         }
 
+        // 🔥 Updated renderContacts logic for Spinner 🔥
         function renderContacts() {
+            if (isDataLoading) {
+                contactsContainer.innerHTML = `
+                    <div class="text-center text-[#8696a0] p-8">
+                        <div class="loader-spinner"></div>
+                        <p class="text-sm mt-3 font-medium">Loading chats...</p>
+                    </div>`;
+                return;
+            }
+
             const term = searchInput.value.toLowerCase();
             if(lockedContacts.length > 0 && !isViewingLocked) document.getElementById('locked-indicator').classList.remove('hidden'); else document.getElementById('locked-indicator').classList.add('hidden');
 
@@ -472,6 +501,8 @@
                 contactsContainer.appendChild(div);
             });
         }
+
+        searchInput.addEventListener('input', renderContacts);
 
         function closeChatLogic() { document.getElementById('sidebar').classList.remove('hidden'); document.getElementById('sidebar').classList.add('flex'); if (window.innerWidth < 768) { document.getElementById('chat-area').classList.remove('flex'); document.getElementById('chat-area').classList.add('hidden'); if (window.location.hash === '#chat') history.replaceState(null, null, ' '); } else document.getElementById('empty-chat-state').classList.remove('hidden'); activeContactMobile = null; renderContacts(); if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus(); clearSelection(); cancelReply(); }
         window.closeChatMobile = () => { if (window.innerWidth < 768 && window.location.hash === '#chat') history.back(); else closeChatLogic(); };
@@ -620,8 +651,8 @@
             const msgData = { text: encText, replyToText: encReplyText, senderMobile: myMobile, timestamp: Date.now(), timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), fileUrl: null, fileName: null, fileType: null, reaction: null, read: false };
 
             try {
-                if (selectedFile) { if(!navigator.onLine) { alert("অফলাইনে ফাইল বা ছবি সেন্ড করা যাবে না। দয়া করে নেট কানেকশন চালু করুন।"); throw new Error("Offline file upload blocked"); } const uploadResult = await uploadFileWithProgress(selectedFile); if(uploadResult.secure_url) { msgData.fileUrl = uploadResult.secure_url; msgData.fileName = selectedFile.name; msgData.fileType = selectedFile.type || 'audio/mp3'; } else throw new Error("Cloudinary failed"); }
-                if (navigator.onLine) { await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), msgData); let pushText = text ? text : (msgData.fileUrl ? "একটি ফাইল পাঠিয়েছে" : "নতুন মেসেজ"); triggerOneSignalPush(activeContactMobile, pushText); } 
+                if (selectedFile) { if(!navigator.onLine) { alert("অফলাইনে ফাইল বা ছবি সেন্ড করা যাবে না। দয়া করে নেট কানেকশন চালু করুন।"); throw new Error("Offline file upload blocked"); } const uploadResult = await uploadFileWithProgress(selectedFile); if(uploadResult.secure_url) { msgData.fileUrl = uploadResult.secure_url; msgData.fileName = selectedFile.name; msgData.fileType = selectedFile.type || 'audio/mp3'; } else throw new Error("Cloudinary failed"); }
+                if (navigator.onLine) { await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), msgData); let pushText = text ? text : (msgData.fileUrl ? "একটি ফাইল পাঠিয়েছে" : "নতুন মেসেজ"); triggerOneSignalPush(activeContactMobile, pushText); } 
                 else { msgData.chatId = chatId; msgData.isPending = true; await localDB.outbox.add(msgData); const tempId = 'temp_' + Date.now(); msgData.id = tempId; msgBox.appendChild(createMessageElement(tempId, msgData, document.getElementById('active-chat-name').innerText)); msgBox.scrollTop = msgBox.scrollHeight; }
                 msgInput.value = ''; clearFile(); cancelReply(); msgInput.style.height = '24px'; toggleInputButtons(); localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
             } catch (error) { console.error("Message failed:", error); } 
