@@ -26,7 +26,7 @@
             position: fixed; top: 0; left: 0; touch-action: none;
         }
         
-        /* 🔥 FIX 1: WhatsApp Style Background (No Discoloration) 🔥 */
+        /* 🔥 Background Fix (No Discoloration) 🔥 */
         .chat-bg {
             background-color: #0b141a;
             background-image: linear-gradient(rgba(11, 20, 26, 0.85), rgba(11, 20, 26, 0.85)), url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
@@ -64,10 +64,7 @@
         .contact-active { background-color: #2a3942; border-left: 3px solid var(--wa-green); }
 
         /* Selected Message Style */
-        .msg-selected {
-            background-color: rgba(0, 168, 132, 0.3) !important;
-            transition: all 0.3s ease; box-shadow: inset 0 0 0 2px var(--wa-green);
-        }
+        .msg-selected { background-color: rgba(0, 168, 132, 0.3) !important; transition: all 0.3s ease; box-shadow: inset 0 0 0 2px var(--wa-green); }
 
         /* Audio Player Styling */
         audio { height: 40px; outline: none; border-radius: 20px; width: 100%; }
@@ -115,76 +112,11 @@
         </div>
     </div>
 
-    <div id="group-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-[#202c33] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[80vh] fade-in-anim">
-            <div class="p-4 border-b border-[#222d34] flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white">New Group</h2>
-                <button onclick="closeGroupModal()" class="text-[#8696a0] hover:text-white w-8 h-8 rounded-full"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <div class="p-4 border-b border-[#222d34]">
-                <input type="text" id="group-name" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:border-[#00a884]" placeholder="Group Subject">
-            </div>
-            <div class="p-2 overflow-y-auto custom-scroll flex-grow" id="group-contact-list"></div>
-            <div class="p-4 border-t border-[#222d34]">
-                <button onclick="createGroup()" class="w-full bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg w-full">Create Group</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="add-lock-modal" class="hidden fixed inset-0 z-[170] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-[#202c33] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[80vh] fade-in-anim">
-            <div class="p-4 border-b border-[#222d34] flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white">Select Chats to Lock</h2>
-                <button onclick="closeAddLockModal()" class="text-[#8696a0] hover:text-white w-8 h-8 rounded-full"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <div class="p-2 overflow-y-auto custom-scroll flex-grow" id="unlocked-contact-list"></div>
-            <div class="p-4 border-t border-[#222d34]">
-                <button onclick="addSelectedToLock()" class="w-full bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg w-full">Lock Selected Chats</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="pin-modal" class="hidden fixed inset-0 z-[160] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-        <div class="bg-[#202c33] rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl border border-[#222d34] fade-in-anim">
-            <div class="w-16 h-16 bg-[#00a884]/20 text-[#00a884] rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-lock"></i></div>
-            <h2 class="text-xl font-bold text-white mb-2" id="pin-title">Enter PIN</h2>
-            <input type="password" id="pin-input" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-center text-white focus:border-[#00a884] mb-6 text-2xl tracking-[0.5em] font-bold outline-none" maxlength="4" placeholder="••••">
-            <div class="flex gap-3">
-                <button onclick="closePinModal()" class="flex-1 bg-transparent text-white py-3 rounded-lg border border-[#222d34]">Cancel</button>
-                <button id="pin-action-btn" onclick="handlePinAction()" class="flex-1 bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg">Unlock</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-[#202c33] border border-[#222d34] p-8 rounded-2xl w-full max-w-sm shadow-2xl text-center relative fade-in-anim">
-            <button onclick="closeSettings()" class="absolute top-4 right-4 w-8 h-8 rounded-full text-[#8696a0] hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            <h2 class="text-xl font-bold mb-6 text-white">Profile</h2>
-            <div class="relative w-36 h-36 mx-auto mb-6 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()">
-                <img id="settings-avatar-preview" src="" class="w-full h-full rounded-full object-cover group-hover:opacity-60 bg-[#111b21] shadow-lg border border-[#222d34]">
-                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 rounded-full transition-opacity"><i class="fa-solid fa-camera text-3xl text-white"></i></div>
-            </div>
-            <input type="file" id="profile-pic-input" accept="image/*" class="hidden" onchange="previewProfilePic(event)">
-            <div class="mb-6 text-left border-b border-[#00a884] pb-2">
-                <label class="text-[#00a884] text-sm font-bold mb-1 block">Your Name</label>
-                <input type="text" id="settings-name-input" class="w-full bg-transparent p-1 text-white focus:outline-none text-[17px] font-medium" placeholder="Enter your name">
-            </div>
-            <button id="save-settings-btn" onclick="saveProfileSettings()" class="w-full bg-[#00a884] py-3 rounded-lg text-[#111b21] font-bold w-full"><i class="fa-solid fa-check"></i> Save</button>
-        </div>
-    </div>
-
-    <div id="forward-modal" class="hidden fixed inset-0 z-[350] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity">
-        <div class="bg-[#202c33] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[80vh] fade-in-anim">
-            <div class="p-4 border-b border-[#222d34] flex justify-between items-center">
-                <h2 class="text-xl font-bold text-white">Forward to...</h2>
-                <button onclick="closeForwardModal()" class="text-[#8696a0] hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <div class="p-2 overflow-y-auto custom-scroll flex-grow" id="forward-contact-list"></div>
-            <div class="p-4 border-t border-[#222d34]">
-                <button onclick="executeForward()" class="w-full bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg hover:bg-[#029071] transition-colors w-full"><i class="fa-solid fa-paper-plane mr-2"></i> Forward Messages</button>
-            </div>
-        </div>
-    </div>
+    <div id="group-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"><div class="bg-[#202c33] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[80vh] fade-in-anim"><div class="p-4 border-b border-[#222d34] flex justify-between items-center"><h2 class="text-xl font-bold text-white">New Group</h2><button onclick="closeGroupModal()" class="text-[#8696a0] hover:text-white w-8 h-8 rounded-full"><i class="fa-solid fa-xmark text-xl"></i></button></div><div class="p-4 border-b border-[#222d34]"><input type="text" id="group-name" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:border-[#00a884]" placeholder="Group Subject"></div><div class="p-2 overflow-y-auto custom-scroll flex-grow" id="group-contact-list"></div><div class="p-4 border-t border-[#222d34]"><button onclick="createGroup()" class="w-full bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg w-full">Create Group</button></div></div></div>
+    <div id="add-lock-modal" class="hidden fixed inset-0 z-[170] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"><div class="bg-[#202c33] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[80vh] fade-in-anim"><div class="p-4 border-b border-[#222d34] flex justify-between items-center"><h2 class="text-xl font-bold text-white">Select Chats to Lock</h2><button onclick="closeAddLockModal()" class="text-[#8696a0] hover:text-white w-8 h-8 rounded-full"><i class="fa-solid fa-xmark text-xl"></i></button></div><div class="p-2 overflow-y-auto custom-scroll flex-grow" id="unlocked-contact-list"></div><div class="p-4 border-t border-[#222d34]"><button onclick="addSelectedToLock()" class="w-full bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg w-full">Lock Selected Chats</button></div></div></div>
+    <div id="pin-modal" class="hidden fixed inset-0 z-[160] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"><div class="bg-[#202c33] rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl border border-[#222d34] fade-in-anim"><div class="w-16 h-16 bg-[#00a884]/20 text-[#00a884] rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-lock"></i></div><h2 class="text-xl font-bold text-white mb-2" id="pin-title">Enter PIN</h2><input type="password" id="pin-input" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-center text-white focus:border-[#00a884] mb-6 text-2xl tracking-[0.5em] font-bold outline-none" maxlength="4" placeholder="••••"><div class="flex gap-3"><button onclick="closePinModal()" class="flex-1 bg-transparent text-white py-3 rounded-lg border border-[#222d34]">Cancel</button><button id="pin-action-btn" onclick="handlePinAction()" class="flex-1 bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg">Unlock</button></div></div></div>
+    <div id="settings-modal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"><div class="bg-[#202c33] border border-[#222d34] p-8 rounded-2xl w-full max-w-sm shadow-2xl text-center relative fade-in-anim"><button onclick="closeSettings()" class="absolute top-4 right-4 w-8 h-8 rounded-full text-[#8696a0] hover:text-white"><i class="fa-solid fa-xmark"></i></button><h2 class="text-xl font-bold mb-6 text-white">Profile</h2><div class="relative w-36 h-36 mx-auto mb-6 group cursor-pointer" onclick="document.getElementById('profile-pic-input').click()"><img id="settings-avatar-preview" src="" class="w-full h-full rounded-full object-cover group-hover:opacity-60 bg-[#111b21] shadow-lg border border-[#222d34]"><div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 rounded-full transition-opacity"><i class="fa-solid fa-camera text-3xl text-white"></i></div></div><input type="file" id="profile-pic-input" accept="image/*" class="hidden" onchange="previewProfilePic(event)"><div class="mb-6 text-left border-b border-[#00a884] pb-2"><label class="text-[#00a884] text-sm font-bold mb-1 block">Your Name</label><input type="text" id="settings-name-input" class="w-full bg-transparent p-1 text-white focus:outline-none text-[17px] font-medium" placeholder="Enter your name"></div><button id="save-settings-btn" onclick="saveProfileSettings()" class="w-full bg-[#00a884] py-3 rounded-lg text-[#111b21] font-bold w-full"><i class="fa-solid fa-check"></i> Save</button></div></div>
+    <div id="forward-modal" class="hidden fixed inset-0 z-[350] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity"><div class="bg-[#202c33] rounded-2xl w-full max-w-md shadow-2xl flex flex-col max-h-[80vh] fade-in-anim"><div class="p-4 border-b border-[#222d34] flex justify-between items-center"><h2 class="text-xl font-bold text-white">Forward to...</h2><button onclick="closeForwardModal()" class="text-[#8696a0] hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button></div><div class="p-2 overflow-y-auto custom-scroll flex-grow" id="forward-contact-list"></div><div class="p-4 border-t border-[#222d34]"><button onclick="executeForward()" class="w-full bg-[#00a884] text-[#111b21] font-bold py-3 rounded-lg hover:bg-[#029071] transition-colors w-full"><i class="fa-solid fa-paper-plane mr-2"></i> Forward Messages</button></div></div></div>
 
     <div id="app-container" class="hidden absolute top-0 left-0 w-full mx-auto md:py-0 md:px-0" style="height: 100%;">
         <div class="w-full h-full flex bg-[#111b21] overflow-hidden relative">
@@ -218,7 +150,7 @@
                     </div>
                 </div>
 
-                <div id="locked-indicator" class="hidden px-4 py-3.5 border-b border-[#222d34] flex items-center gap-4 cursor-pointer hover:bg-[#202c33]" onclick="openLockedChats()">
+                <div id="locked-indicator" class="hidden px-4 py-3.5 border-b border-[#222d34] flex items-center gap-4 cursor-pointer hover:bg-[#202c33] transition-colors" onclick="openLockedChats()">
                     <div class="w-11 h-11 rounded-full bg-[#00a884]/10 text-[#00a884] flex items-center justify-center text-lg"><i class="fa-solid fa-lock"></i></div>
                     <span class="text-white font-semibold text-[17px]">Locked chats</span>
                 </div>
@@ -229,9 +161,7 @@
                 </div>
 
                 <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative bg-[#111b21]" style="touch-action: pan-y;">
-                    <div id="contacts-container">
-                        <div class="text-center text-[#8696a0] p-6 text-sm"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
-                    </div>
+                    <div id="contacts-container"></div>
                 </div>
             </div>
 
@@ -365,9 +295,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // WebRTC function (Assuming it's loaded from webrtc_core.js)
-        import { setupWebRTC } from "./webrtc_core.js";
-
         // Dexie Local DB Setup
         const localDB = new Dexie("RasGramDB");
         localDB.version(2).stores({
@@ -467,8 +394,7 @@
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload"; 
         const CLOUDINARY_UPLOAD_PRESET = "ml_default"; 
         
-        // 🔥 FIX 1: CORRECT DATABASE PATH (No more 5 segment crash) 🔥
-        const SYNC_APP_ID = "rasel-mia-universal-sync";
+        const SYNC_APP_ID = "rasel-mia-universal-sync"; // Exact original ID
         
         const app = initializeApp(firebaseConfig); 
         const auth = getAuth(app); 
@@ -483,9 +409,10 @@
         function getAvatarUrl(name, customUrl) { return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=8696a0&color=fff&bold=true`; }
         function formatTime(seconds) { if(!seconds || isNaN(seconds)) return "0:00"; const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m}:${s < 10 ? '0' : ''}${s}`; }
 
-        // Initial UI Logic
+        // Start Logic (No Flicker)
         const joinModal = document.getElementById('join-modal');
         const appContainer = document.getElementById('app-container');
+        const contactsContainer = document.getElementById('contacts-container');
 
         if (myName && myMobile && myPassword) {
             joinModal.style.display = 'none'; 
@@ -496,7 +423,6 @@
             joinModal.classList.remove('hidden');
         }
 
-        // 🔥 FIX 2: BULLETPROOF PASSWORD LOGIN 🔥
         document.getElementById('join-form').onsubmit = async (e) => {
             e.preventDefault(); 
             const n = document.getElementById('reg-name').value.trim(); 
@@ -555,7 +481,6 @@
                     startApp();
                     
                 } catch (err) { 
-                    console.error("Login Error: ", err);
                     alert("Connection error! " + err.message); 
                     joinBtn.disabled = false; joinBtn.innerHTML = originalText; 
                 }
@@ -625,21 +550,16 @@
             const cachedMsgs = localStorage.getItem('cached_latest_msgs'); 
             if (cachedMsgs) latestMessages = JSON.parse(cachedMsgs);
             
-            if(allUsers.length > 0) renderContacts();
+            // 🔥 INSTANT CHAT LIST CALL 🔥
+            renderContacts();
+
+            // Then start Firebase listeners immediately
+            listenForUsers();
 
             try {
                 await signInAnonymously(auth);
-                const myRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile); 
-                const mySnap = await getDoc(myRef);
-                
-                if(mySnap.exists()) { 
-                    const d = mySnap.data(); 
-                    if(d.avatarUrl) { myAvatarUrl = d.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl); } 
-                    if(d.name && d.name !== myName) { myName = d.name; localStorage.setItem('pvt_chat_name', myName); } 
-                }
                 const updateMyStatus = async () => { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { name: myName, mobile: myMobile, lastActive: Date.now(), statusVisible: isStatusVisible }, { merge: true }); };
                 updateMyStatus(); activeTrackingInterval = setInterval(updateMyStatus, 60000); 
-                listenForUsers();
             } catch (err) {
                 console.error("Auth Error: ", err);
             }
@@ -680,10 +600,9 @@
             });
         }
 
-        // 🔥 FIX 4: NO SPINNER. INSTANT CHAT LIST LOAD 🔥
         const searchInput = document.getElementById('search-input');
-        const contactsContainer = document.getElementById('contacts-container');
         
+        // 🔥 PERFECT, INSTANT RENDER LOGIC 🔥
         function renderContacts() {
             const term = searchInput.value.toLowerCase();
             if(lockedContacts.length > 0 && !isViewingLocked) document.getElementById('locked-indicator').classList.remove('hidden'); else document.getElementById('locked-indicator').classList.add('hidden');
@@ -692,9 +611,11 @@
             displayUsers = displayUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
             displayUsers.sort((a, b) => { return (latestMessages[b.mobile]?.timestamp || parseInt(b.lastActive) || 0) - (latestMessages[a.mobile]?.timestamp || parseInt(a.lastActive) || 0); });
 
+            // Completely empty the container
+            contactsContainer.innerHTML = '';
+            
             if (displayUsers.length === 0) {
-                contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-[16px] mt-10 p-6">No chats found.</p>`;
-                return;
+                return; // Leaves it totally blank until data comes
             }
             
             let tempHTML = '';
@@ -753,12 +674,12 @@
             const chatArea = document.getElementById('chat-area');
             if (window.innerWidth < 768) { if (!document.getElementById('sidebar').classList.contains('hidden')) history.pushState({ chatOpen: true }, "Chat", "#chat"); document.getElementById('sidebar').classList.remove('flex'); document.getElementById('sidebar').classList.add('hidden'); chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); } else { chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); }
 
-            msgBox.classList.remove('fade-in-anim'); void msgBox.offsetWidth; msgBox.classList.add('fade-in-anim'); renderContacts(); 
-
+            renderContacts(); 
+            const msgBox = document.getElementById('messages-box');
             const chatId = generateChatId(myMobile, contactMobile);
+            
             let msgs = []; const cachedRecord = await localDB.chatHistory.get(chatId);
             if(cachedRecord && cachedRecord.messages) { msgBox.innerHTML = ''; cachedRecord.messages.forEach(mData => msgBox.appendChild(createMessageElement(mData.id, mData, contactName))); msgBox.scrollTop = msgBox.scrollHeight; }
-            const cachedChat = msgs.length > 0;
 
             if(userStatusUnsubscribe) userStatusUnsubscribe();
             userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
@@ -772,7 +693,7 @@
             let isFirstLoad = true;
             currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc')), (snapshot) => {
                 let cacheArray = []; 
-                if(isFirstLoad && !cachedChat) { msgBox.innerHTML = ''; } isFirstLoad = false;
+                if(isFirstLoad && !cachedRecord) { msgBox.innerHTML = ''; } isFirstLoad = false;
                 snapshot.docChanges().forEach(change => {
                     const mData = change.doc.data(); mData.id = change.doc.id;
                     if (!mData.read && mData.senderMobile !== myMobile) updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true });
@@ -892,8 +813,8 @@
             const msgDiv = document.createElement('div'); msgDiv.id = `msg-${docId}`;
             if(data.isCallLog) { msgDiv.className = `pvt-msg flex justify-center w-full my-2 relative z-10`; msgDiv.innerHTML = `<div class="bg-[#182229] border border-[#222d34] text-[#e9edef] px-4 py-1.5 rounded-xl text-[14px] flex items-center gap-2 shadow-sm font-medium"><i class="fa-solid fa-phone text-[#8696a0]"></i> Call</div>`; return msgDiv; }
             
-            const isMe = data.senderMobile === myMobile; const bubbleClasses = isMe ? 'bg-[#005c4b] self-end rounded-tr-none' : 'bg-[#202c33] self-start rounded-tl-none'; 
-            msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[65%] ${bubbleClasses} px-2 pt-1.5 pb-1 rounded-xl mb-1.5 relative cursor-pointer select-none transition-colors z-10 group`; 
+            const isMe = data.senderMobile === myMobile; const bubbleClasses = isMe ? 'bg-[#005c4b] self-end rounded-tr-none shadow-[0_1px_0.5px_rgba(11,20,26,.13)]' : 'bg-[#202c33] self-start rounded-tl-none shadow-[0_1px_0.5px_rgba(11,20,26,.13)]'; const textColor = 'text-[#e9edef]';
+            const bottomMargin = data.reaction ? 'mb-7' : 'mb-1.5'; msgDiv.className = `pvt-msg flex flex-col max-w-[85%] md:max-w-[65%] ${bubbleClasses} px-2 pt-1.5 pb-1 rounded-xl ${bottomMargin} relative cursor-pointer select-none group transition-colors`; 
             
             msgDiv.addEventListener('mousedown', () => { pressTimer = setTimeout(() => toggleSelect(docId), 500); });
             msgDiv.addEventListener('mouseup', () => clearTimeout(pressTimer));
@@ -903,17 +824,23 @@
 
             let content = '';
             if (data.fileUrl) {
-                if (data.fileType && data.fileType.startsWith('image/')) content = `<img src="${data.fileUrl}" class="rounded-lg mb-1 mt-1 max-h-72 w-full object-cover cursor-pointer" onclick="openLightbox('${data.fileUrl}', event)">`;
-                else content = `<a href="${data.fileUrl}" target="_blank" class="bg-black/20 p-3 rounded-lg flex items-center gap-2 text-sm mt-1 text-white border border-transparent"><i class="fa-solid fa-file"></i> Attachment</a>`;
+                if (data.fileType && data.fileType.startsWith('audio/')) { const audioId = `audio_pvt_${docId}`; const avatarForAudio = isMe ? getAvatarUrl(myName, myAvatarUrl) : document.getElementById('active-chat-avatar').src; const micColor = isMe ? 'text-[#53bdeb]' : 'text-[#00a884]'; const sliderColor = isMe ? 'white' : '#00a884'; content = `<div class="flex items-center gap-3 w-60 md:w-72 pt-2 pb-2 pl-1"><div class="relative shrink-0"><img src="${avatarForAudio}" class="w-12 h-12 rounded-full object-cover"><div class="absolute -bottom-1 -right-1 bg-transparent rounded-full p-1"><i class="fa-solid fa-microphone ${micColor} text-[15px]"></i></div></div><button id="btn_${audioId}" onclick="toggleCustomAudio('${audioId}', this); event.stopPropagation();" class="text-4xl text-[#8696a0] hover:text-[#d1d7db] transition-colors w-10 text-left"><i class="fa-solid fa-play"></i></button><div class="flex flex-col flex-grow relative top-1"><input type="range" id="slider_${audioId}" min="0" max="100" value="0" class="audio-slider w-full" style="background: rgba(134,150,160,0.3); color: ${sliderColor}" oninput="seekAudio('${audioId}', this); event.stopPropagation();" onclick="event.stopPropagation();"><div class="flex justify-between items-center mt-2"><span id="time_${audioId}" class="text-[12px] text-[#8696a0]">0:00</span></div></div><audio id="${audioId}" src="${data.fileUrl}" preload="metadata" onloadedmetadata="initAudioDuration('${audioId}', this)" ontimeupdate="updateAudioProgress('${audioId}', this)" onended="audioEnded('${audioId}', this)"></audio></div>`; } 
+                else if (data.fileType && data.fileType.startsWith('video/')) content = `<video controls class="rounded-lg mb-1 mt-1 max-h-72 w-full object-cover bg-black/40"><source src="${data.fileUrl}"></video>`;
+                else if (data.fileType && data.fileType.startsWith('image/')) content = `<img src="${data.fileUrl}" class="rounded-lg mb-1 mt-1 max-h-72 w-full object-cover cursor-pointer" onclick="openLightbox('${data.fileUrl}', event)">`;
+                else { const forcedDownloadUrl = getDownloadableUrl(data.fileUrl); content = `<a href="${forcedDownloadUrl}" download="${data.fileName}" target="_blank" class="bg-[#2a3942]/50 hover:bg-[#2a3942] p-3.5 rounded-lg flex items-center gap-4 text-[15px] mb-1 mt-1 transition-colors w-full border border-transparent"><i class="fa-solid fa-file-arrow-down text-3xl text-[#8696a0] shrink-0"></i> <span class="truncate font-medium ${textColor}">${data.fileName}</span></a>`; }
             }
 
-            let replyHtml = replyText ? `<div class="bg-black/20 p-2 rounded mb-1 text-sm border-l-4 border-[#00a884] opacity-80 truncate"><span class="text-[#00a884] font-bold text-xs">Replied</span><br>${escapeHTML(replyText)}</div>` : '';
-            let finalHtmlText = originalText ? `<p class="text-[16px] text-white whitespace-pre-wrap leading-snug px-1 mt-1">${escapeHTML(originalText)}</p>` : '';
+            let replyHtml = '';
+            if (replyText) { replyHtml = `<div class="bg-black/20 p-2 rounded mb-1 text-sm border-l-4 border-[#00a884] opacity-80 border-b border-r border-t border-transparent truncate"><span class="text-[#00a884] font-bold text-xs">Replied</span><br>${escapeHTML(replyText)}</div>`; }
+
+            let finalHtmlText = originalText ? `<p class="text-[16px] whitespace-pre-wrap leading-snug px-1 ${textColor} mt-1">${escapeHTML(originalText)}</p>` : '';
+            let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-[#202c33] border border-[#222d34] rounded-full px-2.5 py-0.5 text-[14px] shadow-sm z-10 hover:bg-[#2a3942] transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
             
-            let popupMenu = `<div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-14 bg-[#233138] border border-[#222d34] rounded-full flex items-center gap-2 px-3 py-1.5 shadow-xl z-[60] min-w-max"><button onclick="initiateReply('${originalText ? escapeHTML(originalText).replace(/'/g, "\\'") : 'Attachment'}', event)" class="hover:scale-125 transition-all text-[#00a884] text-xl"><i class="fa-solid fa-reply"></i></button>${isMe ? `<div class="w-[1px] h-6 bg-[#374045] mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 transition-all text-[#f15c6d] text-xl"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`;
+            let popupMenu = `<div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-14 bg-[#233138] border border-[#222d34] rounded-full flex items-center gap-2 px-3 py-1.5 shadow-xl z-[60] min-w-max"><button onclick="addReaction('${docId}', '👍', event)" class="hover:scale-125 transition-all text-2xl">👍</button><button onclick="addReaction('${docId}', '❤️', event)" class="hover:scale-125 transition-all text-2xl">❤️</button><button onclick="addReaction('${docId}', '😂', event)" class="hover:scale-125 transition-all text-2xl">😂</button><button onclick="addReaction('${docId}', '😢', event)" class="hover:scale-125 transition-all text-2xl">😢</button><div class="w-[1px] h-6 bg-[#374045] mx-1"></div><button onclick="initiateReply('${originalText ? escapeHTML(originalText).replace(/'/g, "\\'") : 'Attachment'}', event)" class="hover:scale-125 transition-all text-[#00a884] text-xl"><i class="fa-solid fa-reply"></i></button>${isMe ? `<div class="w-[1px] h-6 bg-[#374045] mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 transition-all text-[#f15c6d] text-xl"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`;
             
-            let tickColor = data.read ? "text-[#53bdeb]" : "text-[#8696a0]"; let ticksHtml = isMe ? `<i class="fa-solid fa-check-double text-[12px] ${tickColor} ml-1"></i>` : '';
-            msgDiv.innerHTML = `${popupMenu}${replyHtml}${content}<div class="relative"><span style="display:inline-block; max-width: calc(100% - 65px); vertical-align:top;">${finalHtmlText}</span><div class="inline-flex items-center justify-end absolute bottom-0 right-0 px-1"><span class="text-[11px] text-[#8696a0]">${data.timeString}</span>${ticksHtml}</div></div>`; return msgDiv;
+            let tickColor = data.read ? "text-[#53bdeb]" : "text-[#8696a0]"; let ticksHtml = isMe ? (data.isPending ? `<i class="fa-regular fa-clock text-[12px] text-[#8696a0] ml-1"></i>` : `<i class="fa-solid fa-check-double text-[12px] ${tickColor} ml-1"></i>`) : '';
+            let timeMargin = (originalText || !data.fileUrl || (data.fileType && data.fileType.startsWith('audio/'))) ? "mt-1 float-right inline-block pl-4" : `absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md backdrop-blur-sm bg-black/40`;
+            msgDiv.innerHTML = `${popupMenu}${replyHtml}${content}<div class="relative"><span style="display:inline-block; max-width: calc(100% - 65px); vertical-align:top;">${finalHtmlText}</span><div class="inline-flex items-center justify-end ${timeMargin} relative top-[3px]"><span class="text-[11.5px] text-[#8696a0]">${data.timeString}</span>${ticksHtml}</div></div>${reactionBadge}`; return msgDiv;
         }
 
         async function processOutboxMsgs() { if (!navigator.onLine) return; try { const pendingMsgs = await localDB.outbox.toArray(); if (pendingMsgs.length === 0) return; for (const msg of pendingMsgs) { const outboxId = msg.id; const targetChatId = msg.chatId; delete msg.id; delete msg.chatId; delete msg.isPending; await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${targetChatId}`), msg); await localDB.outbox.delete(outboxId); } } catch (e) { } }
