@@ -74,19 +74,6 @@
         .audio-slider { -webkit-appearance: none; background: rgba(255,255,255,0.2); height: 4px; border-radius: 5px; outline: none; }
         .audio-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; }
 
-        /* 🔥 FIX 2: Loader Spinner Styling 🔥 */
-        .loader-spinner {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid var(--wa-green);
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        body.light-mode .loader-spinner { border: 3px solid rgba(0, 0, 0, 0.1); border-top: 3px solid var(--wa-green); }
-
         .dropdown-menu { display: none; }
         .dropdown-menu.show { display: block; animation: popIn 0.15s ease-out forwards; }
     </style>
@@ -231,7 +218,7 @@
                     </div>
                 </div>
 
-                <div id="locked-indicator" class="hidden px-4 py-3.5 border-b border-[#222d34] flex items-center gap-4 cursor-pointer hover:bg-[#202c33] transition-colors" onclick="openLockedChats()">
+                <div id="locked-indicator" class="hidden px-4 py-3.5 border-b border-[#222d34] flex items-center gap-4 cursor-pointer hover:bg-[#202c33]" onclick="openLockedChats()">
                     <div class="w-11 h-11 rounded-full bg-[#00a884]/10 text-[#00a884] flex items-center justify-center text-lg"><i class="fa-solid fa-lock"></i></div>
                     <span class="text-white font-semibold text-[17px]">Locked chats</span>
                 </div>
@@ -243,10 +230,7 @@
 
                 <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative bg-[#111b21]" style="touch-action: pan-y;">
                     <div id="contacts-container">
-                        <div class="text-center text-[#8696a0] p-8 mt-10">
-                            <div class="loader-spinner"></div>
-                            <p class="text-sm mt-4 font-medium">Loading chats...</p>
-                        </div>
+                        <div class="text-center text-[#8696a0] p-6 text-sm"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
                     </div>
                 </div>
             </div>
@@ -381,6 +365,9 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
+        // WebRTC function (Assuming it's loaded from webrtc_core.js)
+        import { setupWebRTC } from "./webrtc_core.js";
+
         // Dexie Local DB Setup
         const localDB = new Dexie("RasGramDB");
         localDB.version(2).stores({
@@ -395,7 +382,6 @@
         function decryptText(cipherText, chatId) { if (!cipherText) return cipherText; try { const bytes = CryptoJS.AES.decrypt(cipherText, chatId + SECRET_SALT); const original = bytes.toString(CryptoJS.enc.Utf8); return original || cipherText; } catch (e) { return cipherText; } }
 
         // State Variables
-        let isDataLoading = true;
         let selectedMsgs = new Set();
         let pressTimer;
         let currentReplyContext = null;
@@ -481,7 +467,7 @@
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload"; 
         const CLOUDINARY_UPLOAD_PRESET = "ml_default"; 
         
-        // 🔥 FIX: FORCED CORRECT SYNC APP ID TO PREVENT 5-SEGMENT CRASH 🔥
+        // 🔥 FIX 1: CORRECT DATABASE PATH (No more 5 segment crash) 🔥
         const SYNC_APP_ID = "rasel-mia-universal-sync";
         
         const app = initializeApp(firebaseConfig); 
@@ -510,7 +496,7 @@
             joinModal.classList.remove('hidden');
         }
 
-        // 🔥 FIX 3: BULLETPROOF PASSWORD & LOGIN LOGIC 🔥
+        // 🔥 FIX 2: BULLETPROOF PASSWORD LOGIN 🔥
         document.getElementById('join-form').onsubmit = async (e) => {
             e.preventDefault(); 
             const n = document.getElementById('reg-name').value.trim(); 
@@ -527,7 +513,6 @@
                 
                 try {
                     await signInAnonymously(auth); 
-                    // This is exactly 6 segments (Even)
                     const userRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', m); 
                     const userSnap = await getDoc(userRef);
                     
@@ -538,7 +523,6 @@
                             await updateDoc(userRef, { password: hashedPassword, name: n }); 
                             myName = n;
                         } 
-                        // It will check if the user input matches the DB hash OR the DB plaintext
                         else if (dbData.password !== hashedPassword && dbData.password !== p) { 
                             alert("ভুল পাসওয়ার্ড! দয়া করে সঠিক পিন দিন।"); 
                             joinBtn.disabled = false; joinBtn.innerHTML = originalText; 
@@ -546,7 +530,6 @@
                         } 
                         else {
                             if (dbData.password === p) {
-                                // If DB has plaintext password, upgrade it to hash automatically
                                 await updateDoc(userRef, { password: hashedPassword });
                             }
                             myName = dbData.name || n;
@@ -638,7 +621,7 @@
             document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
             
             const cachedUsers = localStorage.getItem('cached_users'); 
-            if (cachedUsers) { allUsers = JSON.parse(cachedUsers); isDataLoading = false; }
+            if (cachedUsers) { allUsers = JSON.parse(cachedUsers); }
             const cachedMsgs = localStorage.getItem('cached_latest_msgs'); 
             if (cachedMsgs) latestMessages = JSON.parse(cachedMsgs);
             
@@ -646,6 +629,14 @@
 
             try {
                 await signInAnonymously(auth);
+                const myRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile); 
+                const mySnap = await getDoc(myRef);
+                
+                if(mySnap.exists()) { 
+                    const d = mySnap.data(); 
+                    if(d.avatarUrl) { myAvatarUrl = d.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl); } 
+                    if(d.name && d.name !== myName) { myName = d.name; localStorage.setItem('pvt_chat_name', myName); } 
+                }
                 const updateMyStatus = async () => { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { name: myName, mobile: myMobile, lastActive: Date.now(), statusVisible: isStatusVisible }, { merge: true }); };
                 updateMyStatus(); activeTrackingInterval = setInterval(updateMyStatus, 60000); 
                 listenForUsers();
@@ -654,7 +645,6 @@
             }
         }
 
-        // 🔥 FIX 2: Loader explicitly turned off after Firebase resolves/rejects 🔥
         function listenForUsers() {
             const usersRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users');
             onSnapshot(usersRef, (snapshot) => {
@@ -666,14 +656,10 @@
                         setupLastMessageListener(data.mobile); 
                     } 
                 });
-                
-                isDataLoading = false; // Turn off spinner
                 localStorage.setItem('cached_users', JSON.stringify(allUsers)); 
                 renderContacts();
             }, (error) => {
                 console.error("Firestore Error: ", error);
-                isDataLoading = false; // Turn off spinner even if it fails
-                renderContacts();
             });
         }
 
@@ -682,6 +668,11 @@
             chatListeners[contactMobile] = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'desc'), limit(1)), (snapshot) => {
                 if (!snapshot.empty) {
                     const newLatest = snapshot.docs[0].data(); const oldLatest = latestMessages[contactMobile];
+                    if (newLatest.senderMobile !== myMobile && (!oldLatest || newLatest.timestamp > oldLatest.timestamp) && newLatest.timestamp > appStartTime) { 
+                        try { document.getElementById('notification-sound').play(); } catch(e){} 
+                        const u = allUsers.find(x => x.mobile === contactMobile); const pushName = u ? u.name : 'RasGram';
+                        let decText = newLatest.text ? decryptText(newLatest.text, chatId) : ''; const pushBody = newLatest.isCallLog ? "Missed Call" : (decText || "Sent an attachment"); sendPushNotification(pushName, pushBody);
+                    }
                     latestMessages[contactMobile] = newLatest;
                 } else latestMessages[contactMobile] = null;
                 localStorage.setItem('cached_latest_msgs', JSON.stringify(latestMessages)); 
@@ -689,16 +680,14 @@
             });
         }
 
+        // 🔥 FIX 4: NO SPINNER. INSTANT CHAT LIST LOAD 🔥
         const searchInput = document.getElementById('search-input');
         const contactsContainer = document.getElementById('contacts-container');
         
         function renderContacts() {
-            if (isDataLoading) {
-                contactsContainer.innerHTML = `<div class="text-center text-[#8696a0] p-8 mt-10"><div class="loader-spinner"></div><p class="text-sm mt-4 font-medium">Loading chats...</p></div>`;
-                return;
-            }
-
             const term = searchInput.value.toLowerCase();
+            if(lockedContacts.length > 0 && !isViewingLocked) document.getElementById('locked-indicator').classList.remove('hidden'); else document.getElementById('locked-indicator').classList.add('hidden');
+
             let displayUsers = allUsers.filter(u => isViewingLocked ? lockedContacts.includes(u.mobile) : !lockedContacts.includes(u.mobile));
             displayUsers = displayUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
             displayUsers.sort((a, b) => { return (latestMessages[b.mobile]?.timestamp || parseInt(b.lastActive) || 0) - (latestMessages[a.mobile]?.timestamp || parseInt(a.lastActive) || 0); });
@@ -715,9 +704,9 @@
 
                 if (latestMsg) {
                     const isMe = latestMsg.senderMobile === myMobile; let tickClass = latestMsg.read ? "text-[#53bdeb]" : "text-[#8696a0]"; const prefix = isMe ? `<i class='fa-solid fa-check-double text-[12px] mr-1 ${tickClass}'></i> ` : "";
-                    if(latestMsg.isCallLog) { msgPreview = `<i class='fa-solid fa-phone mr-1'></i> Call`; }
+                    if(latestMsg.isCallLog) { const icon = latestMsg.callType === 'video' ? 'fa-video' : 'fa-phone'; const color = latestMsg.callStatus === 'missed' ? 'text-red-500' : 'text-[#8696a0]'; msgPreview = `<i class='fa-solid ${icon} ${color} mr-1'></i> ${decryptText(latestMsg.text, generateChatId(myMobile, user.mobile))}`; }
                     else if (latestMsg.text) msgPreview = prefix + escapeHTML(decryptText(latestMsg.text, generateChatId(myMobile, user.mobile)));
-                    else if (latestMsg.fileUrl) msgPreview = prefix + "<i class='fa-solid fa-file mr-1'></i> Attachment";
+                    else if (latestMsg.fileUrl) { if (latestMsg.fileType?.startsWith('image/')) msgPreview = prefix + "<i class='fa-solid fa-camera mr-1'></i> Photo"; else if (latestMsg.fileType?.startsWith('video/')) msgPreview = prefix + "<i class='fa-solid fa-video mr-1'></i> Video"; else if (latestMsg.fileType?.startsWith('audio/')) msgPreview = prefix + "<i class='fa-solid fa-microphone mr-1'></i> Voice message"; else msgPreview = prefix + "<i class='fa-solid fa-file mr-1'></i> Document"; }
                     timeString = latestMsg.timeString || ""; if (!isMe && latestMsg.timestamp > parseInt(localStorage.getItem(`read_${user.mobile}`) || '0') && !latestMsg.read) { isUnread = true; previewClass = "text-white font-medium"; }
                 }
 
@@ -725,14 +714,21 @@
                 if(user.typingTo === myMobile) { msgPreview = "<span class='text-[#00a884] font-medium text-[14px]'>typing...</span>"; previewClass = ""; unreadBadge = ""; }
 
                 const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
+                
                 tempHTML += `
                 <div class="flex items-center cursor-pointer transition-colors p-3.5 border-b border-[#222d34] ${activeClass} group relative">
                     <div class="relative shrink-0 mr-4" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
                         <img src="${userAvatar}" class="w-12 h-12 rounded-full object-cover bg-[#111b21]">
                     </div>
                     <div class="flex-grow flex flex-col justify-center overflow-hidden" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
-                        <div class="flex justify-between items-center mb-1"><h3 class="text-[17.5px] font-bold text-white truncate">${user.name}</h3><span class="text-[12px] ${isUnread ? 'text-[#00a884] font-medium' : 'text-[#8696a0]'} shrink-0">${timeString}</span></div>
-                        <div class="flex justify-between items-center gap-2"><p class="text-[14px] ${previewClass} truncate w-full">${msgPreview}</p>${unreadBadge}</div>
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-[17.5px] font-bold text-white truncate pr-2 tracking-[0.3px]">${user.name}</h3>
+                            <span class="text-[12px] ${isUnread ? 'text-[#00a884] font-medium' : 'text-[#8696a0]'} shrink-0">${timeString}</span>
+                        </div>
+                        <div class="flex justify-between items-center gap-2">
+                            <p class="text-[14px] ${previewClass} truncate w-full">${msgPreview}</p>
+                            ${unreadBadge}
+                        </div>
                     </div>
                     <div class="shrink-0 relative ml-1">
                         <button onclick="toggleContactMenu('${user.mobile}', event)" class="text-[#8696a0] hover:text-white px-2 py-3 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-[16px]"></i></button>
@@ -746,20 +742,23 @@
         }
         searchInput.addEventListener('input', renderContacts);
 
+        function closeChatLogic() { document.getElementById('sidebar').classList.remove('hidden'); document.getElementById('sidebar').classList.add('flex'); if (window.innerWidth < 768) { document.getElementById('chat-area').classList.remove('flex'); document.getElementById('chat-area').classList.add('hidden'); if (window.location.hash === '#chat') history.replaceState(null, null, ' '); } else document.getElementById('empty-chat-state').classList.remove('hidden'); activeContactMobile = null; renderContacts(); if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus(); clearSelection(); cancelReply(); }
+        window.closeChatMobile = () => { if (window.innerWidth < 768 && window.location.hash === '#chat') history.back(); else closeChatLogic(); };
+        window.addEventListener('popstate', (e) => { if (window.location.hash !== '#chat') { closeChatLogic(); } });
+
         window.openPrivateChat = async (contactName, contactMobile, contactAvatarUrl) => {
             activeContactMobile = contactMobile; localStorage.setItem(`read_${contactMobile}`, Date.now()); clearSelection(); cancelReply();
-            document.getElementById('active-chat-name').innerText = contactName; document.getElementById('active-chat-avatar').src = contactAvatarUrl; document.getElementById('empty-chat-state').classList.add('hidden');
+            document.getElementById('active-chat-name').innerText = contactName; document.getElementById('active-chat-avatar').src = contactAvatarUrl; document.getElementById('empty-chat-state').classList.add('hidden'); document.getElementById('lock-chat-btn').innerText = lockedContacts.includes(contactMobile) ? "Unlock chat" : "Lock chat";
             
             const chatArea = document.getElementById('chat-area');
-            if (window.innerWidth < 768) { document.getElementById('sidebar').classList.add('hidden'); chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); } 
-            else { chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); }
+            if (window.innerWidth < 768) { if (!document.getElementById('sidebar').classList.contains('hidden')) history.pushState({ chatOpen: true }, "Chat", "#chat"); document.getElementById('sidebar').classList.remove('flex'); document.getElementById('sidebar').classList.add('hidden'); chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); } else { chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); }
 
-            renderContacts(); 
-            const msgBox = document.getElementById('messages-box');
+            msgBox.classList.remove('fade-in-anim'); void msgBox.offsetWidth; msgBox.classList.add('fade-in-anim'); renderContacts(); 
+
             const chatId = generateChatId(myMobile, contactMobile);
-            
             let msgs = []; const cachedRecord = await localDB.chatHistory.get(chatId);
             if(cachedRecord && cachedRecord.messages) { msgBox.innerHTML = ''; cachedRecord.messages.forEach(mData => msgBox.appendChild(createMessageElement(mData.id, mData, contactName))); msgBox.scrollTop = msgBox.scrollHeight; }
+            const cachedChat = msgs.length > 0;
 
             if(userStatusUnsubscribe) userStatusUnsubscribe();
             userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
@@ -773,7 +772,7 @@
             let isFirstLoad = true;
             currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc')), (snapshot) => {
                 let cacheArray = []; 
-                if(isFirstLoad && !cachedRecord) { msgBox.innerHTML = ''; } isFirstLoad = false;
+                if(isFirstLoad && !cachedChat) { msgBox.innerHTML = ''; } isFirstLoad = false;
                 snapshot.docChanges().forEach(change => {
                     const mData = change.doc.data(); mData.id = change.doc.id;
                     if (!mData.read && mData.senderMobile !== myMobile) updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true });
@@ -787,7 +786,7 @@
             });
         };
 
-        window.initiateReply = (text, e) => { e.stopPropagation(); currentReplyContext = text; document.getElementById('reply-preview-text').innerText = text; document.getElementById('reply-preview-container').classList.remove('hidden'); document.getElementById('msg-input').focus(); closeAllMenus(); }
+        window.initiateReply = (text, e) => { if(e) e.stopPropagation(); currentReplyContext = text; document.getElementById('reply-preview-text').innerText = text; document.getElementById('reply-preview-container').classList.remove('hidden'); document.getElementById('msg-input').focus(); closeAllMenus(); }
         window.cancelReply = () => { currentReplyContext = null; document.getElementById('reply-preview-container').classList.add('hidden'); }
 
         window.toggleSelect = function(id) {
@@ -856,7 +855,7 @@
         window.removeReaction = async (docId, e) => { if(e) e.stopPropagation(); try { await updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId), { reaction: null }); } catch(e){} };
         window.deleteMsg = async (docId, e) => { if(e) e.stopPropagation(); closeAllMenus(); if(confirm("Delete message for everyone?")) { try { await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${generateChatId(myMobile, activeContactMobile)}`, docId)); } catch(e){} } };
 
-        function uploadFileWithProgress(file) { return new Promise((resolve, reject) => { const xhr = new XMLHttpRequest(); xhr.open('POST', CLOUDINARY_URL, true); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET); xhr.upload.onprogress = (e) => { if (e.lengthComputable) { const percent = Math.round((e.loaded / e.total) * 100); document.getElementById('send-btn').innerHTML = `<span class="text-[13px] font-bold text-[#00a884]">${percent}%</span>`; } }; xhr.onload = () => { if (xhr.status === 200) resolve(JSON.parse(xhr.responseText)); else reject("Upload failed"); }; xhr.onerror = () => reject("Network error"); xhr.send(formData); }); }
+        function uploadFileWithProgress(file) { return new Promise((resolve, reject) => { const xhr = new XMLHttpRequest(); xhr.open('POST', CLOUDINARY_URL, true); const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET); xhr.upload.onprogress = (e) => { if (e.lengthComputable) { const percent = Math.round((e.loaded / e.total) * 100); sendBtn.innerHTML = `<span class="text-[13px] font-bold text-[#00a884]">${percent}%</span>`; } }; xhr.onload = () => { if (xhr.status === 200) resolve(JSON.parse(xhr.responseText)); else reject("Upload failed"); }; xhr.onerror = () => reject("Network error"); xhr.send(formData); }); }
         
         document.getElementById('chat-form').onsubmit = async (e) => {
             e.preventDefault(); const text = msgInput.value.trim(); if ((!text && !selectedFile) || !activeContactMobile) return;
@@ -866,15 +865,24 @@
             const chatId = generateChatId(myMobile, activeContactMobile);
             const encText = encryptText(text, chatId);
             const encReplyText = currentReplyContext ? encryptText(currentReplyContext, chatId) : null;
+
             const msgData = { text: encText, replyToText: encReplyText, senderMobile: myMobile, timestamp: Date.now(), timeString: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), fileUrl: null, fileName: null, fileType: null, reaction: null, read: false };
 
             try {
-                if (selectedFile) { const uploadResult = await uploadFileWithProgress(selectedFile); if(uploadResult.secure_url) { msgData.fileUrl = uploadResult.secure_url; msgData.fileName = selectedFile.name; msgData.fileType = selectedFile.type || 'audio/mp3'; } }
-                if (navigator.onLine) await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), msgData); 
-                else { msgData.chatId = chatId; msgData.isPending = true; await localDB.outbox.add(msgData); const tempId = 'temp_' + Date.now(); msgData.id = tempId; document.getElementById('messages-box').appendChild(createMessageElement(tempId, msgData, "")); }
-                msgInput.value = ''; cancelReply(); clearFile(); localStorage.setItem(`read_${activeContactMobile}`, Date.now());
-            } catch (error) {} finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-[22px] ml-1"></i>'; sendBtn.disabled = false; }
+                if (selectedFile) { if(!navigator.onLine) { alert("অফলাইনে ফাইল বা ছবি সেন্ড করা যাবে না।"); throw new Error("Offline file upload blocked"); } const uploadResult = await uploadFileWithProgress(selectedFile); if(uploadResult.secure_url) { msgData.fileUrl = uploadResult.secure_url; msgData.fileName = selectedFile.name; msgData.fileType = selectedFile.type || 'audio/mp3'; } else throw new Error("Cloudinary failed"); }
+                if (navigator.onLine) { await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), msgData); let pushText = text ? text : (msgData.fileUrl ? "একটি ফাইল পাঠিয়েছে" : "নতুন মেসেজ"); triggerOneSignalPush(activeContactMobile, pushText); } 
+                else { msgData.chatId = chatId; msgData.isPending = true; await localDB.outbox.add(msgData); const tempId = 'temp_' + Date.now(); msgData.id = tempId; msgBox.appendChild(createMessageElement(tempId, msgData, document.getElementById('active-chat-name').innerText)); msgBox.scrollTop = msgBox.scrollHeight; }
+                msgInput.value = ''; clearFile(); cancelReply(); msgInput.style.height = '24px'; toggleInputButtons(); localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
+            } catch (error) { console.error("Message failed:", error); } 
+            finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-[22px] ml-1"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
+
+        window.toggleCustomAudio = (id, btn) => { const audio = document.getElementById(id); const icon = btn.querySelector('i'); if (audio.paused) { document.querySelectorAll('audio').forEach(a => { if(a.id !== id && a.id.startsWith('audio_pvt_')) { a.pause(); const ob = document.getElementById('btn_'+a.id); if(ob) ob.querySelector('i').className = 'fa-solid fa-play'; } }); audio.play(); icon.className = 'fa-solid fa-pause'; } else { audio.pause(); icon.className = 'fa-solid fa-play'; } };
+        window.updateAudioProgress = (id, audio) => { const s = document.getElementById('slider_'+id); const t = document.getElementById('time_'+id); if(audio.duration && s) { s.value = (audio.currentTime / audio.duration) * 100; t.innerText = formatTime(audio.currentTime); } };
+        window.seekAudio = (id, slider) => { const a = document.getElementById(id); if(a.duration) a.currentTime = (slider.value / 100) * a.duration; };
+        window.audioEnded = (id, audio) => { const b = document.getElementById('btn_'+id); if(b) b.querySelector('i').className = 'fa-solid fa-play'; const s = document.getElementById('slider_'+id); if(s) s.value = 0; const t = document.getElementById('time_'+id); if(t) t.innerText = formatTime(audio.duration || 0); };
+        window.initAudioDuration = (id, audio) => { const t = document.getElementById('time_'+id); if(t) t.innerText = formatTime(audio.duration); };
+        function getDownloadableUrl(originalUrl) { return originalUrl && originalUrl.includes('/upload/') ? originalUrl.replace('/upload/', '/upload/fl_attachment/') : originalUrl; }
 
         function createMessageElement(docId, data, contactName) {
             const chatId = generateChatId(myMobile, activeContactMobile);
@@ -907,8 +915,6 @@
             let tickColor = data.read ? "text-[#53bdeb]" : "text-[#8696a0]"; let ticksHtml = isMe ? `<i class="fa-solid fa-check-double text-[12px] ${tickColor} ml-1"></i>` : '';
             msgDiv.innerHTML = `${popupMenu}${replyHtml}${content}<div class="relative"><span style="display:inline-block; max-width: calc(100% - 65px); vertical-align:top;">${finalHtmlText}</span><div class="inline-flex items-center justify-end absolute bottom-0 right-0 px-1"><span class="text-[11px] text-[#8696a0]">${data.timeString}</span>${ticksHtml}</div></div>`; return msgDiv;
         }
-
-        window.closeChatMobile = () => { document.getElementById('chat-area').classList.add('hidden'); document.getElementById('sidebar').classList.remove('hidden'); activeContactMobile=null; renderContacts(); }
 
         async function processOutboxMsgs() { if (!navigator.onLine) return; try { const pendingMsgs = await localDB.outbox.toArray(); if (pendingMsgs.length === 0) return; for (const msg of pendingMsgs) { const outboxId = msg.id; const targetChatId = msg.chatId; delete msg.id; delete msg.chatId; delete msg.isPending; await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${targetChatId}`), msg); await localDB.outbox.delete(outboxId); } } catch (e) { } }
         window.addEventListener('online', () => { processOutboxMsgs(); }); window.addEventListener('load', () => { setTimeout(processOutboxMsgs, 3000); });
