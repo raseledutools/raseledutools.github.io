@@ -362,7 +362,7 @@
         function getAvatarUrl(name, customUrl) { return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=8696a0&color=fff&bold=true`; }
         function formatTime(seconds) { if(!seconds || isNaN(seconds)) return "0:00"; const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m}:${s < 10 ? '0' : ''}${s}`; }
 
-        // 🔥 Updated Login Logic for Multi-Device Fix 🔥
+    // 🔥 Updated Login Logic for Multi-Device & Plaintext Password Fix 🔥
         document.getElementById('join-form').onsubmit = async (e) => {
             e.preventDefault(); 
             const n = document.getElementById('reg-name').value.trim(); 
@@ -384,15 +384,23 @@
                     
                     if (userSnap.exists()) { 
                         const dbData = userSnap.data(); 
+                        
                         if (!dbData.password) { 
                             await updateDoc(userRef, { password: hashedPassword, name: n }); 
                             myName = n;
-                        } else if (dbData.password !== hashedPassword) { 
+                        } 
+                        // 🔥 মেইন ফিক্স: হ্যাশ করা পাসওয়ার্ড এবং ডাটাবেসের সাধারণ পাসওয়ার্ড দুটোই চেক করবে
+                        else if (dbData.password !== hashedPassword && dbData.password !== p) { 
                             alert("ভুল পাসওয়ার্ড! দয়া করে সঠিক পিন দিন।"); 
                             joinBtn.disabled = false; joinBtn.innerHTML = originalText; 
                             return; 
-                        } else {
-                            // If password matches, sync the name and avatar from DB to local device
+                        } 
+                        else {
+                            // পাসওয়ার্ড যদি সাধারণ টেক্সট (927849) হয়, তবে ডাটাবেসে সেটাকে এনক্রিপ্ট করে সেভ করে নিবে
+                            if (dbData.password === p) {
+                                await updateDoc(userRef, { password: hashedPassword });
+                            }
+                            // নাম এবং ছবি সিঙ্ক করবে
                             myName = dbData.name || n;
                             if(dbData.avatarUrl) myAvatarUrl = dbData.avatarUrl;
                         }
@@ -423,7 +431,6 @@
                 alert("দয়া করে সঠিক তথ্য দিন।");
             }
         };
-
         function sendPushNotification(title, body) { if (!("Notification" in window)) return; if (Notification.permission === "granted" && document.visibilityState !== "visible") { const notif = new Notification(title, { body: body, icon: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg', vibrate: [200, 100, 200] }); notif.onclick = () => { window.focus(); notif.close(); }; } }
         function updateStatusUI() { const icon = document.getElementById('status-icon'); const text = document.getElementById('status-toggle-text'); if(isStatusVisible) { icon.className = "fa-solid fa-eye-slash w-5 text-center text-[#8696a0]"; text.innerText = "Turn off Active Status"; } else { icon.className = "fa-solid fa-eye w-5 text-center text-[#00a884]"; text.innerText = "Turn on Active Status"; } }
         window.toggleActiveStatus = async () => { isStatusVisible = !isStatusVisible; localStorage.setItem('status_visible', isStatusVisible); updateStatusUI(); closeAllMenus(); try { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { statusVisible: isStatusVisible }, { merge: true }); } catch(e){} }
