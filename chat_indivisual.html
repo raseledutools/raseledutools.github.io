@@ -26,35 +26,23 @@
             position: fixed; top: 0; left: 0; touch-action: none;
         }
         
-        /* 🔥 Background Fix (No Discoloration) 🔥 */
         .chat-bg {
             background-color: #0b141a;
             background-image: linear-gradient(rgba(11, 20, 26, 0.85), rgba(11, 20, 26, 0.85)), url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
             background-repeat: repeat;
         }
 
-        /* Light Mode Styles */
         body.light-mode { background-color: #f0f2f5 !important; color: #111b21 !important; }
-        body.light-mode .bg-\[\#111b21\] { background-color: #f0f2f5 !important; transition: background-color 0.3s ease; }
-        body.light-mode .bg-\[\#202c33\] { background-color: #ffffff !important; transition: background-color 0.3s ease; }
-        body.light-mode .bg-\[\#222d34\] { background-color: #efeae2 !important; transition: background-color 0.3s ease; }
-        body.light-mode .bg-\[\#233138\] { background-color: #ffffff !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        body.light-mode .bg-\[\#2a3942\] { background-color: #ffffff !important; }
-        body.light-mode .bg-\[\#182229\] { background-color: #ffeecd !important; color: #54656f !important;}
+        body.light-mode .bg-\[\#111b21\] { background-color: #f0f2f5 !important; }
+        body.light-mode .bg-\[\#202c33\] { background-color: #ffffff !important; }
+        body.light-mode .bg-\[\#222d34\] { background-color: #efeae2 !important; }
         body.light-mode .bg-\[\#005c4b\] { background-color: #d9fdd3 !important; }
         body.light-mode .text-white { color: #111b21 !important; }
         body.light-mode .text-\[\#e9edef\] { color: #111b21 !important; }
-        body.light-mode .text-\[\#8696a0\] { color: #667781 !important; }
-        body.light-mode .chat-bg { 
-            background-color: #efeae2 !important; 
-            background-image: linear-gradient(rgba(239, 234, 226, 0.6), rgba(239, 234, 226, 0.6)), url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') !important; 
-        }
+        body.light-mode .chat-bg { background-color: #efeae2 !important; background-image: linear-gradient(rgba(239, 234, 226, 0.6), rgba(239, 234, 226, 0.6)), url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') !important; }
 
-        /* Animations */
         @keyframes popIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
-        @keyframes slideInRight { 0% { opacity: 0; transform: translateX(30px); } 100% { opacity: 1; transform: translateX(0); } }
         .msg-bubble { animation: popIn 0.2s ease-out forwards; }
-        .slide-in-anim { animation: slideInRight 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; }
         .fade-in-anim { animation: popIn 0.2s ease-out forwards; }
 
         .custom-scroll::-webkit-scrollbar { width: 6px; }
@@ -62,29 +50,21 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(134, 150, 160, 0.3); border-radius: 10px; }
         
         .contact-active { background-color: #2a3942; border-left: 3px solid var(--wa-green); }
-
-        /* Selected Message Style */
         .msg-selected { background-color: rgba(0, 168, 132, 0.3) !important; transition: all 0.3s ease; box-shadow: inset 0 0 0 2px var(--wa-green); }
+        .dropdown-menu { display: none; }
+        .dropdown-menu.show { display: block; animation: popIn 0.15s ease-out forwards; }
 
-        /* Audio Player Styling */
         audio { height: 40px; outline: none; border-radius: 20px; width: 100%; }
         .audio-slider { -webkit-appearance: none; background: rgba(255,255,255,0.2); height: 4px; border-radius: 5px; outline: none; }
         .audio-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; }
-
-        .dropdown-menu { display: none; }
-        .dropdown-menu.show { display: block; animation: popIn 0.15s ease-out forwards; }
     </style>
     
    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
    <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "522b3136-c16d-4deb-8423-74dac3d6452e",
-          notifyButton: { enable: true },
-        });
-        const userId = localStorage.getItem("pvt_chat_mobile"); 
-        if (userId) OneSignal.login(userId);
+        await OneSignal.init({ appId: "522b3136-c16d-4deb-8423-74dac3d6452e", notifyButton: { enable: true } });
+        const userId = localStorage.getItem("pvt_chat_mobile"); if (userId) OneSignal.login(userId);
       });
    </script>
 </head>
@@ -161,7 +141,9 @@
                 </div>
 
                 <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative bg-[#111b21]" style="touch-action: pan-y;">
-                    <div id="contacts-container"></div>
+                    <div id="contacts-container">
+                        <div class="text-center text-[#8696a0] p-6 text-sm"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+                    </div>
                 </div>
             </div>
 
@@ -394,7 +376,7 @@
         const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload"; 
         const CLOUDINARY_UPLOAD_PRESET = "ml_default"; 
         
-        const SYNC_APP_ID = "rasel-mia-universal-sync"; // Exact original ID
+        const SYNC_APP_ID = "rasel-mia-universal-sync"; 
         
         const app = initializeApp(firebaseConfig); 
         const auth = getAuth(app); 
@@ -409,10 +391,9 @@
         function getAvatarUrl(name, customUrl) { return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=8696a0&color=fff&bold=true`; }
         function formatTime(seconds) { if(!seconds || isNaN(seconds)) return "0:00"; const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m}:${s < 10 ? '0' : ''}${s}`; }
 
-        // Start Logic (No Flicker)
+        // Start Logic 
         const joinModal = document.getElementById('join-modal');
         const appContainer = document.getElementById('app-container');
-        const contactsContainer = document.getElementById('contacts-container');
 
         if (myName && myMobile && myPassword) {
             joinModal.style.display = 'none'; 
@@ -423,6 +404,7 @@
             joinModal.classList.remove('hidden');
         }
 
+        // 🔥 LOG IN FIX 🔥
         document.getElementById('join-form').onsubmit = async (e) => {
             e.preventDefault(); 
             const n = document.getElementById('reg-name').value.trim(); 
@@ -550,24 +532,30 @@
             const cachedMsgs = localStorage.getItem('cached_latest_msgs'); 
             if (cachedMsgs) latestMessages = JSON.parse(cachedMsgs);
             
-            // 🔥 INSTANT CHAT LIST CALL 🔥
-            renderContacts();
-
-            // Then start Firebase listeners immediately
-            listenForUsers();
+            // 🔥 Exact Chat List Logic Requested by User 🔥
+            if(allUsers.length > 0) renderContacts();
 
             try {
                 await signInAnonymously(auth);
+                const myRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile); 
+                const mySnap = await getDoc(myRef);
+                
+                if(mySnap.exists()) { 
+                    const d = mySnap.data(); 
+                    if(d.avatarUrl) { myAvatarUrl = d.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl); } 
+                    if(d.name && d.name !== myName) { myName = d.name; localStorage.setItem('pvt_chat_name', myName); } 
+                }
                 const updateMyStatus = async () => { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { name: myName, mobile: myMobile, lastActive: Date.now(), statusVisible: isStatusVisible }, { merge: true }); };
                 updateMyStatus(); activeTrackingInterval = setInterval(updateMyStatus, 60000); 
+                listenForUsers();
             } catch (err) {
                 console.error("Auth Error: ", err);
             }
         }
 
+        // 🔥 Original Listen For Users Logic 🔥
         function listenForUsers() {
-            const usersRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users');
-            onSnapshot(usersRef, (snapshot) => {
+            onSnapshot(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users'), (snapshot) => {
                 allUsers = []; 
                 snapshot.forEach(doc => { 
                     const data = doc.data(); 
@@ -601,8 +589,9 @@
         }
 
         const searchInput = document.getElementById('search-input');
+        const contactsContainer = document.getElementById('contacts-container');
         
-        // 🔥 PERFECT, INSTANT RENDER LOGIC 🔥
+        // 🔥 Exact Original Render Contacts Logic 🔥
         function renderContacts() {
             const term = searchInput.value.toLowerCase();
             if(lockedContacts.length > 0 && !isViewingLocked) document.getElementById('locked-indicator').classList.remove('hidden'); else document.getElementById('locked-indicator').classList.add('hidden');
@@ -611,14 +600,13 @@
             displayUsers = displayUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
             displayUsers.sort((a, b) => { return (latestMessages[b.mobile]?.timestamp || parseInt(b.lastActive) || 0) - (latestMessages[a.mobile]?.timestamp || parseInt(a.lastActive) || 0); });
 
-            // Completely empty the container
             contactsContainer.innerHTML = '';
             
             if (displayUsers.length === 0) {
-                return; // Leaves it totally blank until data comes
+                contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-[16px] mt-10 p-6">No chats found.</p>`;
+                return;
             }
             
-            let tempHTML = '';
             displayUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile; const activeClass = isActive ? 'contact-active' : 'hover:bg-[#202c33]';
                 const latestMsg = latestMessages[user.mobile]; let msgPreview = "Tap to chat..."; let timeString = ""; let isUnread = false; let previewClass = "text-[#8696a0]";
@@ -636,8 +624,10 @@
 
                 const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
                 
-                tempHTML += `
-                <div class="flex items-center cursor-pointer transition-colors p-3.5 border-b border-[#222d34] ${activeClass} group relative">
+                const div = document.createElement('div');
+                div.className = `flex items-center cursor-pointer transition-colors p-3.5 border-b border-[#222d34] ${activeClass} group relative`;
+                
+                div.innerHTML = `
                     <div class="relative shrink-0 mr-4" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
                         <img src="${userAvatar}" class="w-12 h-12 rounded-full object-cover bg-[#111b21]">
                     </div>
@@ -657,9 +647,9 @@
                             <button onclick="toggleLockContact('${user.mobile}', event)" class="w-full text-left px-4 py-2.5 text-[15px] text-white hover:bg-[#111b21] transition-colors flex items-center"><i class="fa-solid ${isViewingLocked ? 'fa-unlock' : 'fa-lock'} text-[#00a884] w-6 text-center mr-1"></i> ${isViewingLocked ? 'Unlock Chat' : 'Lock Chat'}</button>
                         </div>
                     </div>
-                </div>`;
+                `;
+                contactsContainer.appendChild(div);
             });
-            contactsContainer.innerHTML = tempHTML;
         }
         searchInput.addEventListener('input', renderContacts);
 
@@ -674,26 +664,27 @@
             const chatArea = document.getElementById('chat-area');
             if (window.innerWidth < 768) { if (!document.getElementById('sidebar').classList.contains('hidden')) history.pushState({ chatOpen: true }, "Chat", "#chat"); document.getElementById('sidebar').classList.remove('flex'); document.getElementById('sidebar').classList.add('hidden'); chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); } else { chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); }
 
-            renderContacts(); 
-            const msgBox = document.getElementById('messages-box');
+            msgBox.classList.remove('fade-in-anim'); void msgBox.offsetWidth; msgBox.classList.add('fade-in-anim'); renderContacts(); document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
+
             const chatId = generateChatId(myMobile, contactMobile);
-            
             let msgs = []; const cachedRecord = await localDB.chatHistory.get(chatId);
-            if(cachedRecord && cachedRecord.messages) { msgBox.innerHTML = ''; cachedRecord.messages.forEach(mData => msgBox.appendChild(createMessageElement(mData.id, mData, contactName))); msgBox.scrollTop = msgBox.scrollHeight; }
+            if(cachedRecord && cachedRecord.messages) { msgs = cachedRecord.messages; msgs.forEach(mData => msgBox.appendChild(createMessageElement(mData.id, mData, contactName))); msgBox.scrollTop = msgBox.scrollHeight; }
+            const cachedChat = msgs.length > 0;
 
             if(userStatusUnsubscribe) userStatusUnsubscribe();
             userStatusUnsubscribe = onSnapshot(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', contactMobile), (docSnap) => {
                 const statusElem = document.getElementById('active-chat-status');
                 if(docSnap.exists()){
-                    const uData = docSnap.data(); if(uData.typingTo === myMobile) { statusElem.innerText = 'typing...'; statusElem.classList.remove('hidden'); } else { const isOnline = (Date.now() - uData.lastActive) < 120000; statusElem.innerText = isOnline ? 'Online' : ''; if(!isOnline) statusElem.classList.add('hidden'); else statusElem.classList.remove('hidden'); }
+                    const uData = docSnap.data(); if(uData.avatarUrl) document.getElementById('active-chat-avatar').src = getAvatarUrl(contactName, uData.avatarUrl);
+                    if(uData.typingTo === myMobile) { statusElem.innerText = 'typing...'; statusElem.className = 'text-[14px] text-[#00a884] font-medium mt-0.5'; } 
+                    else { const onlineVisible = uData.statusVisible !== false; const isOnline = onlineVisible && (Date.now() - uData.lastActive) < 120000; statusElem.innerText = isOnline ? 'Online' : ''; statusElem.className = 'text-[13px] text-[#8696a0] mt-0.5 empty:hidden'; }
                 }
             });
 
             if (currentChatUnsubscribe) currentChatUnsubscribe();
-            let isFirstLoad = true;
-            currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc')), (snapshot) => {
+            currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc'), limit(500)), (snapshot) => {
                 let cacheArray = []; 
-                if(isFirstLoad && !cachedRecord) { msgBox.innerHTML = ''; } isFirstLoad = false;
+                if(!cachedChat) { msgBox.innerHTML = ''; }
                 snapshot.docChanges().forEach(change => {
                     const mData = change.doc.data(); mData.id = change.doc.id;
                     if (!mData.read && mData.senderMobile !== myMobile) updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true });
