@@ -81,6 +81,7 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         body.light-mode .loader-spinner { border: 3px solid rgba(0, 0, 0, 0.1); border-top: 3px solid var(--wa-green); }
     </style>
     
@@ -92,7 +93,7 @@
           appId: "522b3136-c16d-4deb-8423-74dac3d6452e",
           notifyButton: { enable: true },
         });
-        const userId = localStorage.getItem("myId"); if (userId) OneSignal.login(userId);
+        const userId = localStorage.getItem("pvt_chat_mobile"); if (userId) OneSignal.login(userId);
       });
    </script>
 </head>
@@ -110,11 +111,11 @@
         <div class="bg-[#202c33] p-8 rounded-2xl w-full max-w-sm shadow-2xl text-center fade-in-anim border border-[#222d34]">
             <div class="w-20 h-20 bg-[#00a884]/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#00a884]/30"><i class="fa-solid fa-shield-halved text-4xl text-[#00a884]"></i></div>
             <h2 class="text-2xl font-bold mb-2 text-white">Secure RasGram</h2>
-            <p class="text-[#8696a0] text-sm mb-6 font-medium">Create your E2EE secure account.</p>
+            <p class="text-[#8696a0] text-sm mb-6 font-medium">Log in or create your E2EE account.</p>
             <form id="join-form" class="space-y-4">
                 <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884]" placeholder="Your Name">
                 <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884]" placeholder="Mobile Number (11 digits)">
-                <input type="password" id="reg-password" required autocomplete="off" minlength="6" maxlength="6" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] tracking-widest text-center text-lg" placeholder="Create 6-digit Password">
+                <input type="password" id="reg-password" required autocomplete="off" minlength="6" maxlength="6" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] tracking-widest text-center text-lg" placeholder="6-digit Password / PIN">
                 <button type="submit" id="join-btn" class="w-full bg-[#00a884] hover:bg-[#029071] py-3 rounded-lg text-[#111b21] font-bold uppercase mt-4">Secure Login</button>
             </form>
         </div>
@@ -315,7 +316,7 @@
         let selectedMsgs = new Set();
         let pressTimer;
         let currentReplyContext = null;
-        let isDataLoading = true; // 🔥 Track initial load state 🔥
+        let isDataLoading = true;
 
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); }
         function setRealViewportHeight() { let vh = window.innerHeight; if (window.visualViewport) vh = window.visualViewport.height; document.body.style.height = vh + 'px'; document.documentElement.style.height = vh + 'px'; const appContainer = document.getElementById('app-container'); if (appContainer) appContainer.style.height = vh + 'px'; const msgBox = document.getElementById('messages-box'); if(msgBox) setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 50); }
@@ -337,6 +338,16 @@
         let mediaRecorder; let audioChunks = []; let isRecording = false; let settingsSelectedFile = null;
         let callTimerInterval = null; let callSeconds = 0; let currentCallType = 'voice';
 
+        // 🔥 Initial UI Logic to Prevent Flicker 🔥
+        if (myName && myMobile && myPassword) {
+            document.getElementById('join-modal').style.display = 'none'; // Instant hide
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('flex');
+            startApp(); 
+        } else {
+            document.getElementById('join-modal').classList.remove('hidden');
+        }
+
         const remoteAudioElem = document.getElementById('remote-audio'); const remoteVideoElem = document.getElementById('remote-video');
         function startLiveCallTimer() { clearInterval(callTimerInterval); callSeconds = 0; const statusElem = document.getElementById('call-status'); statusElem.innerText = "0:00"; callTimerInterval = setInterval(() => { callSeconds++; statusElem.innerText = formatTime(callSeconds); }, 1000); }
         remoteAudioElem.addEventListener('playing', startLiveCallTimer); remoteVideoElem.addEventListener('playing', startLiveCallTimer);
@@ -351,19 +362,66 @@
         function getAvatarUrl(name, customUrl) { return customUrl ? customUrl : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=8696a0&color=fff&bold=true`; }
         function formatTime(seconds) { if(!seconds || isNaN(seconds)) return "0:00"; const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m}:${s < 10 ? '0' : ''}${s}`; }
 
-        if (myName && myMobile && myPassword) { startApp(); } else { joinModal.classList.remove('hidden'); }
-
+        // 🔥 Updated Login Logic for Multi-Device Fix 🔥
         document.getElementById('join-form').onsubmit = async (e) => {
-            e.preventDefault(); const n = document.getElementById('reg-name').value.trim(); const m = document.getElementById('reg-mobile').value.trim(); const p = document.getElementById('reg-password').value.trim(); const joinBtn = document.getElementById('join-btn');
+            e.preventDefault(); 
+            const n = document.getElementById('reg-name').value.trim(); 
+            const m = document.getElementById('reg-mobile').value.trim(); 
+            const p = document.getElementById('reg-password').value.trim(); 
+            const joinBtn = document.getElementById('join-btn');
+            
             const hashedPassword = hashPassword(p);
+            
             if (n && m.length === 11 && p.length >= 4) {
-                const originalText = joinBtn.innerHTML; joinBtn.disabled = true; joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+                const originalText = joinBtn.innerHTML; 
+                joinBtn.disabled = true; 
+                joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
+                
                 try {
-                    await signInAnonymously(auth); const userRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', m); const userSnap = await getDoc(userRef);
-                    if (userSnap.exists()) { const dbData = userSnap.data(); if (!dbData.password) { await updateDoc(userRef, { password: hashedPassword, name: n }); } else if (dbData.password !== hashedPassword) { alert("Wrong password for this mobile number."); joinBtn.disabled = false; joinBtn.innerHTML = originalText; return; } if(dbData.avatarUrl) { myAvatarUrl = dbData.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); } } else { await setDoc(userRef, { name: n, mobile: m, password: hashedPassword, lastActive: Date.now(), typingTo: null, avatarUrl: '', statusVisible: true }); }
-                    myName = n; myMobile = m; myPassword = hashedPassword; localStorage.setItem('pvt_chat_name', n); localStorage.setItem('pvt_chat_mobile', m); localStorage.setItem('pvt_chat_password', hashedPassword); joinModal.classList.add('hidden'); startApp();
-                } catch (err) { alert("Connection error! " + err.message); joinBtn.disabled = false; joinBtn.innerHTML = originalText; }
-            } else alert("Please fill all details correctly.");
+                    await signInAnonymously(auth); 
+                    const userRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', m); 
+                    const userSnap = await getDoc(userRef);
+                    
+                    if (userSnap.exists()) { 
+                        const dbData = userSnap.data(); 
+                        if (!dbData.password) { 
+                            await updateDoc(userRef, { password: hashedPassword, name: n }); 
+                            myName = n;
+                        } else if (dbData.password !== hashedPassword) { 
+                            alert("ভুল পাসওয়ার্ড! দয়া করে সঠিক পিন দিন।"); 
+                            joinBtn.disabled = false; joinBtn.innerHTML = originalText; 
+                            return; 
+                        } else {
+                            // If password matches, sync the name and avatar from DB to local device
+                            myName = dbData.name || n;
+                            if(dbData.avatarUrl) myAvatarUrl = dbData.avatarUrl;
+                        }
+                    } else { 
+                        await setDoc(userRef, { name: n, mobile: m, password: hashedPassword, lastActive: Date.now(), typingTo: null, avatarUrl: '', statusVisible: true }); 
+                        myName = n;
+                    }
+                    
+                    myMobile = m; 
+                    myPassword = hashedPassword; 
+                    
+                    localStorage.setItem('pvt_chat_name', myName); 
+                    localStorage.setItem('pvt_chat_mobile', myMobile); 
+                    localStorage.setItem('pvt_chat_password', myPassword); 
+                    if(myAvatarUrl) localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
+                    
+                    joinModal.classList.add('hidden'); 
+                    joinModal.style.display = 'none';
+                    appContainer.classList.remove('hidden'); 
+                    appContainer.classList.add('flex');
+                    startApp();
+                    
+                } catch (err) { 
+                    alert("Connection error! " + err.message); 
+                    joinBtn.disabled = false; joinBtn.innerHTML = originalText; 
+                }
+            } else {
+                alert("দয়া করে সঠিক তথ্য দিন।");
+            }
         };
 
         function sendPushNotification(title, body) { if (!("Notification" in window)) return; if (Notification.permission === "granted" && document.visibilityState !== "visible") { const notif = new Notification(title, { body: body, icon: 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg', vibrate: [200, 100, 200] }); notif.onclick = () => { window.focus(); notif.close(); }; } }
@@ -414,7 +472,7 @@
 
         async function startApp() {
             if ("Notification" in window && Notification.permission === "default") { Notification.requestPermission(); }
-            appContainer.classList.remove('hidden'); appContainer.classList.add('flex'); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl); updateStatusUI();
+            document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl); updateStatusUI();
 
             const cachedUsers = localStorage.getItem('cached_users'); if (cachedUsers) { allUsers = JSON.parse(cachedUsers); isDataLoading = false; }
             const cachedMsgs = localStorage.getItem('cached_latest_msgs'); if (cachedMsgs) latestMessages = JSON.parse(cachedMsgs);
@@ -438,7 +496,7 @@
         function listenForUsers() {
             onSnapshot(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users'), (snapshot) => {
                 allUsers = []; snapshot.forEach(doc => { const data = doc.data(); if (data.mobile !== myMobile) { allUsers.push(data); setupLastMessageListener(data.mobile); } });
-                isDataLoading = false; // Data is loaded
+                isDataLoading = false; 
                 localStorage.setItem('cached_users', JSON.stringify(allUsers)); renderContacts();
             });
         }
@@ -459,7 +517,7 @@
             });
         }
 
-        // 🔥 Updated renderContacts logic for Spinner 🔥
+        // 🔥 Flicker Fix: String based rendering for Contacts 🔥
         function renderContacts() {
             if (isDataLoading) {
                 contactsContainer.innerHTML = `
@@ -477,9 +535,12 @@
             displayUsers = displayUsers.filter(u => u.name.toLowerCase().includes(term) || u.mobile.includes(term));
             displayUsers.sort((a, b) => { return (latestMessages[b.mobile]?.timestamp || parseInt(b.lastActive) || 0) - (latestMessages[a.mobile]?.timestamp || parseInt(a.lastActive) || 0); });
 
-            contactsContainer.innerHTML = '';
-            if (displayUsers.length === 0) return contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-[16px] mt-10 p-6">No chats found.</p>`;
+            if (displayUsers.length === 0) {
+                contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-[16px] mt-10 p-6">No chats found.</p>`;
+                return;
+            }
             
+            let tempHTML = '';
             displayUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile; const activeClass = isActive ? 'contact-active' : 'hover:bg-[#202c33]';
                 const latestMsg = latestMessages[user.mobile]; let msgPreview = "Tap to chat..."; let timeString = ""; let isUnread = false; let previewClass = "text-[#8696a0]";
@@ -495,11 +556,32 @@
                 let unreadBadge = isUnread ? `<span class="bg-[#00a884] text-[#111b21] text-[11px] font-bold px-2 py-0.5 rounded-full ml-2">New</span>` : ``;
                 if(user.typingTo === myMobile) { msgPreview = "<span class='text-[#00a884] font-medium text-[14px]'>typing...</span>"; previewClass = ""; unreadBadge = ""; }
 
-                const userAvatar = getAvatarUrl(user.name, user.avatarUrl); const div = document.createElement('div');
-                div.className = `flex items-center cursor-pointer transition-colors p-3.5 border-b border-[#222d34] ${activeClass} group relative`;
-                div.innerHTML = `<div class="relative shrink-0 mr-4" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')"><img src="${userAvatar}" class="w-12 h-12 rounded-full object-cover bg-[#111b21]"></div><div class="flex-grow flex flex-col justify-center overflow-hidden" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')"><div class="flex justify-between items-center mb-1"><h3 class="text-[17.5px] font-bold text-white truncate pr-2 tracking-[0.3px]">${user.name}</h3><span class="text-[12px] ${isUnread ? 'text-[#00a884] font-medium' : 'text-[#8696a0]'} shrink-0">${timeString}</span></div><div class="flex justify-between items-center gap-2"><p class="text-[14px] ${previewClass} truncate w-full">${msgPreview}</p>${unreadBadge}</div></div><div class="shrink-0 relative ml-1"><button onclick="toggleContactMenu('${user.mobile}', event)" class="text-[#8696a0] hover:text-white px-2 py-3 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-[16px]"></i></button><div id="contact-menu-${user.mobile}" class="dropdown-menu absolute top-full right-0 mt-1 bg-[#233138] border border-[#222d34] rounded-md shadow-xl py-1 w-40 z-[60]"><button onclick="toggleLockContact('${user.mobile}', event)" class="w-full text-left px-4 py-2.5 text-[15px] text-white hover:bg-[#111b21] transition-colors flex items-center"><i class="fa-solid ${isViewingLocked ? 'fa-unlock' : 'fa-lock'} text-[#00a884] w-6 text-center mr-1"></i> ${isViewingLocked ? 'Unlock Chat' : 'Lock Chat'}</button></div></div>`;
-                contactsContainer.appendChild(div);
+                const userAvatar = getAvatarUrl(user.name, user.avatarUrl);
+                
+                tempHTML += `
+                <div class="flex items-center cursor-pointer transition-colors p-3.5 border-b border-[#222d34] ${activeClass} group relative">
+                    <div class="relative shrink-0 mr-4" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
+                        <img src="${userAvatar}" class="w-12 h-12 rounded-full object-cover bg-[#111b21]">
+                    </div>
+                    <div class="flex-grow flex flex-col justify-center overflow-hidden" onclick="openPrivateChat('${user.name}', '${user.mobile}', '${userAvatar}')">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-[17.5px] font-bold text-white truncate pr-2 tracking-[0.3px]">${user.name}</h3>
+                            <span class="text-[12px] ${isUnread ? 'text-[#00a884] font-medium' : 'text-[#8696a0]'} shrink-0">${timeString}</span>
+                        </div>
+                        <div class="flex justify-between items-center gap-2">
+                            <p class="text-[14px] ${previewClass} truncate w-full">${msgPreview}</p>
+                            ${unreadBadge}
+                        </div>
+                    </div>
+                    <div class="shrink-0 relative ml-1">
+                        <button onclick="toggleContactMenu('${user.mobile}', event)" class="text-[#8696a0] hover:text-white px-2 py-3 transition-colors"><i class="fa-solid fa-ellipsis-vertical text-[16px]"></i></button>
+                        <div id="contact-menu-${user.mobile}" class="dropdown-menu absolute top-full right-0 mt-1 bg-[#233138] border border-[#222d34] rounded-md shadow-xl py-1 w-40 z-[60]">
+                            <button onclick="toggleLockContact('${user.mobile}', event)" class="w-full text-left px-4 py-2.5 text-[15px] text-white hover:bg-[#111b21] transition-colors flex items-center"><i class="fa-solid ${isViewingLocked ? 'fa-unlock' : 'fa-lock'} text-[#00a884] w-6 text-center mr-1"></i> ${isViewingLocked ? 'Unlock Chat' : 'Lock Chat'}</button>
+                        </div>
+                    </div>
+                </div>`;
             });
+            contactsContainer.innerHTML = tempHTML;
         }
 
         searchInput.addEventListener('input', renderContacts);
@@ -515,7 +597,7 @@
             const chatArea = document.getElementById('chat-area');
             if (window.innerWidth < 768) { if (!document.getElementById('sidebar').classList.contains('hidden')) history.pushState({ chatOpen: true }, "Chat", "#chat"); document.getElementById('sidebar').classList.remove('flex'); document.getElementById('sidebar').classList.add('hidden'); chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); } else { chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); }
 
-            msgBox.classList.remove('fade-in-anim'); void msgBox.offsetWidth; msgBox.classList.add('fade-in-anim'); renderContacts(); document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
+            renderContacts(); document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
 
             const chatId = generateChatId(myMobile, contactMobile);
             let msgs = []; const cachedRecord = await localDB.chatHistory.get(chatId);
@@ -533,8 +615,14 @@
             });
 
             if (currentChatUnsubscribe) currentChatUnsubscribe();
+            
+            // 🔥 Flicker Fix: Only clear msgBox on the VERY first load if no cache 🔥
+            let isFirstLoad = true;
             currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc'), limit(500)), (snapshot) => {
-                let cacheArray = []; if(!cachedChat) msgBox.innerHTML = ''; 
+                let cacheArray = []; 
+                if(!cachedChat && isFirstLoad) { msgBox.innerHTML = ''; }
+                isFirstLoad = false;
+                
                 snapshot.docChanges().forEach(change => {
                     const mData = change.doc.data(); mData.id = change.doc.id;
                     if (!mData.read && mData.senderMobile !== myMobile) updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true });
@@ -545,7 +633,6 @@
             });
         };
 
-        // --- Select, Reply, & Forward Logic ---
         window.initiateReply = (text, e) => { if(e) e.stopPropagation(); currentReplyContext = text; document.getElementById('reply-preview-text').innerText = text; document.getElementById('reply-preview-container').classList.remove('hidden'); document.getElementById('msg-input').focus(); closeAllMenus(); }
         window.cancelReply = () => { currentReplyContext = null; document.getElementById('reply-preview-container').classList.add('hidden'); }
 
@@ -560,7 +647,6 @@
         window.clearSelection = () => { selectedMsgs.forEach(id => { const el = document.getElementById(`msg-${id}`); if(el) el.classList.remove('msg-selected'); }); selectedMsgs.clear(); document.getElementById('selection-header').classList.add('hidden'); }
         window.deleteSelectedMsgs = () => { if(confirm(`Delete ${selectedMsgs.size} messages?`)) { const chatId = generateChatId(myMobile, activeContactMobile); selectedMsgs.forEach(id => { deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, id)); }); clearSelection(); } }
 
-        // 🔥 FORWARD FEATURE LOGIC 🔥
         window.openForwardModal = () => {
             if(selectedMsgs.size === 0) return;
             const list = document.getElementById('forward-contact-list'); list.innerHTML = '';
@@ -586,7 +672,6 @@
             forwardBtn.disabled = true; forwardBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Forwarding...';
 
             try {
-                // Fetch the selected messages
                 let msgsToForward = [];
                 for (let docId of selectedMsgs) {
                     const docSnap = await getDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${currentChatId}`, docId));
@@ -597,7 +682,6 @@
                     }
                 }
 
-                // Forward to each contact with Re-Encryption
                 for (let contactMobile of selectedContacts) {
                     const targetChatId = generateChatId(myMobile, contactMobile);
                     for (let msg of msgsToForward) {
@@ -638,7 +722,6 @@
         
         async function triggerOneSignalPush(receiverMobile, messageText) { try { const receiverRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', receiverMobile); const receiverSnap = await getDoc(receiverRef); if (receiverSnap.exists()) { const rData = receiverSnap.data(); if (rData.onesignal_id) { const restApiKey = "os_v2_app_kivtcnwbnvg6xbbdotnmhvsffzag6wdfng7ufmfb7dtdwn2k4nr43uy5xgi6zvzqfyttgujh3yhn4eghuttyixea2o7dopgljwgq3uq"; fetch("https://onesignal.com/api/v1/notifications", { method: "POST", headers: { "Content-Type": "application/json; charset=utf-8", "Authorization": "Basic " + restApiKey }, body: JSON.stringify({ app_id: "522b3136-c16d-4deb-8423-74dac3d6452e", include_player_ids: [rData.onesignal_id], contents: {"en": messageText}, headings: {"en": myName + " থেকে মেসেজ"}, priority: 10 }) }).catch(e => console.log("Push Error:", e)); } } } catch (error) {} }
 
-        // --- Sending Logic with E2EE & Reply ---
         chatForm.onsubmit = async (e) => {
             e.preventDefault(); const text = msgInput.value.trim(); if ((!text && !selectedFile) || !activeContactMobile) return;
             sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[22px] text-[#00a884]"></i>';
