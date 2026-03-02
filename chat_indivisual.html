@@ -1041,7 +1041,7 @@
             displayUsers.sort((a, b) => { return (latestMessages[b.mobile]?.timestamp || parseInt(b.lastActive) || 0) - (latestMessages[a.mobile]?.timestamp || parseInt(a.lastActive) || 0); });
 
             contactsContainer.innerHTML = '';
-            if (displayUsers.length === 0) return contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-[16px] mt-10 p-6">No chats found.</p>`;
+            if (displayUsers.length === 0) return contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-[16px] mt-10 p-6">Please wait for loading chats list.</p>`;
             
             displayUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile;
