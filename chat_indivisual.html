@@ -4,26 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>RasGram | Secure Messenger - Enhanced WhatsApp Experience</title>
-    <meta name="title" content="RasGram | Secure Messenger - Enhanced WhatsApp Experience">
-    <meta name="description" content="RasGram is a secure messaging platform by Rasel EduTools that overcomes common WhatsApp limitations. Enjoy seamless chatting, Rasel Messenger features, and Rasel WhatsApp style security in one place.">
+<meta name="title" content="RasGram | Secure Messenger - Enhanced WhatsApp Experience">
+<meta name="description" content="RasGram is a secure messaging platform by Rasel EduTools that overcomes common WhatsApp limitations. Enjoy seamless chatting, Rasel Messenger features, and Rasel WhatsApp style security in one place.">
 
-    <meta name="keywords" content="RasGram, Rasel Messenger, Rasel WhatsApp, Secure WhatsApp, WhatsApp Limitations Solver, Rasel EduTools, Secure Messenger, Chat Individual">
+<meta name="keywords" content="RasGram, Rasel Messenger, Rasel WhatsApp, Secure WhatsApp, WhatsApp Limitations Solver, Rasel EduTools, Secure Messenger, Chat Individual">
 
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://raseledutools.github.io/chat_indivisual.html">
-    <meta property="og:title" content="RasGram | Secure Messenger - Secure & Limitless Chatting">
-    <meta property="og:description" content="Experience the next level of messaging with RasGram. Built to provide a secure and flexible chat environment, overcoming traditional WhatsApp limits.">
-    <meta property="og:image" content="https://raseledutools.github.io/your-logo.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://raseledutools.github.io/chat_indivisual.html">
+<meta property="og:title" content="RasGram | Secure Messenger - Secure & Limitless Chatting">
+<meta property="og:description" content="Experience the next level of messaging with RasGram. Built to provide a secure and flexible chat environment, overcoming traditional WhatsApp limits.">
+<meta property="og:image" content="https://raseledutools.github.io/your-logo.png">
 
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://raseledutools.github.io/chat_indivisual.html">
-    <meta property="twitter:title" content="RasGram | Secure Messenger">
-    <meta property="twitter:description" content="Tired of WhatsApp limits? Try RasGram for a secure and powerful messaging experience.">
-    <meta property="twitter:image" content="https://raseledutools.github.io/your-logo.png">
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://raseledutools.github.io/chat_indivisual.html">
+<meta property="twitter:title" content="RasGram | Secure Messenger">
+<meta property="twitter:description" content="Tired of WhatsApp limits? Try RasGram for a secure and powerful messaging experience.">
+<meta property="twitter:image" content="https://raseledutools.github.io/your-logo.png">
 
-    <link rel="canonical" href="https://raseledutools.github.io/chat_indivisual.html">
+<link rel="canonical" href="https://raseledutools.github.io/chat_indivisual.html">
 
-    <meta name="author" content="Rasel EduTools">
+<meta name="author" content="Rasel EduTools">
     <meta name="theme-color" content="#111b21">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,7 +36,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -146,21 +145,13 @@
             background: #fff; cursor: pointer; box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
     </style>
-   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
-      appId: "522b3136-c16d-4deb-8423-74dac3d6452e", // এখানে আপনার App ID বসাবেন
-      safari_web_id: "আপনার_সাফারি_আইডি", // যদি থাকে
-      notifyButton: { enable: true },
+      appId: "522b3136-c16d-4deb-8423-74dac3d6452e", // আপনার আইডি সেট করা আছে
     });
-    
-    // ইউজারের আইডি সেট করা যাতে তাকে নির্দিষ্ট করে মেসেজ পাঠানো যায়
-    const userId = localStorage.getItem("myId"); // আপনার বর্তমান আইডি
-    if (userId) {
-      OneSignal.login(userId);
-    }
   });
 </script>
 </head>
@@ -187,7 +178,7 @@
             <form id="join-form" class="space-y-4">
                 <input type="text" id="reg-name" required autocomplete="off" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] transition-colors font-medium" placeholder="Your Name">
                 <input type="tel" id="reg-mobile" required autocomplete="off" pattern="[0-9]{11}" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] transition-colors font-medium tracking-widest" placeholder="Mobile Number (11 digits)">
-                <input type="password" id="reg-password" required autocomplete="off" minlength="4" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] transition-colors font-medium tracking-widest text-center text-lg" placeholder="PIN / Password">
+                <input type="password" id="reg-password" required autocomplete="off" minlength="6" maxlength="6" class="w-full bg-[#111b21] border border-[#222d34] rounded-lg p-3 text-white focus:outline-none focus:border-[#00a884] transition-colors font-medium tracking-widest text-center text-lg" placeholder="Create 6-digit Password">
                 
                 <button type="submit" id="join-btn" class="w-full bg-[#00a884] hover:bg-[#029071] py-3 rounded-lg text-[#111b21] font-bold uppercase tracking-wide transition-colors mt-4">Create & Login</button>
             </form>
@@ -343,7 +334,8 @@
 
                 <div id="contacts-list" class="flex-grow overflow-y-auto custom-scroll relative bg-[#111b21]" style="touch-action: pan-y;">
                     <div id="contacts-container">
-                        </div>
+                        <div class="text-center text-[#8696a0] p-6 text-sm"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+                    </div>
                 </div>
             </div>
 
@@ -509,13 +501,11 @@
             outbox: '++id, chatId, text, senderMobile, timestamp, timeString, fileUrl, fileName, fileType, reaction, read, isPending'
         });
 
-        // --- Security (Encryption for Logic only) ---
-        function hashPassword(password) { return CryptoJS.SHA256(password).toString(); }
-
         // --- Service Worker Register for PWA ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('Service Worker registered!', reg))
                 .catch(err => console.error('Service Worker failed!', err));
             });
         }
@@ -645,12 +635,10 @@
 
         const appStartTime = Date.now();
 
-        if (typeof setupWebRTC === 'function') {
-            setupWebRTC(
-                db, SYNC_APP_ID, 
-                () => myMobile, () => activeContactMobile, () => allUsers
-            );
-        }
+        setupWebRTC(
+            db, SYNC_APP_ID, 
+            () => myMobile, () => activeContactMobile, () => allUsers
+        );
 
         const joinModal = document.getElementById('join-modal');
         const unlockModal = document.getElementById('unlock-modal');
@@ -672,29 +660,21 @@
             const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        // 🔥 INSTANT LOAD FIX 🔥
         if (myName && myMobile && myPassword) {
-            joinModal.style.display = 'none'; // Instant hide
             startApp();
         } else {
             joinModal.classList.remove('hidden');
         }
 
-        // 🔥 BULLETPROOF NEW LOGIN SYSTEM 🔥
         document.getElementById('join-form').onsubmit = async (e) => {
             e.preventDefault();
             const n = document.getElementById('reg-name').value.trim(); 
             const m = document.getElementById('reg-mobile').value.trim();
             const p = document.getElementById('reg-password').value.trim();
             const joinBtn = document.getElementById('join-btn');
-            
-            const hashedPassword = hashPassword(p);
 
             if (n && m.length === 11 && p.length >= 4) {
-                const originalText = joinBtn.innerHTML; 
-                joinBtn.disabled = true; 
-                joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
-                
+                const originalText = joinBtn.innerHTML; joinBtn.disabled = true; joinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
                 try {
                     await signInAnonymously(auth);
                     const userRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', m);
@@ -702,44 +682,22 @@
                     
                     if (userSnap.exists()) {
                         const dbData = userSnap.data();
-                        
                         if (!dbData.password) {
-                            await updateDoc(userRef, { password: hashedPassword, name: n }); 
-                            myName = n;
-                        } 
-                        else if (dbData.password !== hashedPassword && dbData.password !== p) { 
-                            alert("ভুল পাসওয়ার্ড! দয়া করে সঠিক পিন দিন।"); 
-                            joinBtn.disabled = false; joinBtn.innerHTML = originalText; 
-                            return; 
+                            await updateDoc(userRef, { password: p, name: n }); 
+                        } else if (dbData.password !== p) { 
+                            alert("Wrong password for this mobile number."); 
+                            joinBtn.disabled = false; joinBtn.innerHTML = originalText; return; 
                         }
-                        else {
-                            if (dbData.password === p) {
-                                await updateDoc(userRef, { password: hashedPassword });
-                            }
-                            myName = dbData.name || n;
-                            if(dbData.avatarUrl) myAvatarUrl = dbData.avatarUrl;
-                        }
+                        if(dbData.avatarUrl) { myAvatarUrl = dbData.avatarUrl; localStorage.setItem('pvt_chat_avatar', myAvatarUrl); }
                     } else { 
-                        await setDoc(userRef, { name: n, mobile: m, password: hashedPassword, lastActive: Date.now(), typingTo: null, avatarUrl: '', statusVisible: true }); 
-                        myName = n;
+                        await setDoc(userRef, { name: n, mobile: m, password: p, lastActive: Date.now(), typingTo: null, avatarUrl: '', statusVisible: true }); 
                     }
                     
-                    myMobile = m; 
-                    myPassword = hashedPassword;
-                    
-                    localStorage.setItem('pvt_chat_name', myName); 
-                    localStorage.setItem('pvt_chat_mobile', myMobile); 
-                    localStorage.setItem('pvt_chat_password', myPassword);
-                    if(myAvatarUrl) localStorage.setItem('pvt_chat_avatar', myAvatarUrl);
-                    
-                    joinModal.classList.add('hidden'); 
-                    joinModal.style.display = 'none';
-                    startApp();
-                } catch (err) { 
-                    alert("Connection error! " + err.message); 
-                    joinBtn.disabled = false; joinBtn.innerHTML = originalText; 
-                }
-            } else alert("দয়া করে সঠিক তথ্য দিন।");
+                    myName = n; myMobile = m; myPassword = p;
+                    localStorage.setItem('pvt_chat_name', n); localStorage.setItem('pvt_chat_mobile', m); localStorage.setItem('pvt_chat_password', p);
+                    joinModal.classList.add('hidden'); startApp();
+                } catch (err) { alert("Connection error! " + err.message); joinBtn.disabled = false; joinBtn.innerHTML = originalText; }
+            } else alert("Please fill all details correctly.");
         };
 
         function sendPushNotification(title, body) {
@@ -808,7 +766,7 @@
         window.createGroup = () => {
             const name = document.getElementById('group-name').value.trim(); const selected = Array.from(document.querySelectorAll('.group-checkbox:checked')).map(cb => cb.value);
             if(!name || selected.length === 0) return alert("Enter group name and select at least 1 contact.");
-            alert(`Group '${name}' created successfully!`); closeGroupModal();
+            alert(`Group '${name}' created successfully with ${selected.length} members!`); closeGroupModal();
         }
 
         window.openLockedChats = () => {
@@ -950,22 +908,20 @@
             isRecording = false; document.getElementById('recording-ui').classList.add('hidden'); msgInput.parentElement.classList.remove('hidden'); micBtn.classList.remove('hidden');
         }
 
-        // 🔥 APP START LOGIC 🔥
+        function generateChatId(mob1, mob2) { return mob1 < mob2 ? `${mob1}_${mob2}` : `${mob2}_${mob1}`; }
+
         async function startApp() {
             if ("Notification" in window && Notification.permission === "default") {
                 Notification.requestPermission();
             }
 
-            appContainer.classList.remove('hidden'); appContainer.classList.add('flex'); 
-            document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
+            appContainer.classList.remove('hidden'); appContainer.classList.add('flex'); document.getElementById('my-avatar').src = getAvatarUrl(myName, myAvatarUrl);
             updateStatusUI();
 
             const cachedUsers = localStorage.getItem('cached_users');
             if (cachedUsers) allUsers = JSON.parse(cachedUsers);
             const cachedMsgs = localStorage.getItem('cached_latest_msgs');
             if (cachedMsgs) latestMessages = JSON.parse(cachedMsgs);
-            
-            // 🔥 Instantly Render Chat List if cache exists 🔥
             if(allUsers.length > 0) renderContacts();
 
             try {
@@ -977,31 +933,11 @@
                     if(d.name && d.name !== myName) { myName = d.name; localStorage.setItem('pvt_chat_name', myName); }
                 }
                 const updateMyStatus = async () => { await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { name: myName, mobile: myMobile, lastActive: Date.now(), statusVisible: isStatusVisible }, { merge: true }); };
-                updateMyStatus(); activeTrackingInterval = setInterval(updateMyStatus, 60000); 
-                
-                // Fetch real-time data
-                listenForUsers();
-
+                updateMyStatus(); activeTrackingInterval = setInterval(updateMyStatus, 60000); listenForUsers();
                 if(window.listenForIncomingCallsWebRTC) window.listenForIncomingCallsWebRTC();
-
-                // OneSignal Setup
-                window.OneSignalDeferred.push(async function(OneSignal) {
-                    OneSignal.User.PushSubscription.addEventListener("change", async (event) => {
-                        const oneSignalUserId = event.current.id;
-                        if (oneSignalUserId && myMobile) {
-                            await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { onesignal_id: oneSignalUserId }, { merge: true });
-                        }
-                    });
-                    const currentId = OneSignal.User.PushSubscription.id;
-                    if (currentId && myMobile) {
-                        await setDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', myMobile), { onesignal_id: currentId }, { merge: true });
-                    }
-                });
-
             } catch (err) {}
         }
 
-        // 🔥 ORIGINAL CHAT LIST RENDER LOGIC (No Spinner) 🔥
         function listenForUsers() {
             onSnapshot(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users'), (snapshot) => {
                 allUsers = [];
@@ -1041,7 +977,7 @@
             displayUsers.sort((a, b) => { return (latestMessages[b.mobile]?.timestamp || parseInt(b.lastActive) || 0) - (latestMessages[a.mobile]?.timestamp || parseInt(a.lastActive) || 0); });
 
             contactsContainer.innerHTML = '';
-            if (displayUsers.length === 0) return contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-[16px] mt-10 p-6">Please wait for loading chats list.</p>`;
+            if (displayUsers.length === 0) return contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-[16px] mt-10 p-6">No chats found.</p>`;
             
             displayUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile;
@@ -1107,8 +1043,6 @@
             });
         }
 
-        searchInput.addEventListener('input', renderContacts);
-
         function closeChatLogic() {
             document.getElementById('sidebar').classList.remove('hidden'); document.getElementById('sidebar').classList.add('flex');
             if (window.innerWidth < 768) {
@@ -1144,6 +1078,7 @@
 
             const chatId = generateChatId(myMobile, contactMobile);
             
+            // --- Dexie.js (অফলাইন থেকে চ্যাট লোড করা) ---
             let msgs = [];
             const cachedRecord = await localDB.chatHistory.get(chatId);
             if(cachedRecord && cachedRecord.messages) {
@@ -1187,6 +1122,7 @@
                     }
                 });
 
+                // --- Dexie.js (অফলাইনের জন্য নতুন মেসেজ সেভ করা) ---
                 snapshot.docs.forEach(doc => { let d = doc.data(); d.id = doc.id; cacheArray.push(d); });
                 localDB.chatHistory.put({ chatId: chatId, messages: cacheArray });
 
@@ -1211,33 +1147,7 @@
             });
         }
 
-        async function triggerOneSignalPush(receiverMobile, messageText) {
-            try {
-                const receiverRef = doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'chat_users', receiverMobile);
-                const receiverSnap = await getDoc(receiverRef);
-                if (receiverSnap.exists()) {
-                    const rData = receiverSnap.data();
-                    if (rData.onesignal_id) {
-                        const restApiKey = "os_v2_app_kivtcnwbnvg6xbbdotnmhvsffzag6wdfng7ufmfb7dtdwn2k4nr43uy5xgi6zvzqfyttgujh3yhn4eghuttyixea2o7dopgljwgq3uq";
-                        fetch("https://onesignal.com/api/v1/notifications", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json; charset=utf-8",
-                                "Authorization": "Basic " + restApiKey
-                            },
-                            body: JSON.stringify({
-                                app_id: "522b3136-c16d-4deb-8423-74dac3d6452e",
-                                include_player_ids: [rData.onesignal_id],
-                                contents: {"en": messageText},
-                                headings: {"en": myName + " থেকে মেসেজ"},
-                                priority: 10
-                            })
-                        }).catch(e => console.log("Push Error:", e));
-                    }
-                }
-            } catch (error) {}
-        }
-
+        // --- Offline Send System Updated ---
         chatForm.onsubmit = async (e) => {
             e.preventDefault(); const text = msgInput.value.trim(); if ((!text && !selectedFile) || !activeContactMobile) return;
             sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[22px] text-[#00a884]"></i>';
@@ -1262,12 +1172,12 @@
 
                 if (navigator.onLine) {
                     await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), msgData);
-                    let pushText = msgData.text ? msgData.text : (msgData.fileUrl ? "একটি ফাইল পাঠিয়েছে" : "নতুন মেসেজ");
-                    triggerOneSignalPush(activeContactMobile, pushText);
                 } else {
+                    // নেট না থাকলে Dexie.js এর Outbox এ জমা হবে
                     msgData.chatId = chatId;
                     msgData.isPending = true;
                     await localDB.outbox.add(msgData);
+                    
                     const tempId = 'temp_' + Date.now();
                     msgData.id = tempId;
                     msgBox.appendChild(createMessageElement(tempId, msgData, document.getElementById('active-chat-name').innerText));
@@ -1275,7 +1185,7 @@
                 }
 
                 msgInput.value = ''; clearFile(); msgInput.style.height = '24px'; toggleInputButtons(); localStorage.setItem(`read_${activeContactMobile}`, Date.now()); msgInput.focus();
-            } catch (error) {} 
+            } catch (error) { console.error("Message failed:", error); } 
             finally { sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane text-[22px] ml-1"></i>'; sendBtn.disabled = msgInput.value.trim() === '' && !selectedFile; }
         };
 
@@ -1313,6 +1223,7 @@
             let reactionBadge = data.reaction ? `<div class="absolute -bottom-4 ${isMe ? 'right-2' : 'left-2'} bg-[#202c33] border border-[#222d34] rounded-full px-2.5 py-0.5 text-[14px] shadow-sm z-10 hover:bg-[#2a3942] transition-colors" onclick="removeReaction('${docId}', event)" title="Remove reaction">${data.reaction}</div>` : '';
             let popupMenu = `<div id="react-menu-${docId}" class="reaction-menu-popup hidden absolute ${isMe ? 'right-0' : 'left-0'} -top-14 bg-[#233138] border border-[#222d34] rounded-full flex items-center gap-2 px-3 py-1.5 shadow-xl z-[60] min-w-max"><button onclick="addReaction('${docId}', '👍', event)" class="hover:scale-125 transition-all text-2xl">👍</button><button onclick="addReaction('${docId}', '❤️', event)" class="hover:scale-125 transition-all text-2xl">❤️</button><button onclick="addReaction('${docId}', '😂', event)" class="hover:scale-125 transition-all text-2xl">😂</button><button onclick="addReaction('${docId}', '😢', event)" class="hover:scale-125 transition-all text-2xl">😢</button>${isMe ? `<div class="w-[1px] h-6 bg-[#374045] mx-1"></div><button onclick="deleteMsg('${docId}', event)" class="hover:scale-125 transition-all text-[#f15c6d] text-xl"><i class="fa-solid fa-trash"></i></button>` : ''}</div>`;
             
+            // --- Clock icon for pending messages ---
             let tickColor = data.read ? "text-[#53bdeb]" : "text-[#8696a0]"; 
             let ticksHtml = isMe ? (data.isPending ? `<i class="fa-regular fa-clock text-[12px] text-[#8696a0] ml-1"></i>` : `<i class="fa-solid fa-check-double text-[12px] ${tickColor} ml-1"></i>`) : '';
             
@@ -1321,30 +1232,40 @@
         }
         function escapeHTML(str) { return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)); }
 
+        // --- Offline Message Auto-Sync System ---
         async function processOutboxMsgs() {
-            if (!navigator.onLine) return; 
+            if (!navigator.onLine) return; // নেট না থাকলে রিটার্ন করবে
+            
             try {
                 const pendingMsgs = await localDB.outbox.toArray();
-                if (pendingMsgs.length === 0) return; 
+                if (pendingMsgs.length === 0) return; // পেন্ডিং মেসেজ না থাকলে কিছু করবে না
 
+                console.log(`${pendingMsgs.length} টি পেন্ডিং মেসেজ সেন্ড হচ্ছে...`);
+                
                 for (const msg of pendingMsgs) {
                     const outboxId = msg.id;
                     const targetChatId = msg.chatId;
 
+                    // লোকাল ডেটাগুলো মুছে ফেলি ফায়ারবেসে পাঠানোর আগে
                     delete msg.id;
                     delete msg.chatId;
                     delete msg.isPending;
 
                     await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${targetChatId}`), msg);
-                    await localDB.outbox.delete(outboxId); 
+                    await localDB.outbox.delete(outboxId); // সেন্ড সফল হলে Outbox থেকে ডিলিট
+                    console.log("পেন্ডিং মেসেজ সফলভাবে সেন্ড হয়েছে!");
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error("পেন্ডিং মেসেজ সেন্ড হতে ব্যর্থ:", e);
+            }
         }
 
+        // যখনই ইন্টারনেট কানেকশন ফিরে আসবে, এই ইভেন্ট কল হবে
         window.addEventListener('online', () => {
             processOutboxMsgs();
         });
 
+        // অ্যাপ চালু হওয়ার সময় একবার চেক করে নেবে কোনো পেন্ডিং মেসেজ আছে কি না
         window.addEventListener('load', () => {
             setTimeout(processOutboxMsgs, 3000); 
         });
