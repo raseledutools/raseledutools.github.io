@@ -150,7 +150,7 @@
   window.OneSignalDeferred = window.OneSignalDeferred || [];
   OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
-      appId: "522b3136-c16d-4deb-8423-74dac3d6452e", // আপনার আইডি সেট করা আছে
+      appId: "522b3136-c16d-4deb-8423-74dac3d6452e", 
     });
   });
 </script>
@@ -313,7 +313,7 @@
                 <div class="px-2 pb-2 border-b border-[#222d34] bg-[#111b21] shrink-0">
                     <div class="bg-[#202c33] rounded-full flex items-center px-4 py-1.5 focus-within:bg-[#111b21] border border-transparent focus-within:border-[#00a884]/50 transition-colors">
                         <i class="fa-solid fa-magnifying-glass text-[#8696a0] text-[15px]"></i>
-                        <input type="text" id="search-input" placeholder="Search or start new chat" class="bg-transparent border-none outline-none text-white text-[16px] w-full ml-4 placeholder-[#8696a0] font-medium py-1">
+                        <input type="text" id="search-input" placeholder="Search or start new chat" class="bg-transparent border-none outline-none text-white text-[16px] w-full ml-4 placeholder-[#8696a0] font-medium py-1" oninput="renderContacts()">
                     </div>
                 </div>
 
@@ -501,7 +501,6 @@
             outbox: '++id, chatId, text, senderMobile, timestamp, timeString, fileUrl, fileName, fileType, reaction, read, isPending'
         });
 
-        // --- Service Worker Register for PWA ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -783,8 +782,8 @@
         }
         window.closePinModal = () => document.getElementById('pin-modal').classList.add('hidden');
 
-        function enterLockedView() { isViewingLocked = true; document.getElementById('locked-header-bar').classList.remove('hidden'); document.getElementById('locked-indicator').classList.add('hidden'); renderContacts(); }
-        window.closeLockedChats = () => { isViewingLocked = false; document.getElementById('locked-header-bar').classList.add('hidden'); renderContacts(); closeChatMobile(); }
+        function enterLockedView() { isViewingLocked = true; document.getElementById('locked-header-bar').classList.remove('hidden'); document.getElementById('locked-indicator').classList.add('hidden'); requestRenderContacts(); }
+        window.closeLockedChats = () => { isViewingLocked = false; document.getElementById('locked-header-bar').classList.add('hidden'); requestRenderContacts(); closeChatMobile(); }
 
         window.openAddLockModal = () => {
             const list = document.getElementById('unlocked-contact-list'); list.innerHTML = ''; const unlockedUsers = allUsers.filter(u => !lockedContacts.includes(u.mobile));
@@ -801,14 +800,14 @@
             document.getElementById('add-lock-modal').classList.remove('hidden');
         }
         window.closeAddLockModal = () => document.getElementById('add-lock-modal').classList.add('hidden');
-        window.addSelectedToLock = () => { const selected = Array.from(document.querySelectorAll('.lock-checkbox:checked')).map(cb => cb.value); if(selected.length > 0) { lockedContacts.push(...selected); localStorage.setItem('locked_contacts', JSON.stringify(lockedContacts)); renderContacts(); } closeAddLockModal(); }
+        window.addSelectedToLock = () => { const selected = Array.from(document.querySelectorAll('.lock-checkbox:checked')).map(cb => cb.value); if(selected.length > 0) { lockedContacts.push(...selected); localStorage.setItem('locked_contacts', JSON.stringify(lockedContacts)); requestRenderContacts(); } closeAddLockModal(); }
 
         window.toggleLockContact = (mobile, e) => {
             if(e) e.stopPropagation(); closeAllMenus();
             if(!userPin) { userPin = prompt("Set a 4-digit PIN first to lock chats:"); if(userPin && userPin.length >= 4) { localStorage.setItem('nexus_pin', userPin); } else { return; } }
             if(lockedContacts.includes(mobile)) lockedContacts = lockedContacts.filter(m => m !== mobile); else lockedContacts.push(mobile);
             localStorage.setItem('locked_contacts', JSON.stringify(lockedContacts));
-            if (activeContactMobile === mobile) { if ((!isViewingLocked && lockedContacts.includes(mobile)) || (isViewingLocked && !lockedContacts.includes(mobile))) closeChatMobile(); else renderContacts(); } else renderContacts();
+            if (activeContactMobile === mobile) { if ((!isViewingLocked && lockedContacts.includes(mobile)) || (isViewingLocked && !lockedContacts.includes(mobile))) closeChatMobile(); else requestRenderContacts(); } else requestRenderContacts();
         }
         window.toggleLockCurrentChat = (e) => toggleLockContact(activeContactMobile, e);
 
@@ -922,7 +921,7 @@
             if (cachedUsers) allUsers = JSON.parse(cachedUsers);
             const cachedMsgs = localStorage.getItem('cached_latest_msgs');
             if (cachedMsgs) latestMessages = JSON.parse(cachedMsgs);
-            if(allUsers.length > 0) renderContacts();
+            if(allUsers.length > 0) requestRenderContacts();
 
             try {
                 await signInAnonymously(auth);
@@ -943,8 +942,16 @@
                 allUsers = [];
                 snapshot.forEach(doc => { const data = doc.data(); if (data.mobile !== myMobile) { allUsers.push(data); setupLastMessageListener(data.mobile); } });
                 localStorage.setItem('cached_users', JSON.stringify(allUsers));
-                renderContacts();
+                requestRenderContacts();
             });
+        }
+
+        // --- Optimized Debounced Rendering ---
+        let renderTimeout = null;
+        window.renderContacts = renderContacts; // For the search input oninput
+        function requestRenderContacts() {
+            if(renderTimeout) clearTimeout(renderTimeout);
+            renderTimeout = setTimeout(renderContacts, 150);
         }
 
         function setupLastMessageListener(contactMobile) {
@@ -963,7 +970,7 @@
                     latestMessages[contactMobile] = newLatest;
                 } else latestMessages[contactMobile] = null;
                 localStorage.setItem('cached_latest_msgs', JSON.stringify(latestMessages));
-                renderContacts();
+                requestRenderContacts();
             });
         }
 
@@ -979,6 +986,8 @@
             contactsContainer.innerHTML = '';
             if (displayUsers.length === 0) return contactsContainer.innerHTML = `<p class="text-center text-[#8696a0] text-[16px] mt-10 p-6">No chats found.</p>`;
             
+            const fragment = document.createDocumentFragment(); // Using DocumentFragment for performance
+
             displayUsers.forEach(user => {
                 const isActive = activeContactMobile === user.mobile;
                 const activeClass = isActive ? 'contact-active' : 'hover:bg-[#202c33]';
@@ -1039,8 +1048,10 @@
                         </div>
                     </div>
                 `;
-                contactsContainer.appendChild(div);
+                fragment.appendChild(div);
             });
+            
+            contactsContainer.appendChild(fragment); // DOM hit only once
         }
 
         function closeChatLogic() {
@@ -1049,7 +1060,7 @@
                 document.getElementById('chat-area').classList.remove('flex'); document.getElementById('chat-area').classList.add('hidden');
                 if (window.location.hash === '#chat') history.replaceState(null, null, ' '); 
             } else document.getElementById('empty-chat-state').classList.remove('hidden');
-            activeContactMobile = null; renderContacts();
+            activeContactMobile = null; requestRenderContacts();
             if(currentChatUnsubscribe) currentChatUnsubscribe(); if(userStatusUnsubscribe) userStatusUnsubscribe(); closeAllMenus();
         }
         
@@ -1074,7 +1085,7 @@
             } else { chatArea.classList.remove('hidden'); chatArea.classList.add('flex'); }
 
             msgBox.classList.remove('fade-in-anim'); void msgBox.offsetWidth; msgBox.classList.add('fade-in-anim');
-            renderContacts(); document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
+            requestRenderContacts(); document.querySelectorAll('.pvt-msg').forEach(e => e.remove());
 
             const chatId = generateChatId(myMobile, contactMobile);
             
@@ -1083,7 +1094,9 @@
             const cachedRecord = await localDB.chatHistory.get(chatId);
             if(cachedRecord && cachedRecord.messages) {
                  msgs = cachedRecord.messages;
-                 msgs.forEach(mData => msgBox.appendChild(createMessageElement(mData.id, mData, contactName)));
+                 const msgFragment = document.createDocumentFragment();
+                 msgs.forEach(mData => msgFragment.appendChild(createMessageElement(mData.id, mData, contactName)));
+                 msgBox.appendChild(msgFragment);
                  msgBox.scrollTop = msgBox.scrollHeight;
             }
             const cachedChat = msgs.length > 0;
@@ -1104,10 +1117,12 @@
             });
 
             if (currentChatUnsubscribe) currentChatUnsubscribe();
-            currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc'), limit(500)), (snapshot) => {
+            currentChatUnsubscribe = onSnapshot(query(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`), orderBy('timestamp', 'asc'), limit(100)), (snapshot) => { // Changed 500 to 100 for fast load
                 let cacheArray = [];
                 if(!cachedChat) msgBox.innerHTML = ''; 
-
+                
+                const newMsgsFragment = document.createDocumentFragment(); // Added Fragment for real-time load
+                
                 snapshot.docChanges().forEach(change => {
                     const mData = change.doc.data(); mData.id = change.doc.id;
                     if (!mData.read && mData.senderMobile !== myMobile) updateDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${chatId}`, change.doc.id), { read: true });
@@ -1118,15 +1133,17 @@
                         else if(change.type === "modified" && oldNode) oldNode.replaceWith(createMessageElement(change.doc.id, mData, contactName));
                         else if(change.type === "removed" && oldNode) oldNode.remove();
                     } else {
-                        msgBox.appendChild(createMessageElement(change.doc.id, mData, contactName));
+                        newMsgsFragment.appendChild(createMessageElement(change.doc.id, mData, contactName));
                     }
                 });
+                
+                if(!cachedChat) msgBox.appendChild(newMsgsFragment);
 
                 // --- Dexie.js (অফলাইনের জন্য নতুন মেসেজ সেভ করা) ---
                 snapshot.docs.forEach(doc => { let d = doc.data(); d.id = doc.id; cacheArray.push(d); });
                 localDB.chatHistory.put({ chatId: chatId, messages: cacheArray });
 
-                localStorage.setItem(`read_${activeContactMobile}`, Date.now()); renderContacts(); setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 100);
+                localStorage.setItem(`read_${activeContactMobile}`, Date.now()); requestRenderContacts(); setTimeout(() => msgBox.scrollTop = msgBox.scrollHeight, 100);
             });
         };
 
@@ -1163,7 +1180,7 @@
             try {
                 if (selectedFile) { 
                     if(!navigator.onLine) {
-                        alert("অফলাইনে ফাইল বা ছবি সেন্ড করা যাবে না। দয়া করে নেট কানেকশন চালু করুন।");
+                        alert("অফলাইনে ফাইল বা ছবি সেন্ড করা যাবে না। দয়া করে নেট কানেকশন চালু করুন।");
                         throw new Error("Offline file upload blocked");
                     }
                     const uploadResult = await uploadFileWithProgress(selectedFile); 
@@ -1246,14 +1263,14 @@
                     const outboxId = msg.id;
                     const targetChatId = msg.chatId;
 
-                    // লোকাল ডেটাগুলো মুছে ফেলি ফায়ারবেসে পাঠানোর আগে
+                    // লোকাল ডেটাগুলো মুছে ফেলি ফায়ারবেসে পাঠানোর আগে
                     delete msg.id;
                     delete msg.chatId;
                     delete msg.isPending;
 
                     await addDoc(collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', `pvt_msg_${targetChatId}`), msg);
                     await localDB.outbox.delete(outboxId); // সেন্ড সফল হলে Outbox থেকে ডিলিট
-                    console.log("পেন্ডিং মেসেজ সফলভাবে সেন্ড হয়েছে!");
+                    console.log("পেন্ডিং মেসেজ সফলভাবে সেন্ড হয়েছে!");
                 }
             } catch (e) {
                 console.error("পেন্ডিং মেসেজ সেন্ড হতে ব্যর্থ:", e);
@@ -1265,7 +1282,7 @@
             processOutboxMsgs();
         });
 
-        // অ্যাপ চালু হওয়ার সময় একবার চেক করে নেবে কোনো পেন্ডিং মেসেজ আছে কি না
+        // অ্যাপ চালু হওয়ার সময় একবার চেক করে নেবে কোনো পেন্ডিং মেসেজ আছে কি না
         window.addEventListener('load', () => {
             setTimeout(processOutboxMsgs, 3000); 
         });
