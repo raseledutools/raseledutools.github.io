@@ -171,15 +171,22 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Offline Service Worker Setup ---
         const swCode = `
-            const CACHE_NAME = 'psc-portal-offline-v1';
+            const CACHE_NAME = 'psc-portal-offline-v2';
             self.addEventListener('install', e => {
                 e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['/'])));
             });
             self.addEventListener('fetch', e => {
+                const url = new URL(e.request.url);
+                
+                // ফায়ারবেস এবং ক্লাউডিনারি রিকোয়েস্ট সার্ভিস ওয়ার্কার থেকে বাইপাস করা হলো (কারণ ফায়ারবেস নিজেই অফলাইন ডাটা সেভ রাখে)
+                if (url.hostname.includes('googleapis.com') || url.hostname.includes('firebase') || url.hostname.includes('cloudinary')) {
+                    return;
+                }
+
                 e.respondWith(
                     caches.match(e.request).then(res => {
                         return res || fetch(e.request).then(fetchRes => {
@@ -263,7 +270,11 @@
         // Firebase Init
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        
+        // ফায়ারবেসের অফলাইন ডাটাবেস (IndexedDB) চালু করা হলো, এখন অফলাইনেও ডাটা দেখা যাবে
+        const db = initializeFirestore(app, {
+            localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+        });
 
         // UI Elements
         const navTabs = document.getElementById('nav-tabs');
