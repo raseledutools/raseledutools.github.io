@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSC Preparation Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for UI and Bengali Text -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: #f0f4f8; 
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .bengali-text { font-family: 'Noto Serif Bengali', serif; }
+        
+        /* Glassmorphism Navbar */
+        .glass-nav { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(12px); 
+            border-bottom: 1px solid rgba(255,255,255,0.3); 
+        }
+        
+        /* Modern Tabs */
+        .tab-btn { position: relative; transition: all 0.3s ease; }
+        .tab-btn:hover { color: #2563eb; }
+        .tab-btn.active { color: #2563eb; font-weight: 600; }
+        .tab-btn.active::after { 
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; 
+            height: 3px; background-color: #2563eb; border-radius: 3px 3px 0 0; 
+        }
+
+        /* Eye Friendly Book Reader */
+        .modal { transition: opacity 0.4s ease; }
+        .book-reader { 
+            background-color: #fcf5e5; /* Eye-friendly paper color */
+            color: #2c2820; 
+            background-image: linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px); /* Subtle book fold line */
+        }
+        .book-title { 
+            color: #8b0000; /* Deep red for title */
+            border-bottom: 2px dashed #d3c3a5; 
+            padding-bottom: 15px; 
+            margin-bottom: 25px;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+        }
+        #reader-content p { margin-bottom: 1.5rem; line-height: 1.85; }
+
+        /* Loader */
+        .spinner { border: 4px solid rgba(0,0,0,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: #3b82f6; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="glass-nav shadow-sm z-10 sticky top-0">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center gap-2">
+                    <i class="fa-solid fa-book-open-reader text-blue-600"></i> PSC Portal
+                </div>
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-500 hover:text-blue-600 focus:outline-none transition">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div id="nav-tabs" class="hidden md:flex flex-wrap space-x-2 md:space-x-6 overflow-x-auto pb-0">
+                <!-- Tabs will be generated here by JS -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow p-4 md:p-8 overflow-y-auto w-full max-w-7xl mx-auto" id="main-content">
+        <div class="flex justify-center items-center h-full" id="global-loader">
+            <div class="spinner"></div>
+            <span class="ml-4 text-lg font-medium text-gray-500">ডাটা লোড হচ্ছে...</span>
+        </div>
+    </main>
+
+    <!-- Reader Modal (Interactive Book UI) -->
+    <div id="reader-modal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 hidden flex flex-col opacity-0 backdrop-blur-sm">
+        <div class="bg-white w-full h-full md:w-4/5 md:h-[90%] md:m-auto md:rounded-xl shadow-2xl flex flex-col overflow-hidden transform transition-transform duration-300 scale-95" id="reader-container">
+            
+            <!-- Modal Header (Toolbar) -->
+            <div class="bg-gradient-to-r from-gray-800 to-gray-900 text-white p-3 md:p-4 flex justify-between items-center shrink-0 shadow-md">
+                <div class="flex items-center gap-2 text-gray-300">
+                    <i class="fa-solid fa-glasses"></i> <span class="hidden md:inline text-sm font-medium tracking-wide">রিডিং মুড</span>
+                </div>
+                
+                <div class="flex items-center gap-2 md:gap-4">
+                    <!-- Zoom Controls -->
+                    <div class="bg-gray-700 rounded-lg flex items-center px-1 py-1 shadow-inner border border-gray-600">
+                        <button onclick="zoomText(-1)" class="w-8 h-8 rounded-md hover:bg-gray-600 flex justify-center items-center text-xl transition" title="Zoom Out"><i class="fa-solid fa-minus text-sm"></i></button>
+                        <span class="px-3 text-sm font-bold text-gray-300 select-none" id="zoom-level">100%</span>
+                        <button onclick="zoomText(1)" class="w-8 h-8 rounded-md hover:bg-gray-600 flex justify-center items-center text-xl transition" title="Zoom In"><i class="fa-solid fa-plus text-sm"></i></button>
+                    </div>
+
+                    <a id="reader-pdf-btn" href="#" target="_blank" class="hidden bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-500 text-sm font-semibold transition flex items-center gap-2">
+                        <i class="fa-solid fa-file-pdf"></i> <span class="hidden md:inline">PDF</span>
+                    </a>
+                    <button onclick="closeReader()" class="w-10 h-10 rounded-lg bg-gray-700 hover:bg-red-500 hover:text-white transition text-xl flex justify-center items-center">&times;</button>
+                </div>
+            </div>
+
+            <!-- Modal Body (The Book Page) -->
+            <div class="p-6 md:p-12 overflow-y-auto flex-grow book-reader shadow-inner relative" id="reader-wrapper">
+                <!-- Book content -->
+                <div class="max-w-3xl mx-auto">
+                    <h1 id="reader-title" class="text-3xl md:text-4xl font-bold book-title bengali-text text-center leading-snug">Title</h1>
+                    <div id="reader-content" class="text-lg md:text-xl font-medium bengali-text transition-all duration-300 text-justify">
+                        <!-- Text content goes here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configurations
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+            authDomain: "mywebtools-f8d53.firebaseapp.com",
+            projectId: "mywebtools-f8d53",
+            storageBucket: "mywebtools-f8d53.firebasestorage.app",
+            messagingSenderId: "979594414301",
+            appId: "1:979594414301:web:7048c995e56e331a85f334"
+        };
+        const SYNC_APP_ID = "rasel-mia-universal-sync";
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/de2w78yxh/auto/upload";
+        const CLOUDINARY_PRESET = "ml_default";
+
+        // Categories Translated to Bengali & Beautiful Icons
+        const categories = {
+            bangla: {
+                label: "বাংলা", icon: "fa-language",
+                subs: ["প্রবন্ধ", "ভাব সম্প্রসারণ", "পত্র ও দরখাস্ত", "সারাংশ ও সারমর্ম", "অনুবাদ", "ব্যাকরণ"]
+            },
+            english: {
+                label: "English", icon: "fa-a",
+                subs: ["Essay", "Letter & Application", "Passage", "Grammar", "Paragraph"]
+            },
+            bd_affairs: { label: "বাংলাদেশ বিষয়াবলি", icon: "fa-map-location-dot", subs: ["সাধারণ জ্ঞান", "ইতিহাস", "ভূগোল"] },
+            int_affairs: { label: "আন্তর্জাতিক বিষয়াবলি", icon: "fa-earth-americas", subs: ["সাধারণ জ্ঞান", "সংস্থা ও চুক্তি"] },
+            science_ict: { label: "বিজ্ঞান ও প্রযুক্তি", icon: "fa-microchip", subs: ["সাধারণ বিজ্ঞান", "কম্পিউটার ও তথ্যপ্রযুক্তি"] },
+            eee: { label: "EEE ডিপার্টমেন্ট", icon: "fa-bolt", subs: ["Electrical", "Electronics", "Telecommunication"] }
+        };
+
+        // State
+        let currentTab = 'bangla';
+        let currentSub = '';
+        let allData = [];
+        let userAuth = null;
+        let isAdminLoggedIn = false;
+
+        // Firebase Init
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // UI Elements
+        const navTabs = document.getElementById('nav-tabs');
+        const mainContent = document.getElementById('main-content');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+
+        // Mobile menu toggle
+        mobileMenuBtn.addEventListener('click', () => {
+            navTabs.classList.toggle('hidden');
+        });
+
+        // Initialize App
+        async function init() {
+            try {
+                await signInAnonymously(auth);
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userAuth = user;
+                        fetchData();
+                        renderNavigation();
+                    }
+                });
+            } catch (error) {
+                console.error("Auth error:", error);
+                mainContent.innerHTML = `<div class="text-red-500 text-center mt-10">Authentication failed. Please check internet connection.</div>`;
+            }
+        }
+
+        // Fetch Data from Firestore
+        function fetchData() {
+            if (!userAuth) return;
+            const dataRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'psc_materials');
+            
+            onSnapshot(dataRef, (snapshot) => {
+                allData = [];
+                snapshot.forEach((doc) => {
+                    allData.push({ id: doc.id, ...doc.data() });
+                });
+                allData.sort((a, b) => {
+                    const timeA = a.createdAt?.toMillis() || 0;
+                    const timeB = b.createdAt?.toMillis() || 0;
+                    return timeB - timeA;
+                });
+                renderContent();
+            }, (error) => {
+                console.error("Data fetch error:", error);
+            });
+        }
+
+        // Render Top Navigation
+        function renderNavigation() {
+            navTabs.innerHTML = '';
+            
+            Object.keys(categories).forEach(catKey => {
+                const btn = document.createElement('button');
+                btn.className = `tab-btn py-4 px-4 text-sm md:text-base whitespace-nowrap focus:outline-none flex items-center gap-2 ${currentTab === catKey ? 'active' : 'text-gray-500'}`;
+                btn.innerHTML = `<i class="fa-solid ${categories[catKey].icon}"></i> <span class="${catKey !== 'english' ? 'bengali-text font-medium' : ''}">${categories[catKey].label}</span>`;
+                btn.onclick = () => {
+                    currentTab = catKey;
+                    currentSub = ''; 
+                    renderNavigation();
+                    renderContent();
+                    if(window.innerWidth < 768) navTabs.classList.add('hidden');
+                };
+                navTabs.appendChild(btn);
+            });
+
+            // Admin Tab
+            const adminBtn = document.createElement('button');
+            adminBtn.className = `tab-btn py-4 px-4 text-sm md:text-base whitespace-nowrap focus:outline-none text-red-500 hover:text-red-700 flex items-center gap-2 ${currentTab === 'admin' ? 'active !text-red-700' : ''}`;
+            adminBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> <span>অ্যাডমিন</span>';
+            adminBtn.onclick = () => {
+                currentTab = 'admin';
+                currentSub = '';
+                renderNavigation();
+                renderContent();
+                if(window.innerWidth < 768) navTabs.classList.add('hidden');
+            };
+            navTabs.appendChild(adminBtn);
+        }
+
+        // Main Content Router
+        function renderContent() {
+            mainContent.innerHTML = ''; 
+
+            if (currentTab === 'admin') {
+                if(isAdminLoggedIn) {
+                    renderAdminPanel();
+                } else {
+                    renderAdminLogin();
+                }
+                return;
+            }
+
+            const catData = categories[currentTab];
+            const isBengali = currentTab !== 'english';
+            
+            // Header
+            const header = document.createElement('h1');
+            header.className = `text-3xl md:text-4xl font-bold mb-8 text-gray-800 border-b-2 border-indigo-100 pb-3 flex items-center gap-3 ${isBengali ? 'bengali-text' : ''}`;
+            header.innerHTML = `<i class="fa-solid ${catData.icon} text-indigo-500"></i> ${catData.label}`;
+            mainContent.appendChild(header);
+
+            // Subcategories Grid
+            if (currentSub === '') {
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
+                
+                catData.subs.forEach(sub => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer flex flex-col justify-between group transform hover:-translate-y-1 relative overflow-hidden';
+                    card.onclick = () => { currentSub = sub; renderContent(); };
+                    
+                    // Decorative background shape
+                    const deco = document.createElement('div');
+                    deco.className = 'absolute -right-6 -top-6 w-24 h-24 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500';
+                    card.appendChild(deco);
+
+                    const titleWrapper = document.createElement('div');
+                    titleWrapper.className = 'relative z-10 flex justify-between items-start';
+
+                    const title = document.createElement('h3');
+                    title.className = `text-xl font-semibold text-gray-700 group-hover:text-indigo-600 transition-colors ${isBengali ? 'bengali-text' : ''}`;
+                    title.innerText = sub;
+                    
+                    const count = allData.filter(d => d.mainCategory === currentTab && d.subCategory === sub).length;
+                    const badge = document.createElement('span');
+                    badge.className = 'bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm';
+                    badge.innerText = count + " টি";
+
+                    titleWrapper.appendChild(title);
+                    titleWrapper.appendChild(badge);
+                    
+                    const iconBottom = document.createElement('div');
+                    iconBottom.className = 'mt-6 text-gray-300 group-hover:text-indigo-200 transition-colors text-right relative z-10';
+                    iconBottom.innerHTML = '<i class="fa-solid fa-arrow-right-long text-xl"></i>';
+
+                    card.appendChild(titleWrapper);
+                    card.appendChild(iconBottom);
+                    grid.appendChild(card);
+                });
+                mainContent.appendChild(grid);
+            } else {
+                // Show Items List
+                const backBtn = document.createElement('button');
+                backBtn.className = `mb-6 text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-2 transition bg-indigo-50 px-4 py-2 rounded-lg hover:bg-indigo-100 w-fit ${isBengali ? 'bengali-text' : ''}`;
+                backBtn.innerHTML = `<i class="fa-solid fa-arrow-left"></i> ফিরে যান (${catData.label})`;
+                backBtn.onclick = () => { currentSub = ''; renderContent(); };
+                mainContent.appendChild(backBtn);
+
+                const subHeader = document.createElement('h2');
+                subHeader.className = `text-2xl font-bold mb-6 text-indigo-900 bg-white p-4 rounded-lg shadow-sm border-l-4 border-indigo-500 ${isBengali ? 'bengali-text' : ''}`;
+                subHeader.innerText = currentSub;
+                mainContent.appendChild(subHeader);
+
+                const items = allData.filter(d => d.mainCategory === currentTab && d.subCategory === currentSub);
+
+                if (items.length === 0) {
+                    mainContent.innerHTML += `<div class="text-gray-500 p-10 bg-white rounded-xl shadow-sm text-center border border-dashed border-gray-300 bengali-text text-lg"><i class="fa-regular fa-folder-open text-4xl mb-3 text-gray-300 block"></i>এই বিভাগে এখনো কোনো তথ্য যুক্ত করা হয়নি।</div>`;
+                    return;
+                }
+
+                const listContainer = document.createElement('div');
+                listContainer.className = 'space-y-4';
+
+                items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'bg-white p-5 rounded-xl shadow-sm hover:shadow-md border border-gray-100 cursor-pointer flex flex-col md:flex-row md:justify-between md:items-center transition-all group hover:border-indigo-200';
+                    itemDiv.onclick = () => openReader(item, isBengali);
+                    
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = `font-semibold text-gray-800 text-lg group-hover:text-indigo-600 mb-2 md:mb-0 ${isBengali ? 'bengali-text' : ''}`;
+                    titleDiv.innerHTML = `<i class="fa-solid fa-file-lines text-indigo-300 mr-2"></i> ${item.title}`;
+                    
+                    const iconsDiv = document.createElement('div');
+                    iconsDiv.className = 'flex gap-3 text-sm';
+                    
+                    if(item.content) {
+                        iconsDiv.innerHTML += '<span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-md font-medium flex items-center gap-1 border border-blue-100"><i class="fa-solid fa-align-left"></i> পড়া যাবে</span>';
+                    }
+                    if(item.pdfUrl) {
+                        iconsDiv.innerHTML += '<span class="bg-red-50 text-red-600 px-3 py-1 rounded-md font-medium flex items-center gap-1 border border-red-100"><i class="fa-solid fa-file-pdf"></i> PDF আছে</span>';
+                    }
+
+                    itemDiv.appendChild(titleDiv);
+                    itemDiv.appendChild(iconsDiv);
+                    listContainer.appendChild(itemDiv);
+                });
+
+                mainContent.appendChild(listContainer);
+            }
+        }
+
+        // Admin Login Screen
+        function renderAdminLogin() {
+            mainContent.innerHTML = `
+                <div class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-xl mt-10 text-center border-t-4 border-indigo-600 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full -z-10"></div>
+                    
+                    <div class="w-20 h-20 mx-auto bg-indigo-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                        <i class="fa-solid fa-user-lock text-4xl text-indigo-600"></i>
+                    </div>
+                    
+                    <h2 class="text-2xl font-bold mb-2 text-gray-800 bengali-text">অ্যাডমিন লগইন</h2>
+                    <p class="text-gray-500 mb-8 text-sm bengali-text">প্যানেলে প্রবেশ করতে পাসওয়ার্ড দিন</p>
+                    
+                    <form id="login-form" onsubmit="event.preventDefault(); window.checkAdminPass();">
+                        <input type="password" id="admin-pass" placeholder="পাসওয়ার্ড লিখুন..." class="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-center text-xl tracking-widest shadow-sm mb-4 bg-gray-50">
+                        <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold py-4 px-4 rounded-xl hover:shadow-lg hover:from-indigo-700 hover:to-blue-700 transition-all transform hover:-translate-y-0.5 bengali-text text-lg">লগইন করুন</button>
+                    </form>
+                    <p id="admin-error" class="text-red-500 mt-4 hidden font-medium bengali-text bg-red-50 p-2 rounded-lg border border-red-100"><i class="fa-solid fa-circle-exclamation"></i> পাসওয়ার্ড ভুল হয়েছে!</p>
+                </div>
+            `;
+            setTimeout(() => document.getElementById('admin-pass').focus(), 100);
+        }
+
+        window.checkAdminPass = function() {
+            const pass = document.getElementById('admin-pass').value;
+            if(pass === '7284') {
+                isAdminLoggedIn = true;
+                renderAdminPanel();
+            } else {
+                const err = document.getElementById('admin-error');
+                err.classList.remove('hidden');
+                err.classList.add('animate-pulse');
+                setTimeout(() => err.classList.remove('animate-pulse'), 500);
+            }
+        };
+
+        // Render Admin Panel
+        function renderAdminPanel() {
+            const html = `
+                <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                    <div class="flex justify-between items-center mb-8 border-b-2 border-indigo-50 pb-4">
+                        <h2 class="text-2xl font-bold text-indigo-900 bengali-text flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up text-indigo-500"></i> নতুন তথ্য যুক্ত করুন</h2>
+                        <button onclick="window.logoutAdmin()" class="text-red-500 hover:text-red-700 text-sm font-semibold bengali-text bg-red-50 px-3 py-1 rounded-md"><i class="fa-solid fa-right-from-bracket"></i> লগআউট</button>
+                    </div>
+                    
+                    <form id="admin-form" class="space-y-6 bengali-text text-lg">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">মূল ক্যাটাগরি *</label>
+                                <select id="admin-main-cat" required class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-gray-50">
+                                    <option value="">নির্বাচন করুন</option>
+                                    ${Object.keys(categories).map(k => `<option value="${k}">${categories[k].label}</option>`).join('')}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">সাব-ক্যাটাগরি *</label>
+                                <select id="admin-sub-cat" required class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none bg-gray-50 disabled:opacity-50">
+                                    <option value="">আগে মূল ক্যাটাগরি নির্বাচন করুন</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">টাইটেল (শিরোনাম) *</label>
+                            <input type="text" id="admin-title" required placeholder="যেমন: সময়ের মূল্য..." class="w-full border-2 border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none bg-gray-50">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2 flex justify-between"><span>বিস্তারিত লেখা (অপশনাল)</span> <span class="text-xs text-gray-400 font-normal">বইয়ের মতো দেখাবে</span></label>
+                            <textarea id="admin-content" rows="8" placeholder="এখানে আপনার লেখা পেস্ট করুন..." class="w-full border-2 border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500 outline-none bg-gray-50 leading-relaxed"></textarea>
+                        </div>
+
+                        <div class="border-2 border-dashed border-indigo-200 rounded-xl p-6 bg-indigo-50/30 text-center hover:bg-indigo-50 transition-colors relative">
+                            <i class="fa-regular fa-file-pdf text-4xl text-indigo-300 mb-3 block"></i>
+                            <label class="block text-sm font-semibold text-indigo-900 mb-2">পিডিএফ ফাইল আপলোড (অপশনাল)</label>
+                            <input type="file" id="admin-pdf" accept=".pdf" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 cursor-pointer outline-none">
+                            <p class="text-xs text-gray-500 mt-3 font-sans">সর্বোচ্চ সাইজ: ১০ এমবি (Cloudinary)</p>
+                        </div>
+
+                        <div class="pt-4">
+                            <button type="submit" id="admin-submit-btn" class="w-full bg-indigo-600 text-white font-bold py-4 px-4 rounded-xl hover:bg-indigo-700 transition-colors flex justify-center items-center text-lg shadow-md">
+                                <i class="fa-solid fa-paper-plane mr-2"></i> তথ্য সেভ করুন
+                            </button>
+                        </div>
+                        <div id="admin-status" class="text-center text-base font-semibold hidden p-3 rounded-lg"></div>
+                    </form>
+                </div>
+            `;
+            mainContent.innerHTML = html;
+
+            const mainCatSelect = document.getElementById('admin-main-cat');
+            const subCatSelect = document.getElementById('admin-sub-cat');
+
+            mainCatSelect.addEventListener('change', (e) => {
+                const selected = e.target.value;
+                subCatSelect.innerHTML = '';
+                if (selected && categories[selected]) {
+                    categories[selected].subs.forEach(sub => {
+                        const opt = document.createElement('option');
+                        opt.value = sub;
+                        opt.innerText = sub;
+                        subCatSelect.appendChild(opt);
+                    });
+                } else {
+                    subCatSelect.innerHTML = '<option value="">আগে মূল ক্যাটাগরি নির্বাচন করুন</option>';
+                }
+            });
+
+            document.getElementById('admin-form').addEventListener('submit', handleAdminSubmit);
+        }
+
+        window.logoutAdmin = function() {
+            isAdminLoggedIn = false;
+            renderContent();
+        }
+
+        async function handleAdminSubmit(e) {
+            e.preventDefault();
+            if(!userAuth) return;
+
+            const btn = document.getElementById('admin-submit-btn');
+            const statusDiv = document.getElementById('admin-status');
+            
+            const mainCategory = document.getElementById('admin-main-cat').value;
+            const subCategory = document.getElementById('admin-sub-cat').value;
+            const title = document.getElementById('admin-title').value;
+            const content = document.getElementById('admin-content').value;
+            const fileInput = document.getElementById('admin-pdf');
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner border-t-white w-6 h-6 mr-3"></div> আপলোড হচ্ছে...';
+            statusDiv.className = 'text-center text-sm font-semibold text-indigo-700 mt-4 block bg-indigo-50 p-3 rounded-lg border border-indigo-100';
+            statusDiv.innerText = 'অনুরোধ প্রসেস করা হচ্ছে...';
+
+            try {
+                let pdfUrl = '';
+
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    statusDiv.innerText = 'পিডিএফ আপলোড হচ্ছে (Cloudinary)...';
+                    
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('upload_preset', CLOUDINARY_PRESET);
+
+                    const res = await fetch(CLOUDINARY_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!res.ok) throw new Error("Cloudinary upload failed");
+                    const cloudData = await res.json();
+                    pdfUrl = cloudData.secure_url;
+                }
+
+                statusDiv.innerText = 'ডাটাবেসে সেভ করা হচ্ছে...';
+                const dataRef = collection(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'psc_materials');
+                
+                await addDoc(dataRef, {
+                    mainCategory,
+                    subCategory,
+                    title,
+                    content,
+                    pdfUrl,
+                    createdAt: serverTimestamp()
+                });
+
+                statusDiv.className = 'text-center text-sm font-semibold text-green-700 mt-4 block bg-green-50 p-3 rounded-lg border border-green-200';
+                statusDiv.innerHTML = '<i class="fa-solid fa-circle-check"></i> সফলভাবে সেভ হয়েছে!';
+                document.getElementById('admin-form').reset();
+                document.getElementById('admin-sub-cat').innerHTML = '<option value="">আগে মূল ক্যাটাগরি নির্বাচন করুন</option>';
+
+            } catch (error) {
+                console.error(error);
+                statusDiv.className = 'text-center text-sm font-semibold text-red-700 mt-4 block bg-red-50 p-3 rounded-lg border border-red-200';
+                statusDiv.innerText = 'ত্রুটি: ' + error.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> তথ্য সেভ করুন';
+                setTimeout(() => { if(statusDiv.classList.contains('text-green-700')) statusDiv.classList.add('hidden'); }, 4000);
+            }
+        }
+
+        // --- Reader Global Functions (Book View & Zoom) ---
+        let currentZoom = 100; // base zoom percentage
+        const baseFontSizeBody = 1.125; // in rem (18px)
+        const baseFontSizeTitle = 2.25; // in rem (36px)
+
+        window.zoomText = function(step) {
+            currentZoom += (step * 10);
+            if(currentZoom < 70) currentZoom = 70; // Minimum zoom
+            if(currentZoom > 200) currentZoom = 200; // Maximum zoom
+            
+            document.getElementById('zoom-level').innerText = currentZoom + '%';
+            
+            const scaleMultiplier = currentZoom / 100;
+            document.getElementById('reader-content').style.fontSize = (baseFontSizeBody * scaleMultiplier) + 'rem';
+            document.getElementById('reader-title').style.fontSize = (baseFontSizeTitle * scaleMultiplier) + 'rem';
+            
+            // Adjust line height slightly for bigger texts to stay readable
+            document.getElementById('reader-content').style.lineHeight = (1.85 - (scaleMultiplier - 1) * 0.2); 
+        };
+
+        window.openReader = function(item, isBengali) {
+            const modal = document.getElementById('reader-modal');
+            const modalContainer = document.getElementById('reader-container');
+            const titleEl = document.getElementById('reader-title');
+            const contentEl = document.getElementById('reader-content');
+            const pdfBtn = document.getElementById('reader-pdf-btn');
+
+            // Reset zoom when opening a new document
+            currentZoom = 100;
+            document.getElementById('zoom-level').innerText = '100%';
+            contentEl.style.fontSize = baseFontSizeBody + 'rem';
+            titleEl.style.fontSize = baseFontSizeTitle + 'rem';
+            contentEl.style.lineHeight = '1.85';
+
+            titleEl.innerText = item.title;
+            if(!isBengali) {
+                titleEl.classList.remove('bengali-text');
+                contentEl.classList.remove('bengali-text');
+                titleEl.style.fontFamily = "'Poppins', sans-serif";
+                contentEl.style.fontFamily = "'Poppins', sans-serif";
+            } else {
+                titleEl.classList.add('bengali-text');
+                contentEl.classList.add('bengali-text');
+                titleEl.style.fontFamily = ""; // fallback to class css
+                contentEl.style.fontFamily = "";
+            }
+            
+            // Format content into book paragraphs
+            let formattedContent = '';
+            if (item.content) {
+                formattedContent = item.content.split('\n').map(p => {
+                    const trimmed = p.trim();
+                    if(!trimmed) return '<div class="h-4"></div>'; // paragraph spacing
+                    return `<p class="indent-8 text-justify">${trimmed}</p>`; // traditional book indent
+                }).join('');
+            } else {
+                formattedContent = `<div class="flex flex-col items-center justify-center mt-20 opacity-50"><i class="fa-solid fa-book-journal-whills text-6xl mb-4"></i><p class="text-xl">এই অংশে কোনো টেক্সট নেই!</p></div>`;
+            }
+            contentEl.innerHTML = formattedContent;
+
+            // PDF Link
+            if (item.pdfUrl) {
+                pdfBtn.href = item.pdfUrl;
+                pdfBtn.classList.remove('hidden');
+                pdfBtn.classList.add('flex');
+            } else {
+                pdfBtn.classList.add('hidden');
+                pdfBtn.classList.remove('flex');
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContainer.classList.remove('scale-95');
+                modalContainer.classList.add('scale-100');
+            }, 10);
+        };
+
+        window.closeReader = function() {
+            const modal = document.getElementById('reader-modal');
+            const modalContainer = document.getElementById('reader-container');
+            
+            modal.classList.add('opacity-0');
+            modalContainer.classList.remove('scale-100');
+            modalContainer.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 400); 
+        };
+
+        // Start App
+        init();
+
+    </script>
+</body>
+</html>
