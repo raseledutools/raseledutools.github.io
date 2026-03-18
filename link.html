@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Workspace Hub</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,14 +25,19 @@
     </script>
     <style>
         body { background-color: #17181c; color: #e2e4e9; -webkit-tap-highlight-color: transparent; }
-        .tool-card { background-color: #212328; border: 1px solid #31353f; transition: all 0.25s ease; }
+        .tool-card { background-color: #212328; border: 1px solid #31353f; transition: all 0.25s ease; cursor: pointer; }
         .tool-card:hover, .tool-card:active { background-color: #2a2d35; border-color: #4b5162; transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
         .category-header { position: relative; }
         .category-header::after { content: ''; position: absolute; bottom: -6px; left: 0; width: 40px; height: 3px; background: #4ade80; border-radius: 2px; transition: width 0.3s ease; }
         .category-wrapper:hover .category-header::after { width: 80px; }
+        
+        /* PDF Reader Styles */
         #pdf-modal { background-color: #121212; }
         #pdf-scroll-area { overflow-y: auto; overflow-x: auto; scroll-behavior: smooth; background-color: #1e1e1e; }
-        .pdf-page-wrapper { margin: 0 auto 16px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.4); background-color: white; position: relative; }
+        
+        /* PDF Page Zoom Styles */
+        .pdf-page-wrapper { margin: 0 auto 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); background-color: white; position: relative; transition: width 0.3s ease, height 0.3s ease; }
+        
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #17181c; }
         ::-webkit-scrollbar-thumb { background: #31353f; border-radius: 4px; }
@@ -54,15 +59,15 @@
                 <i class="fa-solid fa-microchip mr-2 text-textmuted"></i> AI Assistants
             </h2>
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
-                <a href="https://chatgpt.com/" class="tool-card rounded-2xl p-5 md:p-6 flex flex-col items-center justify-center gap-3 text-center decoration-none">
+                <a href="https://chatgpt.com/" target="_blank" class="tool-card rounded-2xl p-5 md:p-6 flex flex-col items-center justify-center gap-3 text-center decoration-none">
                     <svg class="w-10 h-10 text-[#10a37f]" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.073zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829 14.6174 7.2144a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.3927-.6813zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.06a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.445a.7948.7948 0 0 0-.3927.6813v6.7369zM10.824 11.485v-2.313L12.824 8.01l2.0001 1.162v2.313l-2.0001 1.162-2.0001-1.162z"/></svg>
                     <span class="font-medium text-sm md:text-base">ChatGPT</span>
                 </a>
-                <a href="https://gemini.google.com/" class="tool-card rounded-2xl p-5 md:p-6 flex flex-col items-center justify-center gap-3 text-center decoration-none">
+                <a href="https://gemini.google.com/" target="_blank" class="tool-card rounded-2xl p-5 md:p-6 flex flex-col items-center justify-center gap-3 text-center decoration-none">
                     <svg class="w-10 h-10 text-[#8ab4f8]" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C12 6.62742 17.3726 12 24 12C17.3726 12 12 17.3726 12 24C12 17.3726 6.62742 12 0 12C6.62742 12 12 6.62742 12 0Z"/><path d="M19.5 14C19.5 16.4853 21.5147 18.5 24 18.5C21.5147 18.5 19.5 20.5147 19.5 23C19.5 20.5147 17.4853 18.5 15 18.5C17.4853 18.5 19.5 16.4853 19.5 14Z" opacity="0.7"/></svg>
                     <span class="font-medium text-sm md:text-base">Gemini</span>
                 </a>
-                <a href="https://chat.deepseek.com/" class="tool-card rounded-2xl p-5 md:p-6 flex flex-col items-center justify-center gap-3 text-center decoration-none">
+                <a href="https://chat.deepseek.com/" target="_blank" class="tool-card rounded-2xl p-5 md:p-6 flex flex-col items-center justify-center gap-3 text-center decoration-none">
                     <i class="fa-solid fa-brain text-4xl text-blue-400"></i>
                     <span class="font-medium text-sm md:text-base">DeepSeek</span>
                 </a>
@@ -84,22 +89,12 @@
                     </div>
                 </button>
                 <a href="https://raseledutools.github.io/" class="tool-card rounded-2xl p-5 flex items-center gap-4 decoration-none">
-                    <div class="bg-purple-500/10 p-3.5 rounded-xl text-purple-400">
-                        <i class="fa-solid fa-graduation-cap text-2xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-base md:text-lg text-white">Rasel Edu Tools</h3>
-                        <p class="text-xs md:text-sm text-textmuted mt-1">Education Portal</p>
-                    </div>
+                    <div class="bg-purple-500/10 p-3.5 rounded-xl text-purple-400"><i class="fa-solid fa-graduation-cap text-2xl"></i></div>
+                    <div><h3 class="font-semibold text-base md:text-lg text-white">Rasel Edu Tools</h3><p class="text-xs md:text-sm text-textmuted mt-1">Education Portal</p></div>
                 </a>
                 <a href="https://raseledutools.github.io/rasel-mia-controller/" class="tool-card rounded-2xl p-5 flex items-center gap-4 decoration-none">
-                    <div class="bg-pink-500/10 p-3.5 rounded-xl text-pink-400">
-                        <i class="fa-solid fa-qrcode text-2xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-base md:text-lg text-white">RasScanner</h3>
-                        <p class="text-xs md:text-sm text-textmuted mt-1">Controller System</p>
-                    </div>
+                    <div class="bg-pink-500/10 p-3.5 rounded-xl text-pink-400"><i class="fa-solid fa-qrcode text-2xl"></i></div>
+                    <div><h3 class="font-semibold text-base md:text-lg text-white">RasScanner</h3><p class="text-xs md:text-sm text-textmuted mt-1">Controller System</p></div>
                 </a>
             </div>
         </div>
@@ -139,10 +134,10 @@
                     <span class="font-medium text-sm">Facebook</span>
                 </a>
                 
-                <a href="https://m.youtube.com/?app=desktop" class="tool-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none">
+                <button onclick="window.location.href='https://m.youtube.com/?app=desktop'" class="tool-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 text-center focus:outline-none">
                     <i class="fa-brands fa-youtube text-3xl text-red-500"></i>
                     <span class="font-medium text-sm text-[#e2e4e9]">YouTube (Bg-Play)</span>
-                </a>
+                </button>
             </div>
         </div>
         
@@ -151,7 +146,8 @@
         </footer>
     </div>
 
-    <div id="pdf-modal" class="fixed inset-0 z-50 hidden flex-col w-full h-full text-white">
+    <div id="pdf-modal" class="fixed inset-0 z-50 hidden flex-col w-full h-full text-white bg-[#121212]">
+        
         <div class="h-14 bg-[#282828] border-b border-[#3e3e3e] flex items-center justify-between px-3 md:px-6 shadow-md shrink-0">
             <div class="flex items-center gap-3">
                 <div class="bg-red-600 text-white p-1.5 rounded text-sm hidden sm:block"><i class="fa-solid fa-file-pdf"></i></div>
@@ -159,15 +155,33 @@
                     <i class="fa-solid fa-folder-open"></i> <span class="hidden sm:inline">Open File</span>
                 </label>
                 <input type="file" id="pdf-upload" accept="application/pdf" class="hidden">
-                <span id="pdf-title" class="text-sm text-gray-300 ml-2 hidden md:block max-w-[200px] truncate">No file selected</span>
+                <span id="pdf-title" class="text-sm text-gray-300 ml-2 hidden lg:block max-w-[200px] truncate">No file selected</span>
             </div>
-            <div id="pdf-page-indicator" class="hidden flex items-center bg-[#1e1e1e] border border-[#3e3e3e] rounded px-3 py-1 text-sm font-mono">
+            
+            <div id="pdf-page-indicator" class="hidden flex items-center bg-[#1e1e1e] border border-[#3e3e3e] rounded px-3 py-1 text-sm font-mono mx-2">
                 <span id="current-page">0</span><span class="mx-1 text-gray-500">/</span><span id="total-pages">0</span>
             </div>
-            <div class="flex items-center gap-1 md:gap-2">
-                <button onclick="toggleFullScreen()" class="w-9 h-9 flex items-center justify-center hover:bg-[#3e3e3e] rounded text-gray-300 transition-colors" title="Full Screen"><i class="fa-solid fa-expand"></i></button>
-                <div class="w-px h-5 bg-[#444] mx-1"></div>
-                <button onclick="closePdfModal()" class="w-9 h-9 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded transition-colors" title="Close Reader"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="flex items-center gap-2 md:gap-3">
+                
+                <div id="zoom-controls" class="hidden items-center bg-[#1e1e1e] border border-[#3e3e3e] rounded overflow-hidden">
+                    <button onclick="zoomOut()" class="w-8 h-8 hover:bg-[#3e3e3e] flex items-center justify-center text-gray-300 transition-colors" title="Zoom Out">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span id="zoom-level-text" class="text-xs w-10 text-center text-gray-400 font-mono">150%</span>
+                    <button onclick="zoomIn()" class="w-8 h-8 hover:bg-[#3e3e3e] flex items-center justify-center text-gray-300 transition-colors" title="Zoom In">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <div class="w-px h-5 bg-[#444] hidden sm:block"></div>
+                
+                <button onclick="toggleFullScreen()" class="w-9 h-9 flex items-center justify-center hover:bg-[#3e3e3e] rounded text-gray-300 transition-colors" title="Full Screen">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+                <button onclick="closePdfModal()" class="w-9 h-9 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded transition-colors" title="Close Reader">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
         </div>
 
@@ -175,11 +189,11 @@
             <div id="pdf-empty-state" class="m-auto text-center text-gray-400 flex flex-col items-center gap-4 mt-20">
                 <i class="fa-brands fa-adobe text-6xl text-red-500 opacity-80 mb-2"></i>
                 <h3 class="text-xl font-semibold text-gray-200">Acrobat Web Reader</h3>
-                <p class="text-sm">Click "Open File" from the top menu to view documents.<br>Supports native pinch-to-zoom and full-screen.</p>
+                <p class="text-sm">Click "Open File" from the top menu to view documents.</p>
             </div>
             <div id="pdf-render-container" class="w-full flex flex-col items-center"></div>
-            <div id="pdf-loader" class="hidden fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg">
-                <i class="fa-solid fa-circle-notch fa-spin text-accent"></i> Rendering Document...
+            <div id="pdf-loader" class="hidden fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg z-50">
+                <i class="fa-solid fa-circle-notch fa-spin text-accent"></i> Rendering...
             </div>
         </div>
     </div>
@@ -199,11 +213,13 @@
             });
         }
 
-        // ================= PDF READER LOGIC =================
+        // ================= PDF READER LOGIC (WITH PRO ZOOM) =================
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
         let pdfDoc = null;
         let observer = null;
+        let currentScale = 1.5; // Default Zoom Level
+
         const modal = document.getElementById('pdf-modal');
         const scrollArea = document.getElementById('pdf-scroll-area');
         const renderContainer = document.getElementById('pdf-render-container');
@@ -227,10 +243,31 @@
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
                 modal.requestFullscreen().catch(err => {
-                    alert(`Error attempting to enable fullscreen: ${err.message}`);
+                    alert(`Error: ${err.message}`);
                 });
             } else {
                 document.exitFullscreen();
+            }
+        }
+
+        // --- Zoom Functions ---
+        function updateZoomText() {
+            document.getElementById('zoom-level-text').textContent = Math.round(currentScale * 100) + '%';
+        }
+
+        function zoomIn() {
+            if (currentScale < 3.0) { // Max Zoom Limit
+                currentScale += 0.25;
+                updateZoomText();
+                renderAllPages();
+            }
+        }
+
+        function zoomOut() {
+            if (currentScale > 0.5) { // Min Zoom Limit
+                currentScale -= 0.25;
+                updateZoomText();
+                renderAllPages();
             }
         }
 
@@ -253,13 +290,10 @@
         async function renderAllPages() {
             renderContainer.innerHTML = '';
             document.getElementById('pdf-loader').classList.remove('hidden');
-            
-            const screenWidth = window.innerWidth;
-            const maxCanvasWidth = screenWidth < 768 ? screenWidth - 16 : 800; 
 
             for(let num = 1; num <= pdfDoc.numPages; num++) {
                 const wrapper = document.createElement('div');
-                wrapper.className = 'pdf-page-wrapper relative bg-white flex justify-center items-center';
+                wrapper.className = 'pdf-page-wrapper';
                 wrapper.setAttribute('data-page-num', num);
                 
                 const canvas = document.createElement('canvas');
@@ -268,19 +302,15 @@
 
                 try {
                     const page = await pdfDoc.getPage(num);
-                    let viewport = page.getViewport({ scale: 2.0 }); 
-                    
-                    if (viewport.width > maxCanvasWidth) {
-                        const scale = maxCanvasWidth / viewport.width;
-                        viewport = page.getViewport({ scale: scale * 2.0 }); 
-                    }
+                    const viewport = page.getViewport({ scale: currentScale }); 
 
+                    // Set actual canvas resolution based on zoom
                     canvas.width = viewport.width;
                     canvas.height = viewport.height;
                     
-                    canvas.style.width = '100%';
-                    canvas.style.maxWidth = `${viewport.width / 2}px`;
-                    wrapper.style.maxWidth = canvas.style.maxWidth;
+                    // Allow the wrapper to expand, creating scrollbars inside the viewer area
+                    wrapper.style.width = `${viewport.width}px`;
+                    wrapper.style.height = `${viewport.height}px`;
 
                     await page.render({
                         canvasContext: canvas.getContext('2d'),
@@ -308,6 +338,11 @@
                     
                     document.getElementById('pdf-empty-state').classList.add('hidden');
                     document.getElementById('pdf-page-indicator').classList.remove('hidden');
+                    
+                    // Show zoom controls
+                    document.getElementById('zoom-controls').classList.remove('hidden');
+                    document.getElementById('zoom-controls').classList.add('flex');
+                    updateZoomText();
 
                     pdfjsLib.getDocument(typedarray).promise.then(pdfDoc_ => {
                         pdfDoc = pdfDoc_;
