@@ -2,17 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport আপডেট করা হয়েছে যাতে ইউজার আঙুল দিয়ে জুম (Gesture Zoom) করতে পারে -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Workspace Hub</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for standard icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- PDF.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     
     <script>
@@ -63,23 +58,13 @@
         .category-wrapper:hover .category-header::after { width: 80px; }
 
         /* Acrobat Reader Style PDF Viewer */
-        #pdf-modal {
-            background-color: #121212; /* Adobe dark theme */
-        }
+        #pdf-modal { background-color: #121212; }
         
         #pdf-scroll-area {
-            /* Enables smooth native scrolling and pinch-to-zoom */
-            overflow-y: auto;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            background-color: #1e1e1e;
+            overflow-y: auto; overflow-x: auto; scroll-behavior: smooth; background-color: #1e1e1e;
         }
-
         .pdf-page-wrapper {
-            margin: 0 auto 16px auto;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            background-color: white;
-            position: relative;
+            margin: 0 auto 16px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.4); background-color: white; position: relative;
         }
 
         /* Scrollbar */
@@ -92,7 +77,6 @@
 <body class="p-4 md:p-8 font-sans antialiased pb-24">
 
     <div class="max-w-7xl mx-auto">
-        <!-- Header -->
         <header class="text-center mb-14 mt-6">
             <h1 class="text-3xl md:text-5xl font-bold mb-3 tracking-tight">
                 My Workspace <span class="text-accent">Hub</span>
@@ -100,8 +84,6 @@
             <p class="text-textmuted text-base md:text-lg px-4">All your essential daily tools gathered in one soothing place.</p>
         </header>
 
-        <!-- Category: AI Tools -->
-        <!-- Note: Removed target="_blank" so everything opens in the same app -->
         <div class="mb-12 category-wrapper">
             <h2 class="text-xl md:text-2xl font-semibold mb-6 category-header text-gray-200">
                 <i class="fa-solid fa-microchip mr-2 text-textmuted"></i> AI Assistants
@@ -129,14 +111,12 @@
             </div>
         </div>
 
-        <!-- Category: Internal Tools & Apps -->
         <div class="mb-12 category-wrapper">
             <h2 class="text-xl md:text-2xl font-semibold mb-6 category-header text-gray-200">
                 <i class="fa-solid fa-layer-group mr-2 text-textmuted"></i> Apps & Utilities
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
                 
-                <!-- PDF Reader Trigger -->
                 <button onclick="openPdfModal()" class="tool-card rounded-2xl p-5 flex items-center gap-4 text-left w-full cursor-pointer focus:outline-none">
                     <div class="bg-red-500/10 p-3.5 rounded-xl text-red-500">
                         <i class="fa-solid fa-file-pdf text-2xl"></i>
@@ -169,7 +149,6 @@
             </div>
         </div>
 
-        <!-- Category: Google Services -->
         <div class="mb-12 category-wrapper">
             <h2 class="text-xl md:text-2xl font-semibold mb-6 category-header text-gray-200">
                 <i class="fa-brands fa-google mr-2 text-textmuted"></i> Google Workspace
@@ -202,7 +181,6 @@
             </div>
         </div>
 
-        <!-- Category: Cloud & Dev -->
         <div class="mb-12 category-wrapper">
             <h2 class="text-xl md:text-2xl font-semibold mb-6 category-header text-gray-200">
                 <i class="fa-solid fa-cloud mr-2 text-textmuted"></i> Cloud & Development
@@ -223,7 +201,6 @@
             </div>
         </div>
 
-        <!-- Category: Social & Media -->
         <div class="mb-6 category-wrapper">
             <h2 class="text-xl md:text-2xl font-semibold mb-6 category-header text-gray-200">
                 <i class="fa-solid fa-users mr-2 text-textmuted"></i> Social Media
@@ -233,26 +210,22 @@
                     <i class="fa-brands fa-facebook text-3xl text-blue-500"></i>
                     <span class="font-medium text-sm">Facebook</span>
                 </a>
-                <a href="https://www.youtube.com/" class="tool-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none">
+                
+                <button onclick="openYouTubeModal()" class="tool-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 text-center w-full focus:outline-none">
                     <i class="fa-brands fa-youtube text-3xl text-red-500"></i>
-                    <span class="font-medium text-sm">YouTube</span>
-                </a>
+                    <span class="font-medium text-sm text-[#e2e4e9]">YouTube (Bg-Play)</span>
+                </button>
             </div>
         </div>
         
-        <!-- Footer -->
         <footer class="text-center text-textmuted mt-12 pt-8 border-t border-bordercol">
             <p class="text-sm">Optimized for WebView & Offline Access.</p>
         </footer>
 
     </div>
 
-    <!-- ==================== PROFESSIONAL ACROBAT-STYLE PDF READER ==================== -->
     <div id="pdf-modal" class="fixed inset-0 z-50 hidden flex-col w-full h-full text-white">
-        
-        <!-- Acrobat Style Dark Toolbar -->
         <div class="h-14 bg-[#282828] border-b border-[#3e3e3e] flex items-center justify-between px-3 md:px-6 shadow-md shrink-0">
-            <!-- Left: Logo and Upload -->
             <div class="flex items-center gap-3">
                 <div class="bg-red-600 text-white p-1.5 rounded text-sm hidden sm:block">
                     <i class="fa-solid fa-file-pdf"></i>
@@ -264,14 +237,12 @@
                 <span id="pdf-title" class="text-sm text-gray-300 ml-2 hidden md:block max-w-[200px] truncate">No file selected</span>
             </div>
             
-            <!-- Center: Page Indicator -->
             <div id="pdf-page-indicator" class="hidden flex items-center bg-[#1e1e1e] border border-[#3e3e3e] rounded px-3 py-1 text-sm font-mono">
                 <span id="current-page">0</span>
                 <span class="mx-1 text-gray-500">/</span>
                 <span id="total-pages">0</span>
             </div>
             
-            <!-- Right: Controls -->
             <div class="flex items-center gap-1 md:gap-2">
                 <button onclick="toggleFullScreen()" class="w-9 h-9 flex items-center justify-center hover:bg-[#3e3e3e] rounded text-gray-300 transition-colors" title="Full Screen">
                     <i class="fa-solid fa-expand"></i>
@@ -283,30 +254,69 @@
             </div>
         </div>
 
-        <!-- Scrollable Document Area (Supports Pinch Zoom) -->
         <div id="pdf-scroll-area" class="flex-1 w-full relative pt-6 pb-20 px-2 md:px-8 flex flex-col items-center">
-            
-            <!-- Empty State -->
             <div id="pdf-empty-state" class="m-auto text-center text-gray-400 flex flex-col items-center gap-4 mt-20">
                 <i class="fa-brands fa-adobe text-6xl text-red-500 opacity-80 mb-2"></i>
                 <h3 class="text-xl font-semibold text-gray-200">Acrobat Web Reader</h3>
                 <p class="text-sm">Click "Open File" from the top menu to view documents.<br>Supports native pinch-to-zoom and full-screen.</p>
             </div>
-            
-            <!-- Pages will be rendered here continuously -->
             <div id="pdf-render-container" class="w-full flex flex-col items-center"></div>
-            
-            <!-- Loading Indicator -->
             <div id="pdf-loader" class="hidden fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg">
                 <i class="fa-solid fa-circle-notch fa-spin text-accent"></i> Rendering Document...
             </div>
         </div>
     </div>
 
-    <!-- JavaScript for PDF Reader & Offline Cache -->
+    <div id="yt-modal" class="fixed inset-0 z-50 hidden flex-col w-full h-full bg-black">
+        <div class="h-14 bg-[#17181c] border-b border-[#31353f] flex items-center justify-between px-4 shadow-md shrink-0 text-white">
+            <div class="flex items-center gap-2">
+                <i class="fa-brands fa-youtube text-red-500 text-xl"></i>
+                <span class="font-semibold text-sm">RasTube (Background Active)</span>
+            </div>
+            <button onclick="closeYouTubeModal()" class="w-8 h-8 flex items-center justify-center bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white rounded transition-colors" title="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="flex-1 w-full bg-black relative">
+            <iframe 
+                id="yt-iframe"
+                src="" 
+                class="w-full h-full border-none"
+                allow="autoplay; encrypted-media; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-[#17181c]/90 border border-[#31353f] text-xs text-white/80 px-4 py-2 rounded-full text-center shadow-lg w-11/12 max-w-sm pointer-events-none">
+            ডিসপ্লে অফ করলে মিউজিক পজ হলে, নোটিফিকেশন বার থেকে Play করে দিন।
+        </div>
+    </div>
+
+
     <script>
+        // ================= YOUTUBE MODAL LOGIC =================
+        const ytModal = document.getElementById('yt-modal');
+        const ytIframe = document.getElementById('yt-iframe');
+
+        function openYouTubeModal() {
+            ytModal.classList.remove('hidden');
+            ytModal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            
+            // ইউটিউব ডেস্কটপ মুডে লোড হবে যাতে ব্যাকগ্রাউন্ডে চলে
+            if (!ytIframe.src || ytIframe.src === window.location.href) {
+                ytIframe.src = "https://m.youtube.com/?app=desktop";
+            }
+        }
+
+        function closeYouTubeModal() {
+            ytModal.classList.add('hidden');
+            ytModal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+            // মডাল ক্লোজ করলে ভিডিও বন্ধ হয়ে যাবে (যাতে র‍্যাম ফ্রি থাকে)
+            ytIframe.src = ""; 
+        }
+
         // ================= OFFLINE CACHE SYSTEM =================
-        // এটি আপনার ওয়েবসাইটকে অফলাইনে চালানোর জন্য প্রয়োজনীয় লাইব্রেরিগুলো সেভ করে রাখবে
         if ('caches' in window) {
             caches.open('workspace-offline-cache-v1').then(cache => {
                 const urlsToCache = [
@@ -355,7 +365,6 @@
             }
         }
 
-        // Setup Intersection Observer to track current page while scrolling
         function setupPageObserver() {
             if(observer) observer.disconnect();
             
@@ -366,23 +375,20 @@
                         document.getElementById('current-page').textContent = pageNum;
                     }
                 });
-            }, { root: scrollArea, rootMargin: '-40% 0px -40% 0px' }); // Triggers when page is somewhat in the middle
+            }, { root: scrollArea, rootMargin: '-40% 0px -40% 0px' });
 
             const pages = document.querySelectorAll('.pdf-page-wrapper');
             pages.forEach(page => observer.observe(page));
         }
 
-        // Render all pages for Continuous Scroll & Pinch Zoom
         async function renderAllPages() {
             renderContainer.innerHTML = '';
             document.getElementById('pdf-loader').classList.remove('hidden');
             
             const screenWidth = window.innerWidth;
-            // Add a little padding for mobile
             const maxCanvasWidth = screenWidth < 768 ? screenWidth - 16 : 800; 
 
             for(let num = 1; num <= pdfDoc.numPages; num++) {
-                // Create page wrapper
                 const wrapper = document.createElement('div');
                 wrapper.className = 'pdf-page-wrapper relative bg-white flex justify-center items-center';
                 wrapper.setAttribute('data-page-num', num);
@@ -391,24 +397,20 @@
                 wrapper.appendChild(canvas);
                 renderContainer.appendChild(wrapper);
 
-                // Render page
                 try {
                     const page = await pdfDoc.getPage(num);
-                    // Base scale for high quality reading
                     let viewport = page.getViewport({ scale: 2.0 }); 
                     
-                    // Match width to screen while maintaining aspect ratio
                     if (viewport.width > maxCanvasWidth) {
                         const scale = maxCanvasWidth / viewport.width;
-                        viewport = page.getViewport({ scale: scale * 2.0 }); // Keep render quality high
+                        viewport = page.getViewport({ scale: scale * 2.0 }); 
                     }
 
                     canvas.width = viewport.width;
                     canvas.height = viewport.height;
                     
-                    // CSS scaling allows native pinch-to-zoom to work beautifully
                     canvas.style.width = '100%';
-                    canvas.style.maxWidth = `${viewport.width / 2}px`; // Scale down CSS to match device pixels
+                    canvas.style.maxWidth = `${viewport.width / 2}px`;
                     wrapper.style.maxWidth = canvas.style.maxWidth;
 
                     await page.render({
@@ -424,12 +426,9 @@
             setupPageObserver();
         }
 
-        // Handle File Selection
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file && file.type === 'application/pdf') {
-                
-                // Update UI Title
                 const titleSpan = document.getElementById('pdf-title');
                 titleSpan.textContent = file.name;
                 titleSpan.classList.remove('hidden');
