@@ -68,7 +68,7 @@
     <nav class="glass-nav shadow-sm z-10 sticky top-0">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center py-4">
-                <div class="text-2xl font-bold flex items-center gap-2 text-blue-600 dark:text-blue-400 cursor-pointer" onclick="window.openAdmin()">
+                <div class="text-2xl font-bold flex items-center gap-2 text-blue-600 dark:text-blue-400 cursor-pointer select-none" onclick="window.openAdmin()">
                     <i class="fa-solid fa-graduation-cap"></i> PSC Portal
                 </div>
                 
@@ -137,6 +137,64 @@
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // --- Offline First Service Worker Setup ---
+        const swCode = `
+            const CACHE_NAME = 'psc-portal-offline-v5';
+            const assetsToCache = [
+                location.href.split('?')[0]
+            ];
+
+            self.addEventListener('install', e => {
+                e.waitUntil(
+                    caches.open(CACHE_NAME).then(cache => {
+                        return cache.addAll(assetsToCache);
+                    })
+                );
+                self.skipWaiting();
+            });
+
+            self.addEventListener('activate', e => {
+                e.waitUntil(
+                    caches.keys().then(keys => {
+                        return Promise.all(keys.map(key => {
+                            if (key !== CACHE_NAME) return caches.delete(key);
+                        }));
+                    })
+                );
+                self.clients.claim();
+            });
+
+            self.addEventListener('fetch', e => {
+                const url = new URL(e.request.url);
+                if (url.hostname.includes('googleapis.com') || url.hostname.includes('firebase') || url.hostname.includes('cloudinary')) {
+                    return; // Skip API caching
+                }
+                
+                e.respondWith(
+                    caches.match(e.request).then(res => {
+                        return res || fetch(e.request).then(fetchRes => {
+                            return caches.open(CACHE_NAME).then(cache => {
+                                if(e.request.url.startsWith('http') && e.request.method === 'GET') {
+                                    cache.put(e.request, fetchRes.clone());
+                                }
+                                return fetchRes;
+                            });
+                        });
+                    }).catch(() => {
+                        if (e.request.mode === 'navigate') {
+                            return caches.match(location.href.split('?')[0]);
+                        }
+                    })
+                );
+            });
+        `;
+        const blob = new Blob([swCode], {type: 'application/javascript'});
+        const swUrl = URL.createObjectURL(blob);
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(swUrl).catch(err => console.log('SW registration failed:', err));
+        }
+
+        // Theme Setup
         const themeToggleBtn = document.getElementById('theme-toggle');
         const themeIcon = document.getElementById('theme-icon');
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -191,7 +249,10 @@
         document.getElementById('mobile-menu-btn').addEventListener('click', () => navTabs.classList.toggle('hidden'));
 
         async function init() {
-            history.replaceState({ tab: 'diary', sub: '', diaryId: activeDiaryId, readerOpen: false, pdfViewer: false }, "", "");
+            // FIX: Initial history state injection for physical back button support
+            if (!history.state) {
+                history.replaceState({ tab: 'diary', sub: '', diaryId: activeDiaryId, readerOpen: false, pdfViewer: false }, "", "");
+            }
             
             window.addEventListener('popstate', (e) => {
                 if (e.state) {
@@ -221,7 +282,7 @@
                 });
             } catch (error) {
                 console.error("Auth error:", error);
-                mainContent.innerHTML = `<div class="text-red-500 text-center mt-10">Authentication failed. Check internet.</div>`;
+                mainContent.innerHTML = `<div class="text-red-500 text-center mt-10">Authentication failed. Check internet connection.</div>`;
             }
         }
 
@@ -385,7 +446,7 @@
                         const titleDiv = document.createElement('div');
                         titleDiv.className = `font-bold text-white text-xl flex-grow mb-4 md:mb-0 ${isBengali ? 'bengali-text' : ''}`;
                         titleDiv.innerHTML = `<i class="fa-solid fa-file-lines text-white/70 mr-3"></i> ${item.title}`;
-                        titleDiv.onclick = () => { history.pushState({ tab: currentTab, sub: currentSub, readerOpen: true, item: item }, "", ""); window.openReaderUI(item, isBengali); };
+                        titleDiv.onclick = () => window.openReaderById(item.id, isBengali);
                         
                         const iconsDiv = document.createElement('div');
                         iconsDiv.className = 'flex flex-wrap gap-3 text-sm items-center';
@@ -394,7 +455,7 @@
                             const readBtn = document.createElement('button');
                             readBtn.className = "bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-white/30 transition shadow-sm";
                             readBtn.innerHTML = '<i class="fa-solid fa-book-open"></i> পড়ুন';
-                            readBtn.onclick = () => { history.pushState({ tab: currentTab, sub: currentSub, readerOpen: true, item: item }, "", ""); window.openReaderUI(item, isBengali); };
+                            readBtn.onclick = () => window.openReaderById(item.id, isBengali);
                             iconsDiv.appendChild(readBtn);
                         }
                         if(item.pdfUrl || item.driveLink) {
@@ -447,7 +508,6 @@
             }
             if(!activeDiaryId) activeDiaryId = todayEntry.id;
             const activeEntry = diaryData.find(d => d.id === activeDiaryId) || todayEntry;
-            const currentIndex = diaryData.findIndex(d => d.id === activeDiaryId);
 
             const html = `
                 <div class="flex flex-col md:flex-row min-h-[70vh] md:h-[82vh] bg-diaryBg rounded-3xl overflow-hidden shadow-2xl border border-diarySidebar relative">
@@ -703,7 +763,6 @@
             const modal = document.getElementById('reader-modal');
             document.getElementById('reader-title').innerText = title || "PDF Viewer";
             
-            // Layout toggles for Iframe PDF mode
             document.getElementById('text-reader-container').classList.add('hidden');
             document.getElementById('zoom-controls').classList.add('hidden');
             
@@ -718,12 +777,19 @@
             setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('reader-container').classList.remove('scale-95'); }, 10);
         }
 
+        window.openReaderById = function(id, isBengali) {
+            const item = allData.find(d => d.id === id);
+            if(item) {
+                history.pushState({ tab: currentTab, sub: currentSub, readerOpen: true, item: item }, "", "");
+                openReaderUI(item, isBengali);
+            }
+        };
+
         window.openReaderUI = function(item, isBengali) {
             const modal = document.getElementById('reader-modal');
             document.getElementById('reader-title').innerText = item.title;
             const contentEl = document.getElementById('reader-content');
             
-            // Layout toggles for Text mode
             document.getElementById('pdf-viewer-iframe').classList.add('hidden');
             document.getElementById('pdf-viewer-iframe').src = '';
             document.getElementById('text-reader-container').classList.remove('hidden');
@@ -746,7 +812,7 @@
             container.classList.add('scale-95');
             setTimeout(() => {
                 modal.classList.add('hidden');
-                document.getElementById('pdf-viewer-iframe').src = ''; // Stop loading background PDF
+                document.getElementById('pdf-viewer-iframe').src = ''; 
             }, 300);
         };
 
