@@ -90,38 +90,44 @@
     <main class="flex-grow p-4 md:p-8 overflow-y-auto w-full max-w-7xl mx-auto" id="main-content">
         <div class="flex justify-center items-center h-full" id="global-loader">
             <div class="spinner"></div>
-            <span class="ml-4 text-lg font-medium text-gray-500 dark:text-gray-400">ডাটা লোড হচ্ছে...</span>
+            <span class="ml-4 text-lg font-medium text-gray-500 dark:text-gray-400">Loading...</span>
         </div>
     </main>
 
     <div id="reader-modal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 hidden flex flex-col opacity-0 backdrop-blur-sm">
         <div class="bg-white dark:bg-[#252525] w-full h-full md:w-4/5 md:h-[90%] md:m-auto md:rounded-xl shadow-2xl flex flex-col overflow-hidden transform transition-transform duration-300 scale-95" id="reader-container">
-            <div class="bg-gray-800 dark:bg-nightCard text-white p-3 md:p-4 flex justify-between items-center shrink-0 shadow-md">
+            <div class="bg-gray-800 dark:bg-nightCard text-white p-3 md:p-4 flex justify-between items-center shrink-0 shadow-md z-10">
                 <div class="flex items-center gap-2 text-gray-300">
-                    <i class="fa-solid fa-glasses text-purple-400"></i> <span class="hidden md:inline text-sm font-medium">রিডিং মুড</span>
+                    <i class="fa-solid fa-glasses text-purple-400"></i> <span class="hidden md:inline text-sm font-medium">রিডিং মুড / ভিউয়ার</span>
                 </div>
                 <div class="flex items-center gap-2 md:gap-4">
-                    <div class="bg-gray-700 dark:bg-night rounded-lg flex items-center px-1 py-1 shadow-inner border border-gray-600">
+                    <div id="zoom-controls" class="bg-gray-700 dark:bg-night rounded-lg flex items-center px-1 py-1 shadow-inner border border-gray-600">
                         <button onclick="zoomText(-1)" class="w-8 h-8 hover:bg-gray-600 flex justify-center items-center text-xl transition"><i class="fa-solid fa-minus text-sm"></i></button>
                         <span class="px-3 text-sm font-bold select-none" id="zoom-level">100%</span>
                         <button onclick="zoomText(1)" class="w-8 h-8 hover:bg-gray-600 flex justify-center items-center text-xl transition"><i class="fa-solid fa-plus text-sm"></i></button>
                     </div>
-                    <a id="reader-pdf-btn" href="#" target="_blank" class="hidden bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-500 text-sm font-semibold transition items-center gap-2">
-                        <i class="fa-solid fa-file-pdf"></i> PDF
+                    
+                    <a id="reader-pdf-btn" href="#" target="_blank" class="hidden bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-500 text-sm font-semibold transition items-center gap-2" title="সরাসরি ডাউনলোড">
+                        <i class="fa-solid fa-download"></i> 
                     </a>
                     <button onclick="history.back()" class="w-10 h-10 rounded-lg bg-gray-700 hover:bg-red-500 hover:text-white transition text-xl flex justify-center items-center">&times;</button>
                 </div>
             </div>
-            <div class="p-6 md:p-12 overflow-y-auto flex-grow book-reader shadow-inner relative" id="reader-wrapper">
-                <div class="max-w-3xl mx-auto">
-                    <div class="flex justify-center mb-6">
-                        <button onclick="history.back()" class="dark-bright-btn px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 bengali-text">
-                            <i class="fa-solid fa-check text-green-400"></i> পড়া শেষ (Close)
-                        </button>
-                    </div>
+
+            <div class="flex-grow book-reader shadow-inner relative flex flex-col w-full overflow-hidden" id="reader-wrapper">
+                
+                <div class="absolute top-4 right-0 left-0 flex justify-center z-10 pointer-events-none">
+                    <button onclick="history.back()" class="pointer-events-auto dark-bright-btn px-6 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 bengali-text shadow-xl">
+                        <i class="fa-solid fa-check text-green-400"></i> পড়া শেষ (Close)
+                    </button>
+                </div>
+
+                <div id="text-reader-container" class="max-w-3xl mx-auto w-full p-6 md:p-12 overflow-y-auto h-full pt-20">
                     <h1 id="reader-title" class="text-3xl md:text-4xl font-bold book-title bengali-text text-center leading-snug">Title</h1>
                     <div id="reader-content" class="text-lg md:text-xl font-medium bengali-text transition-all duration-300 text-justify"></div>
                 </div>
+
+                <iframe id="pdf-viewer-iframe" class="hidden w-full h-full border-0 bg-gray-100 dark:bg-night pt-16" allow="autoplay"></iframe>
             </div>
         </div>
     </div>
@@ -185,7 +191,7 @@
         document.getElementById('mobile-menu-btn').addEventListener('click', () => navTabs.classList.toggle('hidden'));
 
         async function init() {
-            history.replaceState({ tab: 'diary', sub: '', diaryId: activeDiaryId, readerOpen: false }, "", "");
+            history.replaceState({ tab: 'diary', sub: '', diaryId: activeDiaryId, readerOpen: false, pdfViewer: false }, "", "");
             
             window.addEventListener('popstate', (e) => {
                 if (e.state) {
@@ -194,7 +200,10 @@
                     if (e.state.diaryId) activeDiaryId = e.state.diaryId;
 
                     renderNavigation();
-                    if (e.state.readerOpen && e.state.item) {
+                    if (e.state.pdfViewer && e.state.url) {
+                        openPdfViewerUI(e.state.url, e.state.title);
+                    }
+                    else if (e.state.readerOpen && e.state.item) {
                         openReaderUI(e.state.item, currentTab !== 'english');
                     } else {
                         hideReaderModal();
@@ -208,12 +217,7 @@
             try {
                 await signInAnonymously(auth);
                 onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        userAuth = user;
-                        fetchData();
-                        renderNavigation();
-                        renderContent();
-                    }
+                    if (user) { userAuth = user; fetchData(); renderNavigation(); renderContent(); }
                 });
             } catch (error) {
                 console.error("Auth error:", error);
@@ -264,7 +268,6 @@
                 };
                 navTabs.appendChild(btn);
             });
-            // Admin button is hidden from tabs now
         }
 
         function renderContent() {
@@ -341,8 +344,9 @@
                     handNotes.forEach(item => {
                         const hnCard = document.createElement('div');
                         hnCard.className = `bg-gradient-to-r from-pink-500 to-rose-500 p-5 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between group transform hover:-translate-y-1`;
-                        const fileLink = item.driveLink || item.pdfUrl || '#';
-                        hnCard.onclick = () => window.open(fileLink, '_blank');
+                        const fileLink = item.driveLink || item.pdfUrl || '';
+                        
+                        hnCard.onclick = () => window.triggerPdfViewer(fileLink, item.title);
                         
                         hnCard.innerHTML = `
                             <div class="flex items-start gap-4 mb-4">
@@ -353,7 +357,7 @@
                                 </div>
                             </div>
                             <div class="bg-white/90 text-rose-600 text-center py-2.5 rounded-xl font-bold shadow-sm group-hover:bg-white transition-colors flex justify-center items-center gap-2 ${isBengali ? 'bengali-text' : ''}">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i> ফাইলটি দেখুন
+                                <i class="fa-regular fa-folder-open"></i> ফাইলটি খুলুন
                             </div>
                         `;
                         hnGrid.appendChild(hnCard);
@@ -381,7 +385,7 @@
                         const titleDiv = document.createElement('div');
                         titleDiv.className = `font-bold text-white text-xl flex-grow mb-4 md:mb-0 ${isBengali ? 'bengali-text' : ''}`;
                         titleDiv.innerHTML = `<i class="fa-solid fa-file-lines text-white/70 mr-3"></i> ${item.title}`;
-                        titleDiv.onclick = () => window.openReaderById(item.id, isBengali);
+                        titleDiv.onclick = () => { history.pushState({ tab: currentTab, sub: currentSub, readerOpen: true, item: item }, "", ""); window.openReaderUI(item, isBengali); };
                         
                         const iconsDiv = document.createElement('div');
                         iconsDiv.className = 'flex flex-wrap gap-3 text-sm items-center';
@@ -390,16 +394,15 @@
                             const readBtn = document.createElement('button');
                             readBtn.className = "bg-white/20 text-white border border-white/30 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-white/30 transition shadow-sm";
                             readBtn.innerHTML = '<i class="fa-solid fa-book-open"></i> পড়ুন';
-                            readBtn.onclick = () => window.openReaderById(item.id, isBengali);
+                            readBtn.onclick = () => { history.pushState({ tab: currentTab, sub: currentSub, readerOpen: true, item: item }, "", ""); window.openReaderUI(item, isBengali); };
                             iconsDiv.appendChild(readBtn);
                         }
                         if(item.pdfUrl || item.driveLink) {
                             const finalLink = item.driveLink || item.pdfUrl;
-                            const pdfBtn = document.createElement('a');
-                            pdfBtn.href = finalLink;
-                            pdfBtn.target = "_blank";
+                            const pdfBtn = document.createElement('button');
                             pdfBtn.className = "bg-black/30 text-white border border-black/20 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-black/40 transition shadow-sm";
                             pdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> PDF';
+                            pdfBtn.onclick = (e) => { e.stopPropagation(); window.triggerPdfViewer(finalLink, item.title); };
                             iconsDiv.appendChild(pdfBtn);
                         }
 
@@ -444,13 +447,14 @@
             }
             if(!activeDiaryId) activeDiaryId = todayEntry.id;
             const activeEntry = diaryData.find(d => d.id === activeDiaryId) || todayEntry;
+            const currentIndex = diaryData.findIndex(d => d.id === activeDiaryId);
 
             const html = `
                 <div class="flex flex-col md:flex-row min-h-[70vh] md:h-[82vh] bg-diaryBg rounded-3xl overflow-hidden shadow-2xl border border-diarySidebar relative">
                     
                     <div id="note-sidebar" class="hidden md:flex w-full md:w-1/3 md:max-w-xs bg-diarySidebar flex-col border-r border-nightBorder/50 h-full shrink-0 z-20 absolute md:relative">
                         <div class="p-4 border-b border-nightBorder/50 flex justify-between items-center bg-black/20 shrink-0">
-                            <h2 class="text-white font-bold text-lg bengali-text flex items-center gap-2"><i class="fa-solid fa-list text-diaryHighlight"></i> All Notes</h2>
+                            <h2 class="text-white font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-list text-diaryHighlight"></i> All Notes</h2>
                             <button onclick="window.hidePreviousNotes()" class="md:hidden text-white bg-red-500 hover:bg-red-600 w-8 h-8 rounded-full flex justify-center items-center"><i class="fa-solid fa-times"></i></button>
                         </div>
                         <div class="flex-grow overflow-y-auto diary-scroll p-3 space-y-2" id="diary-list-container">
@@ -487,12 +491,11 @@
                                     <input type="text" id="note-topic" value="${activeEntry.topic || ''}" class="w-full bg-transparent text-lg font-bold text-gray-300 outline-none border-b border-nightBorder/50 focus:border-diaryHighlight/50 pb-2 transition-colors" placeholder="Enter Topic..." oninput="window.triggerDiarySave()">
                                 </div>
                                 
-                                <div class="flex-grow flex flex-col">
+                                <div class="flex-grow flex flex-col mt-4">
                                     <label class="text-xs font-bold text-diaryHighlight/80 uppercase tracking-wider mb-2">Details</label>
                                     <textarea id="note-details" class="w-full flex-grow bg-transparent text-base md:text-lg text-gray-300 outline-none resize-none placeholder-gray-600/70 leading-[2] overflow-hidden" style="min-height: 40vh;" placeholder="Write your note details here..." oninput="window.triggerDiarySave(); this.style.height='auto'; this.style.height=this.scrollHeight+'px';">${activeEntry.details || ''}</textarea>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -589,7 +592,7 @@
                             <textarea id="admin-content" rows="4" placeholder="বিস্তারিত লেখা (শুধুমাত্র 'সাধারণ নোট'-এর ক্ষেত্রে কাজে লাগবে)..." class="w-full border-2 border-gray-200 dark:border-nightBorder rounded-xl p-4 bg-gray-50 dark:bg-night dark:text-white"></textarea>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="border-2 border-dashed border-pink-200 rounded-xl p-4 bg-pink-50 dark:bg-pink-900/10">
-                                    <label class="block font-semibold mb-2 text-pink-700 dark:text-pink-300"><i class="fa-brands fa-google-drive"></i> গুগল ড্রাইভ লিংক (Hand Notes এর জন্য)</label>
+                                    <label class="block font-semibold mb-2 text-pink-700 dark:text-pink-300"><i class="fa-brands fa-google-drive"></i> গুগল ড্রাইভ লিংক</label>
                                     <input type="url" id="admin-drive-link" placeholder="লিংক পেস্ট করুন..." class="w-full p-2 border border-pink-200 rounded-lg dark:bg-night dark:text-white text-sm">
                                 </div>
                                 <div class="border-2 border-dashed border-blue-200 rounded-xl p-4 bg-blue-50 dark:bg-blue-900/10">
@@ -669,7 +672,7 @@
         window.deleteDataItem = async function(id) { if(confirm(`আপনি কি সত্যিই এটি মুছে ফেলতে চান?`)) { await deleteDoc(doc(db, 'artifacts', SYNC_APP_ID, 'public', 'data', 'psc_materials', id)); setTimeout(() => { if(isAdminLoggedIn) renderAdminPanel(); }, 500); } }
 
         // ==========================================
-        //         Reader Global Functions 
+        //         Reader & PDF Viewer Auto Helper
         // ==========================================
         let currentZoom = 100;
         window.zoomText = function(step) {
@@ -680,20 +683,53 @@
             document.getElementById('reader-title').style.fontSize = (2.25 * currentZoom / 100) + 'rem';
         };
 
-        window.openReaderById = function(id, isBengali) {
-            const item = allData.find(d => d.id === id);
-            if(item) {
-                // Here we MUST push state to prevent physical back button from crashing the app
-                history.pushState({ tab: currentTab, sub: currentSub, readerOpen: true, item: item }, "", "");
-                openReaderUI(item, isBengali);
+        function getEmbeddablePdfUrl(url) {
+            if (!url) return '';
+            if (url.includes('drive.google.com/file/d/')) {
+                const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (match && match[1]) { return `https://drive.google.com/file/d/${match[1]}/preview`; }
+            } else if (url.endsWith('.pdf')) {
+                return `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
             }
-        };
+            return url;
+        }
+
+        window.triggerPdfViewer = function(url, title) {
+            history.pushState({ tab: currentTab, sub: currentSub, pdfViewer: true, url: url, title: title }, "", "");
+            openPdfViewerUI(url, title);
+        }
+
+        window.openPdfViewerUI = function(url, title) {
+            const modal = document.getElementById('reader-modal');
+            document.getElementById('reader-title').innerText = title || "PDF Viewer";
+            
+            // Layout toggles for Iframe PDF mode
+            document.getElementById('text-reader-container').classList.add('hidden');
+            document.getElementById('zoom-controls').classList.add('hidden');
+            
+            const pdfBtn = document.getElementById('reader-pdf-btn');
+            pdfBtn.href = url; pdfBtn.classList.remove('hidden'); pdfBtn.classList.add('flex');
+
+            const iframe = document.getElementById('pdf-viewer-iframe');
+            iframe.src = getEmbeddablePdfUrl(url);
+            iframe.classList.remove('hidden');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('reader-container').classList.remove('scale-95'); }, 10);
+        }
 
         window.openReaderUI = function(item, isBengali) {
             const modal = document.getElementById('reader-modal');
             document.getElementById('reader-title').innerText = item.title;
             const contentEl = document.getElementById('reader-content');
             
+            // Layout toggles for Text mode
+            document.getElementById('pdf-viewer-iframe').classList.add('hidden');
+            document.getElementById('pdf-viewer-iframe').src = '';
+            document.getElementById('text-reader-container').classList.remove('hidden');
+            document.getElementById('zoom-controls').classList.remove('hidden');
+            document.getElementById('reader-pdf-btn').classList.add('hidden');
+
             if(isBengali) { document.getElementById('reader-title').classList.add('bengali-text'); contentEl.classList.add('bengali-text'); } 
             else { document.getElementById('reader-title').classList.remove('bengali-text'); contentEl.classList.remove('bengali-text'); }
             
@@ -708,7 +744,10 @@
             const container = document.getElementById('reader-container');
             modal.classList.add('opacity-0');
             container.classList.add('scale-95');
-            setTimeout(() => modal.classList.add('hidden'), 300);
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('pdf-viewer-iframe').src = ''; // Stop loading background PDF
+            }, 300);
         };
 
         init();
