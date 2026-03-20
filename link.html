@@ -31,12 +31,13 @@
         .category-header::after { content: ''; position: absolute; bottom: -6px; left: 0; width: 40px; height: 3px; background: #4ade80; border-radius: 2px; transition: width 0.3s ease; }
         .category-wrapper:hover .category-header::after { width: 80px; }
         
-        /* PDF Reader & Modals */
-        #pdf-modal, #yt-audio-modal { background-color: #121212; }
-        #pdf-scroll-area { overflow-y: auto; overflow-x: auto; scroll-behavior: smooth; background-color: #1e1e1e; padding-top: 20px; }
-        .pdf-page-wrapper { margin: 0 auto 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); background-color: white; position: relative; display: flex; justify-content: center; align-items: center;}
-        canvas { display: block; max-width: 100%; height: auto; } /* HD Canvas Fix */
-
+        /* PDF Reader Styles */
+        #pdf-modal { background-color: #121212; }
+        #pdf-scroll-area { overflow-y: auto; overflow-x: auto; scroll-behavior: smooth; background-color: #1e1e1e; }
+        
+        /* PDF Page Zoom Styles */
+        .pdf-page-wrapper { margin: 0 auto 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); background-color: white; position: relative; transition: width 0.3s ease, height 0.3s ease; }
+        
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #17181c; }
         ::-webkit-scrollbar-thumb { background: #31353f; border-radius: 4px; }
@@ -79,8 +80,13 @@
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
                 <button onclick="openPdfModal()" class="tool-card rounded-2xl p-5 flex items-center gap-4 text-left w-full cursor-pointer focus:outline-none">
-                    <div class="bg-red-500/10 p-3.5 rounded-xl text-red-500"><i class="fa-solid fa-file-pdf text-2xl"></i></div>
-                    <div><h3 class="font-semibold text-base md:text-lg text-white">Acrobat Reader</h3><p class="text-xs md:text-sm text-textmuted mt-1">Pro offline HD viewer</p></div>
+                    <div class="bg-red-500/10 p-3.5 rounded-xl text-red-500">
+                        <i class="fa-solid fa-file-pdf text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-base md:text-lg text-white">Acrobat Reader</h3>
+                        <p class="text-xs md:text-sm text-textmuted mt-1">Pro offline PDF viewer</p>
+                    </div>
                 </button>
                 <a href="https://raseledutools.github.io/" class="tool-card rounded-2xl p-5 flex items-center gap-4 decoration-none">
                     <div class="bg-purple-500/10 p-3.5 rounded-xl text-purple-400"><i class="fa-solid fa-graduation-cap text-2xl"></i></div>
@@ -93,44 +99,55 @@
             </div>
         </div>
 
+        <div class="mb-12 category-wrapper">
+            <h2 class="text-xl md:text-2xl font-semibold mb-6 category-header text-gray-200">
+                <i class="fa-brands fa-google mr-2 text-textmuted"></i> Google Workspace
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
+                <a href="https://www.google.com/" class="tool-card rounded-2xl p-4 md:p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none"><i class="fa-brands fa-google text-3xl text-gray-300"></i><span class="font-medium text-xs md:text-sm">Search</span></a>
+                <a href="https://mail.google.com/" class="tool-card rounded-2xl p-4 md:p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none"><i class="fa-solid fa-envelope text-3xl text-red-400"></i><span class="font-medium text-xs md:text-sm">Gmail</span></a>
+                <a href="https://drive.google.com/" class="tool-card rounded-2xl p-4 md:p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none"><i class="fa-brands fa-google-drive text-3xl text-yellow-500"></i><span class="font-medium text-xs md:text-sm">Drive</span></a>
+                <a href="https://docs.google.com/" class="tool-card rounded-2xl p-4 md:p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none"><i class="fa-solid fa-file-word text-3xl text-blue-400"></i><span class="font-medium text-xs md:text-sm">Docs</span></a>
+                <a href="https://docs.google.com/spreadsheets/" class="tool-card rounded-2xl p-4 md:p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none"><i class="fa-solid fa-file-excel text-3xl text-green-500"></i><span class="font-medium text-xs md:text-sm">Sheets</span></a>
+                <a href="https://docs.google.com/presentation/" class="tool-card rounded-2xl p-4 md:p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none"><i class="fa-solid fa-file-powerpoint text-3xl text-yellow-500"></i><span class="font-medium text-xs md:text-sm">Slides</span></a>
+            </div>
+        </div>
+
+        <div class="mb-12 category-wrapper">
+            <h2 class="text-xl md:text-2xl font-semibold mb-6 category-header text-gray-200">
+                <i class="fa-solid fa-cloud mr-2 text-textmuted"></i> Cloud & Development
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+                <a href="https://colab.research.google.com/" class="tool-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none"><i class="fa-solid fa-code text-3xl text-orange-400"></i><span class="font-medium text-sm">Google Colab</span></a>
+                <a href="https://matlab.mathworks.com/" class="tool-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none"><i class="fa-solid fa-square-root-variable text-3xl text-red-400"></i><span class="font-medium text-sm">MATLAB</span></a>
+                <a href="https://onedrive.live.com/" class="tool-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none"><i class="fa-solid fa-cloud text-3xl text-blue-400"></i><span class="font-medium text-sm">OneDrive</span></a>
+            </div>
+        </div>
+
         <div class="mb-6 category-wrapper">
             <h2 class="text-xl md:text-2xl font-semibold mb-6 category-header text-gray-200">
                 <i class="fa-solid fa-users mr-2 text-textmuted"></i> Social Media
             </h2>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-5">
                 <a href="https://www.facebook.com/" class="tool-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 text-center decoration-none">
-                    <i class="fa-brands fa-facebook text-3xl text-blue-500"></i><span class="font-medium text-sm">Facebook</span>
+                    <i class="fa-brands fa-facebook text-3xl text-blue-500"></i>
+                    <span class="font-medium text-sm">Facebook</span>
                 </a>
-                <button onclick="openYtAudioModal()" class="tool-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 text-center focus:outline-none border-red-500/30">
-                    <i class="fa-brands fa-youtube text-3xl text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]"></i>
-                    <span class="font-medium text-sm text-[#e2e4e9]">RasTube Audio</span>
-                    <span class="text-[10px] text-accent mt-[-5px]">Notification Player</span>
+                
+                <button onclick="window.location.href='https://m.youtube.com/?app=desktop'" class="tool-card rounded-2xl p-5 flex flex-col items-center justify-center gap-3 text-center focus:outline-none">
+                    <i class="fa-brands fa-youtube text-3xl text-red-500"></i>
+                    <span class="font-medium text-sm text-[#e2e4e9]">YouTube (Bg-Play)</span>
                 </button>
             </div>
         </div>
-    </div>
-
-    <div id="yt-audio-modal" class="fixed inset-0 z-50 hidden flex-col w-full h-full text-white bg-[#0f172a]">
-        <div class="h-14 bg-[#1e293b] border-b border-[#334155] flex items-center justify-between px-4 shadow-md shrink-0">
-            <div class="flex items-center gap-2"><i class="fa-brands fa-youtube text-red-500 text-xl"></i><span class="font-semibold text-sm">RasTube Background Player</span></div>
-            <button onclick="closeYtAudioModal()" class="w-8 h-8 flex items-center justify-center bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white rounded transition-colors"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="flex-1 w-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#1e293b] to-[#0f172a]">
-            <div class="w-full max-w-md bg-white/5 p-6 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
-                <h3 class="text-center font-bold text-xl mb-4 text-white drop-shadow-md">Play Any YouTube Video</h3>
-                <p class="text-center text-xs text-gray-400 mb-6">Paste a link, hit play, and press your phone's HOME button. Control music from the notification bar!</p>
-                <input type="text" id="yt-link-input" placeholder="Paste YouTube Link (e.g. https://youtu.be/...)" class="w-full bg-black/40 border border-white/20 p-3 rounded-xl focus:outline-none focus:border-red-500 text-sm mb-4">
-                <button onclick="playCustomYt()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors flex justify-center items-center gap-2 shadow-lg shadow-red-500/30">
-                    <i class="fa-solid fa-play"></i> Start Background Audio
-                </button>
-                <div class="mt-6 rounded-xl overflow-hidden shadow-lg hidden" id="yt-player-container">
-                    <iframe id="yt-audio-iframe" width="100%" height="200" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                </div>
-            </div>
-        </div>
+        
+        <footer class="text-center text-textmuted mt-12 pt-8 border-t border-bordercol">
+            <p class="text-sm">Optimized for WebView & Offline Access.</p>
+        </footer>
     </div>
 
     <div id="pdf-modal" class="fixed inset-0 z-50 hidden flex-col w-full h-full text-white bg-[#121212]">
+        
         <div class="h-14 bg-[#282828] border-b border-[#3e3e3e] flex items-center justify-between px-3 md:px-6 shadow-md shrink-0">
             <div class="flex items-center gap-3">
                 <div class="bg-red-600 text-white p-1.5 rounded text-sm hidden sm:block"><i class="fa-solid fa-file-pdf"></i></div>
@@ -138,95 +155,141 @@
                     <i class="fa-solid fa-folder-open"></i> <span class="hidden sm:inline">Open File</span>
                 </label>
                 <input type="file" id="pdf-upload" accept="application/pdf" class="hidden">
+                <span id="pdf-title" class="text-sm text-gray-300 ml-2 hidden lg:block max-w-[200px] truncate">No file selected</span>
             </div>
+            
             <div id="pdf-page-indicator" class="hidden flex items-center bg-[#1e1e1e] border border-[#3e3e3e] rounded px-3 py-1 text-sm font-mono mx-2">
                 <span id="current-page">0</span><span class="mx-1 text-gray-500">/</span><span id="total-pages">0</span>
             </div>
+            
             <div class="flex items-center gap-2 md:gap-3">
+                
                 <div id="zoom-controls" class="hidden items-center bg-[#1e1e1e] border border-[#3e3e3e] rounded overflow-hidden">
-                    <button onclick="zoomOut()" class="w-8 h-8 hover:bg-[#3e3e3e] flex justify-center items-center text-gray-300"><i class="fa-solid fa-minus"></i></button>
-                    <span id="zoom-level-text" class="text-xs w-10 text-center text-gray-400 font-mono">100%</span>
-                    <button onclick="zoomIn()" class="w-8 h-8 hover:bg-[#3e3e3e] flex justify-center items-center text-gray-300"><i class="fa-solid fa-plus"></i></button>
+                    <button onclick="zoomOut()" class="w-8 h-8 hover:bg-[#3e3e3e] flex items-center justify-center text-gray-300 transition-colors" title="Zoom Out">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span id="zoom-level-text" class="text-xs w-10 text-center text-gray-400 font-mono">150%</span>
+                    <button onclick="zoomIn()" class="w-8 h-8 hover:bg-[#3e3e3e] flex items-center justify-center text-gray-300 transition-colors" title="Zoom In">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
                 </div>
+
                 <div class="w-px h-5 bg-[#444] hidden sm:block"></div>
-                <button onclick="toggleFullScreen()" class="w-9 h-9 flex justify-center items-center hover:bg-[#3e3e3e] rounded text-gray-300"><i class="fa-solid fa-expand"></i></button>
-                <button onclick="closePdfModal()" class="w-9 h-9 flex justify-center items-center bg-red-500 hover:bg-red-600 text-white rounded"><i class="fa-solid fa-xmark"></i></button>
+                
+                <button onclick="toggleFullScreen()" class="w-9 h-9 flex items-center justify-center hover:bg-[#3e3e3e] rounded text-gray-300 transition-colors" title="Full Screen">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+                <button onclick="closePdfModal()" class="w-9 h-9 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded transition-colors" title="Close Reader">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
         </div>
 
-        <div id="pdf-scroll-area" class="flex-1 w-full relative pt-6 pb-20 px-2 flex flex-col items-center">
+        <div id="pdf-scroll-area" class="flex-1 w-full relative pt-6 pb-20 px-2 md:px-8 flex flex-col items-center">
             <div id="pdf-empty-state" class="m-auto text-center text-gray-400 flex flex-col items-center gap-4 mt-20">
                 <i class="fa-brands fa-adobe text-6xl text-red-500 opacity-80 mb-2"></i>
-                <h3 class="text-xl font-semibold text-gray-200">Acrobat Web Reader HD</h3>
-                <p class="text-sm">Optimized for Mobile Displays</p>
+                <h3 class="text-xl font-semibold text-gray-200">Acrobat Web Reader</h3>
+                <p class="text-sm">Click "Open File" from the top menu to view documents.</p>
             </div>
             <div id="pdf-render-container" class="w-full flex flex-col items-center"></div>
+            <div id="pdf-loader" class="hidden fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg z-50">
+                <i class="fa-solid fa-circle-notch fa-spin text-accent"></i> Rendering...
+            </div>
         </div>
     </div>
 
-
     <script>
-        // ================= YOUTUBE BACKGROUND PLAYER API =================
-        const ytAudioModal = document.getElementById('yt-audio-modal');
-        const ytAudioIframe = document.getElementById('yt-audio-iframe');
-        const ytPlayerContainer = document.getElementById('yt-player-container');
-
-        function openYtAudioModal() { ytAudioModal.classList.remove('hidden'); ytAudioModal.classList.add('flex'); document.body.style.overflow = 'hidden'; }
-        function closeYtAudioModal() { ytAudioModal.classList.add('hidden'); ytAudioModal.classList.remove('flex'); document.body.style.overflow = 'auto'; ytAudioIframe.src = ""; ytPlayerContainer.classList.add('hidden'); }
-
-        function playCustomYt() {
-            const link = document.getElementById('yt-link-input').value;
-            const videoId = extractYouTubeID(link);
-            if(videoId) {
-                ytPlayerContainer.classList.remove('hidden');
-                ytAudioIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&playsinline=1`;
-                
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: 'Playing from RasTube', artist: 'My Workspace Hub', album: 'Background Audio',
-                        artwork: [{ src: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`, sizes: '512x512', type: 'image/jpeg' }]
-                    });
-                }
-            } else { alert("Please paste a valid YouTube video link!"); }
+        // ================= OFFLINE CACHE SYSTEM =================
+        if ('caches' in window) {
+            caches.open('workspace-offline-cache-v1').then(cache => {
+                const urlsToCache = [
+                    'https://cdn.tailwindcss.com',
+                    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js',
+                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js',
+                    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
+                ];
+                cache.addAll(urlsToCache).catch(err => console.log('Offline cache log:', err));
+            });
         }
 
-        function extractYouTubeID(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
-        }
-
-        // ================= HD PDF READER LOGIC (CRISP TEXT FIX) =================
+        // ================= PDF READER LOGIC (WITH PRO ZOOM) =================
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-        let pdfDoc = null; let observer = null; let currentScale = 1.0;
+        let pdfDoc = null;
+        let observer = null;
+        let currentScale = 1.5; // Default Zoom Level
+
         const modal = document.getElementById('pdf-modal');
         const scrollArea = document.getElementById('pdf-scroll-area');
         const renderContainer = document.getElementById('pdf-render-container');
         const fileInput = document.getElementById('pdf-upload');
 
-        function openPdfModal() { modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow = 'hidden'; }
-        function closePdfModal() { if (document.fullscreenElement) document.exitFullscreen(); modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow = 'auto'; }
-        function toggleFullScreen() { if (!document.fullscreenElement) modal.requestFullscreen().catch(err => alert(`Error: ${err.message}`)); else document.exitFullscreen(); }
+        function openPdfModal() {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden'; 
+        }
 
-        function updateZoomText() { document.getElementById('zoom-level-text').textContent = Math.round(currentScale * 100) + '%'; }
-        
-        function zoomIn() { if (currentScale < 3.0) { currentScale += 0.2; updateZoomText(); renderAllPages(); } }
-        function zoomOut() { if (currentScale > 0.6) { currentScale -= 0.2; updateZoomText(); renderAllPages(); } }
+        function closePdfModal() {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                modal.requestFullscreen().catch(err => {
+                    alert(`Error: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // --- Zoom Functions ---
+        function updateZoomText() {
+            document.getElementById('zoom-level-text').textContent = Math.round(currentScale * 100) + '%';
+        }
+
+        function zoomIn() {
+            if (currentScale < 3.0) { // Max Zoom Limit
+                currentScale += 0.25;
+                updateZoomText();
+                renderAllPages();
+            }
+        }
+
+        function zoomOut() {
+            if (currentScale > 0.5) { // Min Zoom Limit
+                currentScale -= 0.25;
+                updateZoomText();
+                renderAllPages();
+            }
+        }
 
         function setupPageObserver() {
             if(observer) observer.disconnect();
+            
             observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => { if (entry.isIntersecting) document.getElementById('current-page').textContent = entry.target.getAttribute('data-page-num'); });
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const pageNum = entry.target.getAttribute('data-page-num');
+                        document.getElementById('current-page').textContent = pageNum;
+                    }
+                });
             }, { root: scrollArea, rootMargin: '-40% 0px -40% 0px' });
-            document.querySelectorAll('.pdf-page-wrapper').forEach(page => observer.observe(page));
+
+            const pages = document.querySelectorAll('.pdf-page-wrapper');
+            pages.forEach(page => observer.observe(page));
         }
 
         async function renderAllPages() {
             renderContainer.innerHTML = '';
-            
-            // 🌟 HD TEXT FIX: ফোনের স্ক্রিন রেজুলেশন বের করা
-            const outputScale = window.devicePixelRatio || 1; 
+            document.getElementById('pdf-loader').classList.remove('hidden');
 
             for(let num = 1; num <= pdfDoc.numPages; num++) {
                 const wrapper = document.createElement('div');
@@ -240,44 +303,45 @@
                 try {
                     const page = await pdfDoc.getPage(num);
                     const viewport = page.getViewport({ scale: currentScale }); 
-                    
-                    // 🌟 HD FIX: ক্যানভাসকে ফোনের পিক্সেল রেশিও অনুযায়ী বড় করা
-                    canvas.width = Math.floor(viewport.width * outputScale);
-                    canvas.height = Math.floor(viewport.height * outputScale);
-                    
-                    // 🌟 CSS দিয়ে ক্যানভাসকে আবার নরমাল সাইজে নিয়ে আসা (যাতে লেখা শার্প হয়)
-                    canvas.style.width = Math.floor(viewport.width) + "px";
-                    canvas.style.height = Math.floor(viewport.height) + "px";
-                    
-                    wrapper.style.width = Math.floor(viewport.width) + "px";
-                    wrapper.style.height = Math.floor(viewport.height) + "px";
 
-                    const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+                    // Set actual canvas resolution based on zoom
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    
+                    // Allow the wrapper to expand, creating scrollbars inside the viewer area
+                    wrapper.style.width = `${viewport.width}px`;
+                    wrapper.style.height = `${viewport.height}px`;
 
-                    const renderContext = {
+                    await page.render({
                         canvasContext: canvas.getContext('2d'),
-                        transform: transform,
                         viewport: viewport
-                    };
-
-                    await page.render(renderContext).promise;
-                } catch (e) { console.error('Error rendering page', e); }
+                    }).promise;
+                } catch (e) {
+                    console.error('Error rendering page', num, e);
+                }
             }
+            
+            document.getElementById('pdf-loader').classList.add('hidden');
             setupPageObserver();
         }
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file && file.type === 'application/pdf') {
+                const titleSpan = document.getElementById('pdf-title');
+                titleSpan.textContent = file.name;
+                titleSpan.classList.remove('hidden');
+
                 const fileReader = new FileReader();
                 fileReader.onload = function() {
                     const typedarray = new Uint8Array(this.result);
+                    
                     document.getElementById('pdf-empty-state').classList.add('hidden');
                     document.getElementById('pdf-page-indicator').classList.remove('hidden');
+                    
+                    // Show zoom controls
                     document.getElementById('zoom-controls').classList.remove('hidden');
                     document.getElementById('zoom-controls').classList.add('flex');
-                    
-                    currentScale = window.innerWidth < 768 ? 0.8 : 1.2; // মোবাইলের জন্য ডিফল্ট জুম
                     updateZoomText();
 
                     pdfjsLib.getDocument(typedarray).promise.then(pdfDoc_ => {
@@ -285,6 +349,8 @@
                         document.getElementById('total-pages').textContent = pdfDoc.numPages;
                         document.getElementById('current-page').textContent = '1';
                         renderAllPages();
+                    }).catch(err => {
+                        alert("Error loading PDF: " + err.message);
                     });
                 };
                 fileReader.readAsArrayBuffer(file);
