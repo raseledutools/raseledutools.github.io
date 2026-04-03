@@ -26,7 +26,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* === Base Reset & Globals === */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         a { text-decoration: none; color: inherit; }
@@ -197,6 +196,7 @@
 
     <div class="container">
         <header class="hero-section">
+            
             <div class="profile-img-container" onclick="openAdminLogin()" title="Admin Login">
                 <img src="developer.jpg" alt="Developer Rasel" onerror="this.src='https://ui-avatars.com/api/?name=Rasel+Mia&background=db2777&color=fff'">
             </div>
@@ -316,7 +316,7 @@
         </div>
     </div>
 
-    <script type="module">
+    <script>
         // Set Live Date
         const dateElement = document.getElementById('live-exam-date');
         if (dateElement) {
@@ -325,41 +325,42 @@
         }
 
         // Sidebar Logic
-        window.toggleSidebar = () => {
+        function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('sidebarOverlay').classList.toggle('active');
-        };
+        }
 
-        // 🔥 Admin Modal Logic 🔥
-        const SECRET_PASSWORD = "ras123"; // Changed to ras123
+        // Admin Modal Logic
+        const SECRET_PASSWORD = "ras123";
 
-        window.openAdminLogin = () => {
+        function openAdminLogin() {
             document.getElementById('adminModal').classList.add('active');
             setTimeout(() => document.getElementById('adminPass').focus(), 100);
-        };
+        }
 
-        window.closeAdmin = () => {
+        function closeAdmin() {
             document.getElementById('adminModal').classList.remove('active');
             document.getElementById('adminPass').value = '';
             document.getElementById('passErrorLine').style.width = '0';
-        };
+        }
 
-        window.verifyAdmin = () => {
+        function verifyAdmin() {
             if (document.getElementById('adminPass').value === SECRET_PASSWORD) {
                 sessionStorage.setItem('admin_logged_in', 'true');
-                window.location.href = 'remot.html'; // Changed to remot.html
+                window.location.href = 'remot.html'; // Goes to remot.html
             } else {
                 document.getElementById('passErrorLine').style.width = '100%';
                 document.getElementById('adminPass').value = '';
                 setTimeout(() => document.getElementById('passErrorLine').style.width = '0', 1500);
             }
-        };
+        }
 
-        document.getElementById('adminPass').addEventListener('keypress', e => { 
+        document.getElementById('adminPass').addEventListener('keypress', function(e) { 
             if (e.key === 'Enter') verifyAdmin(); 
         });
+    </script>
 
-        // Firebase Logic
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -369,24 +370,30 @@
             authDomain: "mywebtools-f8d53.firebaseapp.com",
             projectId: "mywebtools-f8d53"
         };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        
+        try {
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
 
-        signInAnonymously(auth).catch(err => console.error(err));
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                onSnapshot(doc(db, 'artifacts', 'rasel-mia-universal-sync', 'public', 'data', 'broadcast', 'current'), (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        const tickerText = document.getElementById('ticker-text');
-                        if(data.message) tickerText.innerHTML = `${data.message} &nbsp;&bull;&nbsp; Global Active.`;
-                        else if(data.text) tickerText.innerHTML = `${data.text} &nbsp;&bull;&nbsp; Global Active.`;
-                    }
-                });
-            }
-        });
+            signInAnonymously(auth).catch(err => console.error("Auth Error", err));
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    onSnapshot(doc(db, 'artifacts', 'rasel-mia-universal-sync', 'public', 'data', 'broadcast', 'current'), (docSnap) => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            const tickerText = document.getElementById('ticker-text');
+                            if(data.message) tickerText.innerHTML = `${data.message} &nbsp;&bull;&nbsp; Global Active.`;
+                            else if(data.text) tickerText.innerHTML = `${data.text} &nbsp;&bull;&nbsp; Global Active.`;
+                        }
+                    });
+                }
+            });
+        } catch (e) {
+            console.error("Firebase load error", e);
+        }
     </script>
+
     <script type="module" src="tracker.js"></script>
 </body>
 </html>
