@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rasel Edu Tools | Professional Web Tools Suite by Rasel Mia</title>
+    <title>Rasel Edu Tools | Professional Web Tools Suite</title>
     
     <meta name="title" content="Rasel Edu Tools | Professional Web Tools Suite by Rasel Mia">
     <meta name="description" content="Rasel Edu Tools: A professional suite engineered by Rasel Mia (EEE, DUET). Access Diary, HTML Editor, Converters, Live Exam, and Global Chat all in one place.">
@@ -17,44 +17,22 @@
     <meta property="og:description" content="A complete professional workspace by Rasel Mia (EEE, DUET). Seamlessly use tools like Live Exam, Code IDE, Diary, and Global Chat.">
     <meta property="og:image" content="developer.jpg"> 
     
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://raseledutools.github.io/">
-    <meta property="twitter:title" content="Rasel Edu Tools | Professional Workspace">
-    <meta property="twitter:description" content="Complete web tools suite engineered by Rasel Mia. Access professional tools for daily tasks.">
-    <meta property="twitter:image" content="developer.jpg">
+    <link rel="icon" href="favicon.ico?v=2" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="developer.jpg">
 
-    <link rel="canonical" href="https://raseledutools.github.io/">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-
-    <meta name="description" content="Professional Web Tools Suite engineered by Rasel Mia (EEE,DUET). Access Diary, Docx Viewer, HTML Editor, Converters, Live Exam, and Global Chat all in one place.">
-    <meta name="keywords" content="Web Tools, Rasel Mia, Live Exam, HTML Editor, Docx Viewer, PDF Converter, Global Chat, Online Dashboard">
-    <meta name="author" content="Rasel Mia">
-    <meta name="robots" content="index, follow">
-    
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Web Tools Suite | Professional Workspace">
-    <meta property="og:description" content="A complete professional workspace by Rasel Mia (EEE,DUET). Use tools like Live Exam, Code IDE, Diary, and Global Chat seamlessly.">
-    <meta property="og:image" content="developer.jpg">
-    <meta property="og:url" content="https://raseledutools.github.io">
-    <meta property="og:site_name" content="Web Tools Suite">
-    
-    <link rel="icon" href="favicon.ico?v=2" type="image/x-icon">
-    <link rel="shortcut icon" href="favicon.ico?v=2" type="image/x-icon">
-    <link rel="apple-touch-icon" sizes="180x180" href="developer.jpg">
-    <link rel="icon" type="image/png" sizes="32x32" href="developer.jpg">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* === Base Reset & Globals === */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         a { text-decoration: none; color: inherit; }
         button { border: none; background: none; cursor: pointer; font-family: inherit; }
         
+        /* === Top Right Product Button === */
         .ras-product-btn {
             position: fixed; top: 20px; right: 20px; z-index: 90;
             background: linear-gradient(135deg, #ec4899, #6366f1);
@@ -70,10 +48,7 @@
         .ras-product-btn .title { color: white; font-weight: 800; font-size: 15px; letter-spacing: 0.5px; }
         .ras-product-btn .sub { color: rgba(255,255,255,0.9); font-size: 10px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px;}
         
-        @keyframes floatIcon {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
-        }
+        @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 
         @media (max-width: 600px) {
             .ras-product-btn { top: 15px; right: 15px; padding: 6px 12px; }
@@ -82,9 +57,11 @@
             .ras-product-btn .sub { font-size: 8px; }
         }
 
+        /* === Menu Button === */
         .menu-btn { position: fixed; top: 24px; left: 24px; z-index: 90; width: 48px; height: 48px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; color: white; font-size: 20px; backdrop-filter: blur(10px); transition: all 0.3s; }
         .menu-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); color: #f472b6; }
 
+        /* === Sidebar === */
         .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 95; opacity: 0; visibility: hidden; transition: 0.3s; }
         .sidebar-overlay.active { opacity: 1; visibility: visible; }
         
@@ -103,12 +80,13 @@
         .nav-link:hover { background: rgba(255,255,255,0.05); color: white; transform: translateX(5px); }
         .nav-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
 
+        /* === Main Content === */
         .container { max-width: 1150px; margin: 0 auto; padding: 0 20px; }
         
         .hero-section { padding: 80px 20px 40px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .profile-img-container { position: relative; margin-bottom: 24px; }
+        .profile-img-container { position: relative; margin-bottom: 24px; cursor: pointer; }
         .profile-img-container img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; z-index: 2; transition: 0.3s;}
-        .profile-img-container img:hover { transform: scale(1.05); }
+        .profile-img-container img:hover { transform: scale(1.05); box-shadow: 0 15px 35px rgba(236,72,153,0.5); }
         
         .status-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; backdrop-filter: blur(10px); }
         .dot { width: 8px; height: 8px; background: #ec4899; border-radius: 50%; position: relative; }
@@ -117,12 +95,14 @@
 
         .main-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; background: linear-gradient(to right, #fff, #fce7f3, #e9d5ff); -webkit-background-clip: text; color: transparent; margin-bottom: 20px; line-height: 1.2; }
 
+        /* === Ticker === */
         .ticker-wrap { max-width: 768px; width: 100%; background: rgba(15,23,42,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; display: flex; align-items: center; height: 48px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
         .ticker-label { background: linear-gradient(to right, #db2777, #9333ea); padding: 0 20px; height: 100%; display: flex; align-items: center; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; z-index: 2; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
         .ticker-content { flex-grow: 1; overflow: hidden; position: relative; height: 100%; display: flex; align-items: center; }
         .ticker-text { white-space: nowrap; font-size: 14px; font-weight: 500; animation: scroll 25s linear infinite; }
         @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
+        /* === Action Buttons === */
         .action-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-bottom: 40px; }
         .btn-action { display: inline-flex; align-items: center; gap: 12px; padding: 12px 24px; border-radius: 50px; font-weight: 700; color: white; transition: 0.3s; border: 1px solid rgba(255,255,255,0.2); }
         .btn-action:hover { transform: translateY(-3px); }
@@ -130,6 +110,7 @@
         .btn-exam { background: linear-gradient(to right, #059669, #0891b2); box-shadow: 0 8px 20px rgba(16,185,129,0.4); text-align: left; }
         .btn-chat { background: linear-gradient(to right, #2563eb, #4f46e5); box-shadow: 0 8px 20px rgba(37,99,235,0.3); }
 
+        /* === Tools Grid === */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; padding-bottom: 60px; }
         .card { border-radius: 20px; padding: 24px; text-decoration: none; color: white; position: relative; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.3); }
@@ -140,6 +121,7 @@
         .card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
         .card p { font-size: 14px; opacity: 0.8; line-height: 1.6; }
 
+        /* Card Colors */
         .c-purple { background: linear-gradient(135deg, rgba(147,51,234,0.8), rgba(219,39,119,0.8)); }
         .c-blue { background: linear-gradient(135deg, rgba(37,99,235,0.8), rgba(8,145,178,0.8)); }
         .c-essential { background: linear-gradient(135deg, rgba(79,70,229,0.9), rgba(236,72,153,0.7)); }
@@ -150,12 +132,14 @@
         .c-amber { background: linear-gradient(135deg, rgba(217,119,6,0.8), rgba(249,115,22,0.8)); }
         .c-fuchsia { background: linear-gradient(135deg, rgba(192,38,211,0.8), rgba(147,51,234,0.8)); }
 
+        /* === Footer === */
         footer { border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4); padding: 24px 0; backdrop-filter: blur(10px); }
         .footer-content { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; }
         .admin-trigger { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 4px 12px 4px 4px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
         .admin-trigger:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
         .admin-trigger img { width: 24px; height: 24px; border-radius: 50%; }
 
+        /* === Admin Modal === */
         .admin-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s; }
         .admin-modal.active { opacity: 1; visibility: visible; }
         .modal-box { background: #0f172a; padding: 32px; border-radius: 24px; width: 90%; max-width: 380px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 0 40px rgba(236,72,153,0.15); text-align: center; position: relative; overflow: hidden; transform: scale(0.9); transition: 0.3s; }
@@ -213,9 +197,10 @@
 
     <div class="container">
         <header class="hero-section">
-            <div class="profile-img-container">
+            <div class="profile-img-container" onclick="openAdminLogin()" title="Admin Login">
                 <img src="developer.jpg" alt="Developer Rasel" onerror="this.src='https://ui-avatars.com/api/?name=Rasel+Mia&background=db2777&color=fff'">
             </div>
+            
             <div class="status-badge"><div class="dot"></div> System Online</div>
             <h1 class="main-title">Rasel Edu Tools</h1>
 
@@ -332,39 +317,49 @@
     </div>
 
     <script type="module">
+        // Set Live Date
         const dateElement = document.getElementById('live-exam-date');
         if (dateElement) {
             const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
             dateElement.innerText = new Date().toLocaleDateString('en-US', options);
         }
 
+        // Sidebar Logic
         window.toggleSidebar = () => {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('sidebarOverlay').classList.toggle('active');
         };
 
-        const SECRET_PASSWORD = "rasel123";
+        // 🔥 Admin Modal Logic 🔥
+        const SECRET_PASSWORD = "ras123"; // Changed to ras123
+
         window.openAdminLogin = () => {
             document.getElementById('adminModal').classList.add('active');
             setTimeout(() => document.getElementById('adminPass').focus(), 100);
         };
+
         window.closeAdmin = () => {
             document.getElementById('adminModal').classList.remove('active');
             document.getElementById('adminPass').value = '';
             document.getElementById('passErrorLine').style.width = '0';
         };
+
         window.verifyAdmin = () => {
             if (document.getElementById('adminPass').value === SECRET_PASSWORD) {
                 sessionStorage.setItem('admin_logged_in', 'true');
-                window.location.href = 'admin_dashboard.html';
+                window.location.href = 'remot.html'; // Changed to remot.html
             } else {
                 document.getElementById('passErrorLine').style.width = '100%';
                 document.getElementById('adminPass').value = '';
                 setTimeout(() => document.getElementById('passErrorLine').style.width = '0', 1500);
             }
         };
-        document.getElementById('adminPass').addEventListener('keypress', e => { if (e.key === 'Enter') verifyAdmin(); });
 
+        document.getElementById('adminPass').addEventListener('keypress', e => { 
+            if (e.key === 'Enter') verifyAdmin(); 
+        });
+
+        // Firebase Logic
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
