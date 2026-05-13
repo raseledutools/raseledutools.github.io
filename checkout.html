@@ -60,9 +60,9 @@
 
     <script>
         // ==========================================
-        // ১. তোমার Vercel ডোমেইনটি এখানে বসাও
+        // ১. তোমার লাইভ Vercel Webhook URL
         // ==========================================
-        const VERCEL_WEBHOOK_URL = "https://rasfocus-backend-তোমার-আইডি.vercel.app/api/webhook"; 
+        const VERCEL_WEBHOOK_URL = "https://rasfocus-backend-raseledutools-projects.vercel.app/api/webhook"; 
 
         // ==========================================
         // ২. URL থেকে UID বের করা
@@ -81,56 +81,53 @@
             uidDisplay.textContent = "UID Not Found!";
             uidDisplay.classList.add('text-red-500');
             showNotice("Please open this page from the RasFocus Desktop App.", "error");
-            actionArea.style.display = 'none'; // UID না থাকলে পেমেন্ট বাটন হাইড হয়ে যাবে
+            actionArea.style.display = 'none'; 
         }
 
         // ==========================================
-        // ৩. রিয়েল পেমেন্ট লজিক (ভবিষ্যতের জন্য)
+        // ৩. রিয়েল পেমেন্ট নোটিফিকেশন
         // ==========================================
         function processRealPayment() {
-            // ভবিষ্যতে যখন aamarpay/sslcommerz যুক্ত করবে, তখন ফর্ম সাবমিটের কোড এখানে হবে
-            alert("This feature will be connected to a real payment gateway (like Aamarpay/bKash) soon! For now, use the 'Test Webhook' button to simulate a successful payment.");
+            alert("Payment Gateway (bKash/aamarpay) integration is in progress. For now, please use the 'Test Webhook' button to verify the system.");
         }
 
         // ==========================================
-        // ৪. ডেভেলপার টেস্ট: সার্ভার সিমুলেশন
+        // ৪. সার্ভার সিমুলেশন (Vercel API ট্রিগার)
         // ==========================================
         async function simulateServerWebhook() {
             if (!userUid) return;
 
-            testBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+            testBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Triggering Server...';
             testBtn.disabled = true;
 
-            // পেমেন্ট গেটওয়ে ঠিক এভাবেই তোমার সার্ভারে ডেটা পাঠাবে
+            // পেমেন্ট গেটওয়ে স্টাইল পেলোড
             const payload = {
                 opt_a: userUid,
                 pay_status: "Successful"
             };
 
             try {
-                // তোমার Vercel API-তে POST রিকোয়েস্ট পাঠানো হচ্ছে
-                const response = await fetch(VERCEL_WEBHOOK_URL, {
+                // তোমার Vercel Webhook-এ রিকোয়েস্ট পাঠানো হচ্ছে
+                await fetch(VERCEL_WEBHOOK_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // ব্রাউজার থেকে সরাসরি টেস্ট করার জন্য
+                    mode: 'no-cors', // ব্রাউজার টেস্টের জন্য
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 // সাকসেস মেসেজ দেখানো
                 actionArea.style.display = 'none';
-                showNotice("Payment Successful! Your account has been upgraded to PREMIUM. Please check the Desktop App.", "success");
+                showNotice("Payment Signal Sent! Your account will be upgraded to PREMIUM in a few seconds. Check your Desktop App.", "success");
                 
             } catch (error) {
                 console.error("Error:", error);
-                showNotice("Webhook trigger failed. Check console for details.", "error");
+                showNotice("Failed to reach server. Check console for details.", "error");
                 testBtn.innerHTML = '<i class="fas fa-bug mr-2"></i> Try Again';
                 testBtn.disabled = false;
             }
         }
 
-        // ==========================================
-        // ৫. নোটিশ দেখানোর হেল্পার ফাংশন
-        // ==========================================
+        // ৫. হেল্পার ফাংশন
         function showNotice(message, type) {
             noticeArea.style.display = 'block';
             noticeArea.textContent = message;
