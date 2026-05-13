@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RasFocus+ Premium Checkout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0fdfa; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 150, 160, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="glass-card max-w-md w-full rounded-2xl overflow-hidden border border-teal-100">
+        
+        <div class="bg-gradient-to-r from-teal-500 to-teal-600 p-6 text-center text-white relative">
+            <i class="fas fa-crown text-4xl text-yellow-300 mb-2"></i>
+            <h2 class="text-2xl font-bold">RasFocus+ Premium</h2>
+            <p class="text-teal-100 text-sm mt-1">Unlock Ultimate Productivity</p>
+            
+            <div class="absolute -bottom-5 left-1/2 transform -translate-x-1/2 bg-white text-teal-600 font-bold px-6 py-2 rounded-full shadow-lg border border-teal-50">
+                ৳ 500 <span class="text-xs text-gray-500 font-normal">/ Lifetime</span>
+            </div>
+        </div>
+
+        <div class="p-8 pt-10">
+            
+            <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 mb-6 text-center">
+                <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Your Account ID</p>
+                <p id="uid-display" class="text-sm font-mono text-gray-700 break-all">Loading UID...</p>
+            </div>
+
+            <ul class="space-y-3 mb-8 text-sm text-gray-600">
+                <li class="flex items-center"><i class="fas fa-check-circle text-teal-500 mr-3 text-lg"></i> Strict Block Protocols</li>
+                <li class="flex items-center"><i class="fas fa-check-circle text-teal-500 mr-3 text-lg"></i> Deep Study Statistics</li>
+                <li class="flex items-center"><i class="fas fa-check-circle text-teal-500 mr-3 text-lg"></i> Cloud Sync & Backup</li>
+                <li class="flex items-center"><i class="fas fa-check-circle text-teal-500 mr-3 text-lg"></i> Lifetime Access</li>
+            </ul>
+
+            <div id="notice-area" class="hidden mb-4 p-3 rounded text-sm text-center"></div>
+
+            <div id="action-area">
+                <button onclick="processRealPayment()" class="w-full mb-3 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-wallet mr-2"></i> Pay with bKash
+                </button>
+                
+                <button onclick="simulateServerWebhook()" id="test-btn" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-xl transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-bug mr-2"></i> Test Webhook (Dev Mode)
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // ১. তোমার Vercel ডোমেইনটি এখানে বসাও
+        // ==========================================
+        const VERCEL_WEBHOOK_URL = "https://rasfocus-backend-তোমার-আইডি.vercel.app/api/webhook"; 
+
+        // ==========================================
+        // ২. URL থেকে UID বের করা
+        // ==========================================
+        const urlParams = new URLSearchParams(window.location.search);
+        let userUid = urlParams.get('uid');
+        
+        const uidDisplay = document.getElementById('uid-display');
+        const noticeArea = document.getElementById('notice-area');
+        const actionArea = document.getElementById('action-area');
+        const testBtn = document.getElementById('test-btn');
+
+        if (userUid) {
+            uidDisplay.textContent = userUid;
+        } else {
+            uidDisplay.textContent = "UID Not Found!";
+            uidDisplay.classList.add('text-red-500');
+            showNotice("Please open this page from the RasFocus Desktop App.", "error");
+            actionArea.style.display = 'none'; // UID না থাকলে পেমেন্ট বাটন হাইড হয়ে যাবে
+        }
+
+        // ==========================================
+        // ৩. রিয়েল পেমেন্ট লজিক (ভবিষ্যতের জন্য)
+        // ==========================================
+        function processRealPayment() {
+            // ভবিষ্যতে যখন aamarpay/sslcommerz যুক্ত করবে, তখন ফর্ম সাবমিটের কোড এখানে হবে
+            alert("This feature will be connected to a real payment gateway (like Aamarpay/bKash) soon! For now, use the 'Test Webhook' button to simulate a successful payment.");
+        }
+
+        // ==========================================
+        // ৪. ডেভেলপার টেস্ট: সার্ভার সিমুলেশন
+        // ==========================================
+        async function simulateServerWebhook() {
+            if (!userUid) return;
+
+            testBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+            testBtn.disabled = true;
+
+            // পেমেন্ট গেটওয়ে ঠিক এভাবেই তোমার সার্ভারে ডেটা পাঠাবে
+            const payload = {
+                opt_a: userUid,
+                pay_status: "Successful"
+            };
+
+            try {
+                // তোমার Vercel API-তে POST রিকোয়েস্ট পাঠানো হচ্ছে
+                const response = await fetch(VERCEL_WEBHOOK_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // ব্রাউজার থেকে সরাসরি টেস্ট করার জন্য
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                // সাকসেস মেসেজ দেখানো
+                actionArea.style.display = 'none';
+                showNotice("Payment Successful! Your account has been upgraded to PREMIUM. Please check the Desktop App.", "success");
+                
+            } catch (error) {
+                console.error("Error:", error);
+                showNotice("Webhook trigger failed. Check console for details.", "error");
+                testBtn.innerHTML = '<i class="fas fa-bug mr-2"></i> Try Again';
+                testBtn.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // ৫. নোটিশ দেখানোর হেল্পার ফাংশন
+        // ==========================================
+        function showNotice(message, type) {
+            noticeArea.style.display = 'block';
+            noticeArea.textContent = message;
+            if (type === 'error') {
+                noticeArea.className = 'mb-4 p-3 rounded text-sm text-center bg-red-100 text-red-700 border border-red-200';
+            } else {
+                noticeArea.className = 'mb-4 p-4 rounded text-sm text-center bg-green-100 text-green-800 border border-green-200 font-semibold shadow-inner';
+            }
+        }
+    </script>
+</body>
+</html>
