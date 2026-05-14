@@ -307,37 +307,30 @@
         }
         .method-btn .method-name {
             font-size: 11px; font-weight: 700; color: var(--text);
+            text-align: center;
         }
 
-        /* LOGO CONTAINERS */
-        .logo-box {
-            width: 52px; height: 38px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
+        /* Real logo images */
+        .pay-logo {
+            width: auto;
+            height: 38px;
+            max-width: 82px;
+            object-fit: contain;
+            border-radius: 6px;
         }
 
-        /* bKash brand */
-        .logo-bkash { background: #e2136e; }
-        .logo-bkash svg { width: 38px; }
-
-        /* Nagad brand */
-        .logo-nagad { background: #f15a29; }
-        .logo-nagad svg { width: 38px; }
-
-        /* Rocket brand */
-        .logo-rocket { background: #8b2fc9; }
-        .logo-rocket svg { width: 32px; }
-
-        /* DBBL brand */
-        .logo-dbbl { background: #006b3c; }
-        .logo-city { background: #0a2d6e; }
-        .logo-islami { background: #1e6b3a; }
-        .bank-text { font-size: 10px; font-weight: 800; color: white; letter-spacing: -0.02em; text-align: center; line-height: 1.2; }
-
-        /* Visa/Mastercard */
-        .logo-visa { background: #1a1f71; }
-        .logo-mastercard { background: #eb001b; }
+        /* LIVE green badge on bKash */
+        .live-badge {
+            position: absolute;
+            top: -8px; right: -6px;
+            background: linear-gradient(135deg, #00c48c, #00a374);
+            color: white;
+            font-size: 8.5px; font-weight: 800;
+            letter-spacing: 0.08em;
+            padding: 2px 7px;
+            border-radius: 99px;
+            box-shadow: 0 2px 6px rgba(0,196,140,0.40);
+        }
 
         .divider {
             height: 1px;
@@ -393,7 +386,8 @@
 <!-- SPINNER -->
 <div class="spinner-overlay hidden" id="spinner">
     <div class="spinner-ring"></div>
-    <div class="spinner-text">Connecting to payment gateway…</div>
+    <div class="spinner-text">Connecting to bKash…</div>
+    <div style="font-size:13px; color:#6b8b8a; margin-top:6px;">Please wait a few seconds ⏳</div>
 </div>
 
 <div class="header">
@@ -523,80 +517,108 @@
         <div class="pay-section-title">Mobile Banking</div>
         <div class="methods-grid">
 
-            <!-- bKash -->
-            <button class="method-btn" onclick="executeBkashPayment(event)">
-                <div class="logo-box logo-bkash">
-                    <!-- bKash SVG Logo -->
-                    <svg viewBox="0 0 120 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="120" height="50" fill="#e2136e"/>
-                        <text x="8" y="34" font-family="Arial Black, Arial" font-weight="900" font-size="22" fill="white">b</text>
-                        <text x="26" y="34" font-family="Arial, sans-serif" font-weight="700" font-size="18" fill="white">Kash</text>
-                    </svg>
-                </div>
+            <!-- bKash — LIVE -->
+            <button class="method-btn" onclick="executeBkashPayment(event)" id="bkash-btn">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Bkash_logo.svg/320px-Bkash_logo.svg.png"
+                     alt="bKash" class="pay-logo" onerror="this.src='https://freepnglogos.com/uploads/bkash-logo-png/bkash-logo-png-1.png'">
                 <div class="method-name">bKash</div>
+                <div class="live-badge">LIVE</div>
             </button>
 
             <!-- Nagad -->
             <button class="method-btn disabled" onclick="showComingSoon('Nagad')">
                 <div class="coming-soon">Soon</div>
-                <div class="logo-box logo-nagad">
-                    <!-- Nagad SVG Logo -->
-                    <svg viewBox="0 0 120 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="120" height="50" fill="#f15a29"/>
-                        <circle cx="18" cy="25" r="12" fill="#fdcc09"/>
-                        <text x="34" y="32" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="white">nagad</text>
-                    </svg>
-                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Nagad_Logo.svg/320px-Nagad_Logo.svg.png"
+                     alt="Nagad" class="pay-logo" onerror="this.style.display='none'; this.nextSibling.style.display='block'">
+                <div class="logo-fallback" style="display:none; background:#f15a29; color:white; font-weight:800; font-size:13px; width:72px; height:38px; border-radius:8px; display:none; align-items:center; justify-content:center;">nagad</div>
                 <div class="method-name">Nagad</div>
             </button>
 
             <!-- Rocket -->
             <button class="method-btn disabled" onclick="showComingSoon('Rocket')">
                 <div class="coming-soon">Soon</div>
-                <div class="logo-box logo-rocket">
-                    <!-- Rocket SVG Logo -->
-                    <svg viewBox="0 0 120 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="120" height="50" fill="#8b2fc9"/>
-                        <path d="M12 38 C12 22 18 12 25 8 C32 12 38 22 38 38 L25 34 Z" fill="white" opacity="0.9"/>
-                        <circle cx="25" cy="24" r="5" fill="#8b2fc9"/>
-                        <text x="43" y="32" font-family="Arial, sans-serif" font-weight="800" font-size="16" fill="white">Rocket</text>
-                    </svg>
-                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Rocket_logo_%28Dutch-Bangla_Bank%29.svg/320px-Rocket_logo_%28Dutch-Bangla_Bank%29.svg.png"
+                     alt="Rocket" class="pay-logo" onerror="this.src='https://i.ibb.co/k5B7dN7/rocket.png'">
                 <div class="method-name">Rocket</div>
+            </button>
+
+            <!-- Upay -->
+            <button class="method-btn disabled" onclick="showComingSoon('Upay')">
+                <div class="coming-soon">Soon</div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Upay_logo.svg/320px-Upay_logo.svg.png"
+                     alt="Upay" class="pay-logo" onerror="this.style.filter='none'; this.alt='উপায়'">
+                <div class="method-name">Upay (উপায়)</div>
+            </button>
+
+            <!-- MyCash -->
+            <button class="method-btn disabled" onclick="showComingSoon('MyCash')">
+                <div class="coming-soon">Soon</div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/MyCash_logo.png/320px-MyCash_logo.png"
+                     alt="MyCash" class="pay-logo">
+                <div class="method-name">MyCash</div>
+            </button>
+
+            <!-- OKWallet (ওকে ওয়ালেট) -->
+            <button class="method-btn disabled" onclick="showComingSoon('OK Wallet')">
+                <div class="coming-soon">Soon</div>
+                <div style="background:#fff200; border-radius:10px; width:72px; height:40px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; color:#333; font-family:serif;">😊k</div>
+                <div class="method-name">OK Wallet</div>
             </button>
         </div>
 
         <div class="divider"></div>
 
-        <!-- Bank & Cards -->
-        <div class="pay-section-title">Internet Banking & Cards</div>
-        <div class="methods-grid">
+        <!-- Banks -->
+        <div class="pay-section-title">Internet Banking</div>
+        <div class="methods-grid" style="grid-template-columns: repeat(3, 1fr);">
 
-            <!-- DBBL / Nexus -->
-            <button class="method-btn disabled" onclick="showComingSoon('DBBL Nexus')">
+            <!-- Dutch-Bangla Bank -->
+            <button class="method-btn disabled" onclick="showComingSoon('Dutch-Bangla Bank')">
                 <div class="coming-soon">Soon</div>
-                <div class="logo-box logo-dbbl">
-                    <div class="bank-text">DUTCH<br>BANGLA</div>
-                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Dutch_Bangla_Bank_Logo.svg/320px-Dutch_Bangla_Bank_Logo.svg.png"
+                     alt="DBBL" class="pay-logo">
                 <div class="method-name">DBBL / Nexus</div>
             </button>
 
             <!-- City Bank -->
             <button class="method-btn disabled" onclick="showComingSoon('City Bank')">
                 <div class="coming-soon">Soon</div>
-                <div class="logo-box logo-city">
-                    <div class="bank-text">CITY<br>BANK</div>
-                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/City_Bank_Bangladesh_Logo.svg/320px-City_Bank_Bangladesh_Logo.svg.png"
+                     alt="City Bank" class="pay-logo" onerror="this.src='https://www.thecitybank.com/images/logo.png'">
                 <div class="method-name">City Bank</div>
             </button>
 
             <!-- Islami Bank -->
             <button class="method-btn disabled" onclick="showComingSoon('Islami Bank')">
                 <div class="coming-soon">Soon</div>
-                <div class="logo-box logo-islami">
-                    <div class="bank-text">ISLAMI<br>BANK</div>
-                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Islami_Bank_Bangladesh_logo.svg/320px-Islami_Bank_Bangladesh_logo.svg.png"
+                     alt="Islami Bank" class="pay-logo">
                 <div class="method-name">Islami Bank</div>
+            </button>
+
+            <!-- Southeast Bank -->
+            <button class="method-btn disabled" onclick="showComingSoon('Southeast Bank')">
+                <div class="coming-soon">Soon</div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Southeast_Bank_Limited_logo.svg/320px-Southeast_Bank_Limited_logo.svg.png"
+                     alt="Southeast Bank" class="pay-logo">
+                <div class="method-name">Southeast Bank</div>
+            </button>
+
+            <!-- Meghna Bank -->
+            <button class="method-btn disabled" onclick="showComingSoon('Meghna Bank')">
+                <div class="coming-soon">Soon</div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Meghna_Bank_Logo.svg/320px-Meghna_Bank_Logo.svg.png"
+                     alt="Meghna Bank" class="pay-logo">
+                <div class="method-name">Meghna Bank</div>
+            </button>
+
+            <!-- MTB -->
+            <button class="method-btn disabled" onclick="showComingSoon('Mutual Trust Bank')">
+                <div class="coming-soon">Soon</div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/MTB_Logo.svg/320px-MTB_Logo.svg.png"
+                     alt="MTB" class="pay-logo" onerror="this.style.display='none'; this.parentNode.querySelector('.logo-fallback-mtb').style.display='flex'">
+                <div class="logo-fallback-mtb" style="display:none; align-items:center; justify-content:center; font-weight:900; font-size:20px; color:#e30613;">MTB</div>
+                <div class="method-name">MTB</div>
             </button>
         </div>
 
@@ -604,34 +626,30 @@
 
         <!-- Cards -->
         <div class="pay-section-title">Debit / Credit Cards</div>
-        <div class="methods-grid" style="grid-template-columns: repeat(2, 1fr);">
+        <div class="methods-grid" style="grid-template-columns: repeat(3, 1fr);">
 
             <!-- Visa -->
             <button class="method-btn disabled" onclick="showComingSoon('Visa')">
                 <div class="coming-soon">Soon</div>
-                <div class="logo-box logo-visa" style="width:80px;">
-                    <!-- Visa SVG -->
-                    <svg viewBox="0 0 80 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="80" height="32" fill="#1a1f71"/>
-                        <text x="8" y="23" font-family="Arial, sans-serif" font-weight="900" font-size="20" fill="white" font-style="italic">VISA</text>
-                    </svg>
-                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/320px-Visa_Inc._logo.svg.png"
+                     alt="Visa" class="pay-logo" style="background:#1a1f71; border-radius:6px; padding:4px 8px;">
                 <div class="method-name">Visa</div>
             </button>
 
             <!-- Mastercard -->
             <button class="method-btn disabled" onclick="showComingSoon('Mastercard')">
                 <div class="coming-soon">Soon</div>
-                <div class="logo-box logo-mastercard" style="width:80px; background:#252525;">
-                    <!-- Mastercard SVG -->
-                    <svg viewBox="0 0 80 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="80" height="38" fill="#252525"/>
-                        <circle cx="28" cy="19" r="13" fill="#eb001b"/>
-                        <circle cx="52" cy="19" r="13" fill="#f79e1b"/>
-                        <path d="M40 8.5 C44 11.5 46.5 15.5 46.5 19 C46.5 22.5 44 26.5 40 29.5 C36 26.5 33.5 22.5 33.5 19 C33.5 15.5 36 11.5 40 8.5Z" fill="#ff5f00"/>
-                    </svg>
-                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/320px-Mastercard-logo.svg.png"
+                     alt="Mastercard" class="pay-logo">
                 <div class="method-name">Mastercard</div>
+            </button>
+
+            <!-- American Express -->
+            <button class="method-btn disabled" onclick="showComingSoon('American Express')">
+                <div class="coming-soon">Soon</div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/320px-American_Express_logo_%282018%29.svg.png"
+                     alt="Amex" class="pay-logo" style="background:#016fcf; border-radius:6px; padding:3px;">
+                <div class="method-name">Amex</div>
             </button>
         </div>
 
