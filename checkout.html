@@ -383,7 +383,6 @@
 </head>
 <body>
 
-<!-- SPINNER -->
 <div class="spinner-overlay hidden" id="spinner">
     <div class="spinner-ring"></div>
     <div class="spinner-text">Connecting to bKash…</div>
@@ -400,10 +399,8 @@
     </div>
 </div>
 
-<!-- ═══════════════ PRICING SECTION ═══════════════ -->
 <div id="pricing-section" class="pricing-grid">
 
-    <!-- FREE / TRIAL -->
     <div class="plan-card" style="animation-delay:0s">
         <div>
             <div class="plan-icon" style="background:#f0f9ff; color:#0ea5e9;"><i class="fas fa-hourglass-half"></i></div>
@@ -422,7 +419,6 @@
         <button class="btn btn-ghost" onclick="selectFreeTrial()">Current Default Plan</button>
     </div>
 
-    <!-- PREMIUM PRO -->
     <div class="plan-card" style="animation-delay:0.1s">
         <div>
             <div class="plan-icon" style="background:#fff0f4; color:#e9184c;"><i class="fas fa-bolt"></i></div>
@@ -459,7 +455,6 @@
         </button>
     </div>
 
-    <!-- 1 YEAR ULTIMATE -->
     <div class="plan-card featured" style="animation-delay:0.2s">
         <div class="best-badge">★ BEST VALUE</div>
         <div>
@@ -483,7 +478,6 @@
     </div>
 </div>
 
-<!-- ═══════════════ PAYMENT SECTION ═══════════════ -->
 <div id="payment-section" class="hidden">
     <div class="pay-header">
         <button class="pay-back" onclick="goBackToPricing()">
@@ -498,7 +492,6 @@
             <span class="amount" id="summary-amount">৳ —</span>
         </div>
 
-        <!-- UID shown on payment page -->
         <div style="margin-top:12px; font-size:11px; opacity:0.75; font-family:'JetBrains Mono',monospace; display:flex; align-items:center; gap:6px;">
             <i class="fas fa-fingerprint"></i>
             Account UID: <strong id="pay-uid" style="font-size:12px; opacity:1;">—</strong>
@@ -507,17 +500,14 @@
 
     <div class="pay-body">
 
-        <!-- Error / Success Notice Area -->
         <div id="pay-notice" style="display:none; align-items:center; gap:10px; border:1.5px solid; border-radius:10px; padding:11px 14px; font-size:12.5px; font-weight:600; margin-bottom:18px;">
             <i class="fas fa-circle-exclamation" style="font-size:15px; flex-shrink:0;"></i>
             <span></span>
         </div>
 
-        <!-- Mobile Banking -->
         <div class="pay-section-title">Mobile Banking</div>
         <div class="methods-grid">
 
-            <!-- bKash — LIVE -->
             <button class="method-btn" onclick="executeBkashPayment(event)" id="bkash-btn">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Bkash_logo.svg/320px-Bkash_logo.svg.png"
                      alt="bKash" class="pay-logo" onerror="this.src='https://freepnglogos.com/uploads/bkash-logo-png/bkash-logo-png-1.png'">
@@ -525,16 +515,14 @@
                 <div class="live-badge">LIVE</div>
             </button>
 
-            <!-- Nagad -->
             <button class="method-btn disabled" onclick="showComingSoon('Nagad')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Nagad_Logo.svg/320px-Nagad_Logo.svg.png"
-                     alt="Nagad" class="pay-logo" onerror="this.style.display='none'; this.nextSibling.style.display='block'">
-                <div class="logo-fallback" style="display:none; background:#f15a29; color:white; font-weight:800; font-size:13px; width:72px; height:38px; border-radius:8px; display:none; align-items:center; justify-content:center;">nagad</div>
+                     alt="Nagad" class="pay-logo" onerror="this.style.display='none'; this.nextSibling.style.display='flex'">
+                <div class="logo-fallback" style="display:none; background:#f15a29; color:white; font-weight:800; font-size:13px; width:72px; height:38px; border-radius:8px; align-items:center; justify-content:center;">nagad</div>
                 <div class="method-name">Nagad</div>
             </button>
 
-            <!-- Rocket -->
             <button class="method-btn disabled" onclick="showComingSoon('Rocket')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Rocket_logo_%28Dutch-Bangla_Bank%29.svg/320px-Rocket_logo_%28Dutch-Bangla_Bank%29.svg.png"
@@ -542,7 +530,6 @@
                 <div class="method-name">Rocket</div>
             </button>
 
-            <!-- Upay -->
             <button class="method-btn disabled" onclick="showComingSoon('Upay')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Upay_logo.svg/320px-Upay_logo.svg.png"
@@ -550,7 +537,6 @@
                 <div class="method-name">Upay (উপায়)</div>
             </button>
 
-            <!-- MyCash -->
             <button class="method-btn disabled" onclick="showComingSoon('MyCash')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/MyCash_logo.png/320px-MyCash_logo.png"
@@ -558,7 +544,6 @@
                 <div class="method-name">MyCash</div>
             </button>
 
-            <!-- OKWallet (ওকে ওয়ালেট) -->
             <button class="method-btn disabled" onclick="showComingSoon('OK Wallet')">
                 <div class="coming-soon">Soon</div>
                 <div style="background:#fff200; border-radius:10px; width:72px; height:40px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; color:#333; font-family:serif;">😊k</div>
@@ -568,11 +553,9 @@
 
         <div class="divider"></div>
 
-        <!-- Banks -->
         <div class="pay-section-title">Internet Banking</div>
         <div class="methods-grid" style="grid-template-columns: repeat(3, 1fr);">
 
-            <!-- Dutch-Bangla Bank -->
             <button class="method-btn disabled" onclick="showComingSoon('Dutch-Bangla Bank')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Dutch_Bangla_Bank_Logo.svg/320px-Dutch_Bangla_Bank_Logo.svg.png"
@@ -580,7 +563,6 @@
                 <div class="method-name">DBBL / Nexus</div>
             </button>
 
-            <!-- City Bank -->
             <button class="method-btn disabled" onclick="showComingSoon('City Bank')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/City_Bank_Bangladesh_Logo.svg/320px-City_Bank_Bangladesh_Logo.svg.png"
@@ -588,7 +570,6 @@
                 <div class="method-name">City Bank</div>
             </button>
 
-            <!-- Islami Bank -->
             <button class="method-btn disabled" onclick="showComingSoon('Islami Bank')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Islami_Bank_Bangladesh_logo.svg/320px-Islami_Bank_Bangladesh_logo.svg.png"
@@ -596,7 +577,6 @@
                 <div class="method-name">Islami Bank</div>
             </button>
 
-            <!-- Southeast Bank -->
             <button class="method-btn disabled" onclick="showComingSoon('Southeast Bank')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Southeast_Bank_Limited_logo.svg/320px-Southeast_Bank_Limited_logo.svg.png"
@@ -604,7 +584,6 @@
                 <div class="method-name">Southeast Bank</div>
             </button>
 
-            <!-- Meghna Bank -->
             <button class="method-btn disabled" onclick="showComingSoon('Meghna Bank')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Meghna_Bank_Logo.svg/320px-Meghna_Bank_Logo.svg.png"
@@ -612,7 +591,6 @@
                 <div class="method-name">Meghna Bank</div>
             </button>
 
-            <!-- MTB -->
             <button class="method-btn disabled" onclick="showComingSoon('Mutual Trust Bank')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/MTB_Logo.svg/320px-MTB_Logo.svg.png"
@@ -624,11 +602,9 @@
 
         <div class="divider"></div>
 
-        <!-- Cards -->
         <div class="pay-section-title">Debit / Credit Cards</div>
         <div class="methods-grid" style="grid-template-columns: repeat(3, 1fr);">
 
-            <!-- Visa -->
             <button class="method-btn disabled" onclick="showComingSoon('Visa')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/320px-Visa_Inc._logo.svg.png"
@@ -636,7 +612,6 @@
                 <div class="method-name">Visa</div>
             </button>
 
-            <!-- Mastercard -->
             <button class="method-btn disabled" onclick="showComingSoon('Mastercard')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/320px-Mastercard-logo.svg.png"
@@ -644,7 +619,6 @@
                 <div class="method-name">Mastercard</div>
             </button>
 
-            <!-- American Express -->
             <button class="method-btn disabled" onclick="showComingSoon('American Express')">
                 <div class="coming-soon">Soon</div>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/320px-American_Express_logo_%282018%29.svg.png"
@@ -706,7 +680,7 @@
     function showPaymentMethods(type) {
         // UID না থাকলে payment section-এ যাওয়া বন্ধ
         if (!userUid) {
-            showPaymentNotice("UID missing! Please open this page from the RasFocus Desktop App.", "error");
+            alert("UID missing! Please open this page from the RasFocus Desktop App.");
             return;
         }
 
