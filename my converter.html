@@ -4,21 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <!-- 🔥 Google Search & SEO Meta Tags 🔥 -->
     <title>Online PDF & Image Tools | 300x300 Job Photo & Signature Converter | Rasel Mia</title>
     <meta name="description" content="Free online web tools suite. Merge, Split, Compress PDF, Convert Photo to PDF. Special tools for BD Job applications: 300x300 Photo and 300x80 Signature converter, QR Generator, and Age Calculator.">
     <meta name="keywords" content="PDF Merger, Split PDF, Photo to PDF converter, Job Photo Converter 300x300, Signature Converter 300x80, BD Job application tool, Age Calculator, QR Code Generator, PNG to PDF, Rasel Mia Web Tools, Free PDF Editor Bangladesh, rasel pdf merger, rasel pdf converter, rasel job photo resizer, rasel pdf compressor, online PDF tools BD, image to PDF Rasel, resize photo for job application Bangladesh, free PDF tools suite">
     <meta name="author" content="Rasel Mia">
     <meta name="robots" content="index, follow">
 
+    <!-- 🔥 Facebook & Social Media (Open Graph) 🔥 -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Web Tools Suite - Professional PDF & Image Converter">
     <meta property="og:description" content="All essential web tools in one place. Resize photos for jobs, merge PDFs, and calculate age instantly. Fast, secure, and free.">
     <meta property="og:image" content="developer.jpg">
    
     <title>My Local Toolset (Updated)</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Required Libraries -->
+    <!-- ইন্টারনেট-নির্ভর FontAwesome বাদ দেওয়া হয়েছে -->
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -32,17 +37,14 @@
     </script>
 
     <style>
-        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        /* ফন্টটি ইন্টারনেট মুক্ত করে সিস্টেম ডিফল্ট ফন্টে সেট করা হয়েছে */
+        body { background-color: #f8fafc; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        
         .tool-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
+            background: white; border-radius: 16px; padding: 20px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            transition: all 0.3s;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            transition: all 0.3s; border: 1px solid #e2e8f0;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
         .tool-card:hover { 
             transform: translateY(-4px); 
@@ -53,8 +55,7 @@
             background: #2563eb; color: white; padding: 10px;
             border-radius: 8px; width: 100%; margin-top: 15px;
             font-weight: 600; transition: background 0.2s;
-            cursor: pointer;
-            border: none;
+            cursor: pointer; border: none;
         }
         .btn-action:hover { background: #1d4ed8; }
         .icon-box {
@@ -66,6 +67,8 @@
         .hidden-canvas { display: none; }
         #qr-result, #qr-reader-result { margin-top: 10px; display: flex; justify-content: center; flex-direction: column; align-items: center; }
         .result-box { background: #f1f5f9; padding: 10px; border-radius: 6px; margin-top: 10px; font-weight: bold; text-align: center; font-size: 0.9em; color: #334155; }
+        
+        /* Download Button Styles */
         .btn-download {
             display: flex; align-items: center; justify-content: center; gap: 8px;
             background: linear-gradient(135deg, #10b981, #059669);
@@ -77,24 +80,17 @@
         .btn-download:hover { background: linear-gradient(135deg, #059669, #047857); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(16,185,129,0.45); }
         .btn-download:active { transform: translateY(0); }
         @keyframes popIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+        
         .download-area { margin-top: 8px; }
         .success-badge { display: inline-flex; align-items: center; gap: 5px; background: #d1fae5; color: #065f46; font-size: 0.78em; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 6px; }
         .drag-over { border: 2px dashed #4b5563; background-color: #f3f4f6; opacity: 0.7; }
         
         .scrollable-home-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background-color: #008CBA;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            text-decoration: none;
-            font-family: Arial, sans-serif;
-            font-size: 13px;
-            font-weight: bold;
-            z-index: 1000;
-            box-shadow: 0px 3px 8px rgba(0,0,0,0.2);
+            position: absolute; top: 15px; right: 15px;
+            background-color: #008CBA; color: white; padding: 6px 12px;
+            border-radius: 20px; text-decoration: none;
+            font-family: Arial, sans-serif; font-size: 13px; font-weight: bold;
+            z-index: 1000; box-shadow: 0px 3px 8px rgba(0,0,0,0.2);
             transition: background-color 0.3s ease;
         }
         .scrollable-home-btn:hover { background-color: #005f7a; }
@@ -176,7 +172,7 @@
             <div class="tool-card border-t-4 border-gray-600">
                 <div class="mb-4 flex items-center gap-3">
                     <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 text-2xl shadow-inner">
-                        <i class="fa-solid fa-file-pdf"></i>
+                        📄 <!-- FontAwesome এর বদলে ইমোজি -->
                     </div>
                     <div>
                         <h3 class="text-lg font-bold text-slate-800">Advanced PDF Merger</h3>
@@ -186,11 +182,11 @@
                 <div>
                     <input type="file" id="merge-files" multiple accept=".pdf" class="hidden" onchange="handlePDFSelection(event)">
                     <label for="merge-files" class="w-full cursor-pointer flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl text-sm mb-4 transition-all border border-gray-300 border-dashed">
-                        <i class="fa-solid fa-plus-circle text-gray-500"></i> Select PDFs
+                        ➕ Select PDFs <!-- FontAwesome এর বদলে ইমোজি -->
                     </label>
                     <ul id="pdf-list" class="mb-4 space-y-2 max-h-40 overflow-y-auto pr-1"></ul>
                     <button id="merge-btn" onclick="executeMerge()" class="hidden w-full bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
-                        <i class="fa-solid fa-layer-group"></i> Merge PDFs Now
+                        📚 Merge PDFs Now <!-- FontAwesome এর বদলে ইমোজি -->
                     </button>
                     <div id="merge-download-area" class="download-area mt-4" style="display:none;"></div>
                 </div>
@@ -267,31 +263,49 @@
         </div>
     </div>
 
+    <!-- Hidden Canvas -->
     <canvas id="canvas" class="hidden-canvas"></canvas>
 
+    <!-- 💬 Universal Comment Section HTML -->
     <div class="max-w-4xl mx-auto px-4 py-10 w-full relative z-10">
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-slate-100">
             <h2 class="text-2xl font-black mb-6 text-slate-800 flex items-center gap-3">
-                <i class="fa-regular fa-comments text-pink-500"></i>
-                Apnar Motamot
+                💬 Apnar Motamot
             </h2>
             <div class="mb-8 flex flex-col gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <input type="text" id="comment-name" placeholder="Apnar Nam (Optional)" class="p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all w-full md:w-1/3 text-slate-700 font-medium text-sm">
                 <div class="flex flex-col md:flex-row gap-3">
                     <textarea id="comment-text" rows="2" placeholder="Ekhane apnar motamot ba proshno likhun..." class="p-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all flex-grow text-slate-700 text-sm resize-none"></textarea>
                     <button id="submit-comment" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-pink-500/30 active:scale-95 whitespace-nowrap flex items-center justify-center gap-2">
-                        <i class="fa-regular fa-paper-plane"></i> Pathan
+                        📤 Pathan
                     </button>
                 </div>
             </div>
             <div id="comments-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                <p class="text-slate-400 italic text-sm text-center py-8"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Comments asche...</p>
+                <p class="text-slate-400 italic text-sm text-center py-8">⏳ Comments asche...</p>
             </div>
         </div>
     </div>
 
     <script>
         const { PDFDocument, rgb, degrees } = PDFLib;
+
+        // 🔥 Global Download System (100% Working Fix) 🔥
+        window.downloadData = {};
+        
+        window.triggerDownload = function(fileId) {
+            if(window.downloadData[fileId]) {
+                saveAs(window.downloadData[fileId].blob, window.downloadData[fileId].filename);
+            } else {
+                alert("File not found! Please process the file again.");
+            }
+        };
+
+        window.downloadQR = function(dataUrl) {
+            fetch(dataUrl)
+                .then(res => res.blob())
+                .then(blob => saveAs(blob, 'qrcode.png'));
+        };
 
         // --- Helper functions ---
         const readFileAsync = (file) => {
@@ -359,18 +373,18 @@
 
                 li.innerHTML = `
                     <div class="flex items-center gap-3 overflow-hidden">
-                        <i class="fa-solid fa-grip-vertical text-gray-300 group-hover:text-gray-500 cursor-grab"></i>
+                        <span class="text-gray-300 group-hover:text-gray-500 cursor-grab text-xl">🤚</span>
                         <span class="text-sm font-semibold text-gray-700 truncate" title="${file.name}">${fileName}</span>
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
                         <button onclick="moveUp(${index})" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed" ${index === 0 ? 'disabled' : ''}>
-                            <i class="fa-solid fa-caret-up"></i>
+                            🔼
                         </button>
                         <button onclick="moveDown(${index})" class="w-7 h-7 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed" ${index === selectedPDFs.length - 1 ? 'disabled' : ''}>
-                            <i class="fa-solid fa-caret-down"></i>
+                            🔽
                         </button>
                         <button onclick="removeFile(${index})" class="w-7 h-7 rounded bg-red-50 hover:bg-red-500 text-red-500 hover:text-white flex items-center justify-center transition-colors ml-1">
-                            <i class="fa-solid fa-xmark"></i>
+                            ❌
                         </button>
                     </div>
                 `;
@@ -398,7 +412,7 @@
             if (selectedPDFs.length < 2) { alert("Please select at least 2 PDFs to merge."); return; }
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            btn.innerHTML = '⏳ Processing...';
 
             try {
                 const { PDFDocument } = PDFLib;
@@ -413,28 +427,29 @@
 
                 const mergedPdfFile = await mergedPdf.save();
                 const blob = new Blob([mergedPdfFile], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                const filename = 'Merged_Document_RaselTools.pdf';
+                
+                const fileId = 'merge_' + Date.now();
+                window.downloadData[fileId] = { blob: blob, filename: 'Merged_Document_RaselTools.pdf' };
 
                 const area = document.getElementById('merge-download-area');
                 area.style.display = 'block';
                 area.innerHTML = `
                     <span class="success-badge">✅ Merged Successfully!</span>
-                    <a href="${url}" download="${filename}" class="btn-download" style="text-decoration:none;">
+                    <button onclick="triggerDownload('${fileId}')" class="btn-download">
                         ⬇️ Download Merged PDF
-                    </a>`;
+                    </button>`;
 
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> Merged Successfully!';
+                btn.innerHTML = '✅ Merged Successfully!';
                 setTimeout(() => {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-layer-group"></i> Merge PDFs Now';
+                    btn.innerHTML = '📚 Merge PDFs Now';
                 }, 2000);
 
             } catch (error) {
                 console.error("Merging error:", error);
                 alert("Error merging PDFs. Ensure they are valid PDF files without passwords.");
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-layer-group"></i> Merge PDFs Now';
+                btn.innerHTML = '📚 Merge PDFs Now';
             }
         };
 
@@ -462,16 +477,17 @@
 
             const pdfData = await newPdf.save();
             const blob = new Blob([pdfData], { type: 'application/pdf' });
-            const filename = `split_pages_${startPage}-${endPage}.pdf`;
-            const url = URL.createObjectURL(blob);
+            
+            const fileId = 'split_' + Date.now();
+            window.downloadData[fileId] = { blob: blob, filename: `split_pages_${startPage}-${endPage}.pdf` };
 
             const area = document.getElementById('split-download-area');
             area.style.display = 'block';
             area.innerHTML = `
                 <span class="success-badge">✅ Ready!</span>
-                <a href="${url}" download="${filename}" class="btn-download" style="text-decoration:none;">
+                <button onclick="triggerDownload('${fileId}')" class="btn-download">
                     ⬇️ Download PDF (Pages ${startPage}–${endPage})
-                </a>`;
+                </button>`;
         }
 
         function customResize() {
@@ -504,9 +520,9 @@
                     area.style.display = 'block';
                     area.innerHTML = `
                         <span class="success-badge">✅ QR Code Ready!</span>
-                        <a href="${img.src}" download="qrcode.png" class="btn-download" style="text-decoration:none;">
+                        <button onclick="downloadQR('${img.src}')" class="btn-download">
                             ⬇️ Download QR Code
-                        </a>`;
+                        </button>`;
                 }
             }, 500);
         }
@@ -537,57 +553,6 @@
             });
         }
 
-        async function convertPdfToPng() {
-            const fileInput = document.getElementById('pdf-to-img-file');
-            let pageNum = parseInt(document.getElementById('pdf-page-num').value) || 1;
-
-            if (!fileInput.files[0]) return alert("Select a PDF file");
-
-            const file = fileInput.files[0];
-            const fileReader = new FileReader();
-
-            fileReader.onload = async function() {
-                const typedarray = new Uint8Array(this.result);
-                try {
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                    if (pageNum > pdf.numPages) {
-                        alert(`Error: PDF only has ${pdf.numPages} pages.`);
-                        return;
-                    }
-                    const page = await pdf.getPage(pageNum);
-                    const viewport = page.getViewport({ scale: 2.0 });
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    const renderContext = { canvasContext: context, viewport: viewport };
-                    await page.render(renderContext).promise;
-
-                    canvas.toBlob(function(blob) {
-                        const filename = `page_${pageNum}.png`;
-                        const url = URL.createObjectURL(blob);
-                        const area = document.getElementById('pdfpng-download-area');
-                        if (area) {
-                            area.style.display = 'block';
-                            area.innerHTML = `
-                                <span class="success-badge">✅ Page ${pageNum} converted!</span>
-                                <a href="${url}" download="${filename}" class="btn-download" style="text-decoration:none;">
-                                    ⬇️ Download PNG
-                                </a>`;
-                        } else {
-                            saveAs(blob, filename);
-                        }
-                    }, 'image/png');
-
-                } catch (error) {
-                    console.error(error);
-                    alert("Error processing PDF. See console.");
-                }
-            };
-            fileReader.readAsArrayBuffer(file);
-        }
-
         async function imagesToPDF() {
             const fileInput = document.getElementById('img-to-pdf-files');
             if (fileInput.files.length === 0) return alert("Select images");
@@ -606,16 +571,16 @@
             }
 
             const pdfBlob = doc.output('blob');
-            const filename = "images_combined.pdf";
-            const url = URL.createObjectURL(pdfBlob);
+            const fileId = 'imgpdf_' + Date.now();
+            window.downloadData[fileId] = { blob: pdfBlob, filename: 'images_combined.pdf' };
 
             const area = document.getElementById('imgpdf-download-area');
             area.style.display = 'block';
             area.innerHTML = `
                 <span class="success-badge">✅ ${fileInput.files.length} image(s) combined!</span>
-                <a href="${url}" download="${filename}" class="btn-download" style="text-decoration:none;">
+                <button onclick="triggerDownload('${fileId}')" class="btn-download">
                     ⬇️ Download PDF
-                </a>`;
+                </button>`;
         }
 
         function processImage(targetW, targetH, filename, elementId, downloadAreaId) {
@@ -636,15 +601,17 @@
                     ctx.drawImage(img, 0, 0, targetW, targetH);
                     
                     canvas.toBlob(function(blob) {
-                        const url = URL.createObjectURL(blob);
+                        const fileId = 'imgproc_' + Date.now() + Math.floor(Math.random()*1000);
+                        window.downloadData[fileId] = { blob: blob, filename: filename };
+
                         if (downloadAreaId) {
                             const area = document.getElementById(downloadAreaId);
                             area.style.display = 'block';
                             area.innerHTML = `
                                 <span class="success-badge">✅ ${targetW}×${targetH}px ready!</span>
-                                <a href="${url}" download="${filename}" class="btn-download" style="text-decoration:none;">
+                                <button onclick="triggerDownload('${fileId}')" class="btn-download">
                                     ⬇️ Download ${filename}
-                                </a>`;
+                                </button>`;
                         } else {
                             saveAs(blob, filename);
                         }
@@ -663,17 +630,20 @@
             const pdfDoc = await PDFDocument.load(pdfBytes);
             const pdfData = await pdfDoc.save({ useObjectStreams: false }); 
             const blob = new Blob([pdfData], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
+            
             const origKB = Math.round(fileInput.files[0].size / 1024);
             const newKB = Math.round(pdfData.length / 1024);
+
+            const fileId = 'comp_' + Date.now();
+            window.downloadData[fileId] = { blob: blob, filename: 'compressed_doc.pdf' };
 
             const area = document.getElementById('compress-download-area');
             area.style.display = 'block';
             area.innerHTML = `
                 <span class="success-badge">✅ ${origKB}KB → ${newKB}KB</span>
-                <a href="${url}" download="compressed_doc.pdf" class="btn-download" style="text-decoration:none;">
+                <button onclick="triggerDownload('${fileId}')" class="btn-download">
                     ⬇️ Download Compressed PDF
-                </a>`;
+                </button>`;
         }
 
         function calculateAge() {
@@ -710,6 +680,7 @@
         document.body.appendChild(dummyDiv);
 
     </script>
+    
     <script type="module" src="tracker.js"></script>
     <script type="module" src="comments.js"></script>
 </body>
