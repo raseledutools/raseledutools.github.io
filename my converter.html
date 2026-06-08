@@ -352,10 +352,7 @@
                 
                 // Download trigger kora
                 const blob = new Blob([mergedPdfFile], { type: 'application/pdf' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'Merged_Document_RaselTools.pdf';
-                link.click();
+                saveAs(blob, 'Merged_Document_RaselTools.pdf');
                 
                 // Reset korchi na jate user chaile abar sequence change kore download korte pare
                 btn.innerHTML = '<i class="fa-solid fa-check"></i> Merged Successfully!';
@@ -528,12 +525,16 @@
             setTimeout(() => {
                 const img = container.querySelector('img');
                 if(img) {
-                    const link = document.createElement('a');
-                    link.href = img.src;
-                    link.download = 'qrcode.png';
-                    link.innerText = "Download QR";
-                    link.className = "text-blue-600 underline text-sm block mt-2";
-                    container.appendChild(link);
+                    // img.src is a data URL — convert to blob and use saveAs
+                    const dlBtn = document.createElement('button');
+                    dlBtn.innerText = "⬇ Download QR";
+                    dlBtn.className = "text-blue-600 underline text-sm block mt-2 cursor-pointer bg-transparent border-none";
+                    dlBtn.onclick = function() {
+                        fetch(img.src)
+                            .then(r => r.blob())
+                            .then(blob => saveAs(blob, 'qrcode.png'));
+                    };
+                    container.appendChild(dlBtn);
                 }
             }, 500);
         }
@@ -632,7 +633,8 @@
                 doc.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
             }
 
-            doc.save("images_combined.pdf");
+            const pdfBlob = doc.output('blob');
+            saveAs(pdfBlob, "images_combined.pdf");
         }
 
         // 7. PDF MERGER
@@ -795,9 +797,3 @@
 
 
 </html>
-
-
-
-
-
-
