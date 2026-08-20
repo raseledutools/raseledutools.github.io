@@ -301,6 +301,30 @@
                 </div>
             </div>
 
+            <!-- ✅ NEW: PDF to High Quality Photo -->
+            <div class="tool-card border-t-4 border-violet-500">
+                <div>
+                    <div class="icon-box bg-violet-100 text-violet-600">🖼️</div>
+                    <h3 class="text-lg font-bold text-slate-800">PDF → High Quality Photo</h3>
+                    <p class="text-slate-500 text-sm mb-3">PDF এর প্রতিটি page কে HD PNG ছবিতে convert করো।</p>
+                </div>
+                <div>
+                    <input type="file" id="pdf-to-photo-file" accept=".pdf" class="text-sm">
+                    <div style="margin:8px 0 4px;">
+                        <label class="text-xs text-slate-500 font-semibold">Quality (DPI):</label>
+                        <select id="pdf-photo-dpi" style="width:100%; border:1px solid #cbd5e1; padding:6px; border-radius:6px; margin-top:4px; font-size:13px;">
+                            <option value="1.5">Normal (150 DPI)</option>
+                            <option value="2" selected>High (200 DPI)</option>
+                            <option value="3">Ultra HD (300 DPI)</option>
+                            <option value="4">Super HD (400 DPI)</option>
+                        </select>
+                    </div>
+                    <button onclick="pdfToHighQualityPhoto()" class="btn-action bg-violet-600">🖼️ Convert to PNG</button>
+                    <div id="pdf-photo-progress" style="display:none; margin-top:10px; font-size:13px; color:#7c3aed; font-weight:600; text-align:center;"></div>
+                    <div id="pdf-photo-download-area" class="download-area" style="display:none;"></div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -714,6 +738,101 @@
             resultBox.innerText = `${years} Years, ${months} Months, ${days} Days`;
             resultBox.classList.remove('hidden');
         }
+
+        // ========== PDF TO HIGH QUALITY PHOTO ==========
+        async function pdfToHighQualityPhoto() {
+            const fileInput = document.getElementById('pdf-to-photo-file');
+            const scale = parseFloat(document.getElementById('pdf-photo-dpi').value);
+            const progressEl = document.getElementById('pdf-photo-progress');
+            const downloadArea = document.getElementById('pdf-photo-download-area');
+
+            if (!fileInput.files[0]) return alert("PDF file select করো");
+
+            progressEl.style.display = 'block';
+            progressEl.textContent = '⏳ PDF লোড হচ্ছে...';
+            downloadArea.style.display = 'none';
+            downloadArea.innerHTML = '';
+
+            try {
+                const arrayBuffer = await fileInput.files[0].arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const totalPages = pdf.numPages;
+
+                progressEl.textContent = `📄 মোট ${totalPages} পেজ পাওয়া গেছে। Convert শুরু হচ্ছে...`;
+
+                const downloadLinks = [];
+
+                for (let i = 1; i <= totalPages; i++) {
+                    progressEl.textContent = `🖼️ Page ${i} / ${totalPages} convert হচ্ছে...`;
+
+                    const page = await pdf.getPage(i);
+                    const viewport = page.getViewport({ scale: scale });
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    const ctx = canvas.getContext('2d');
+
+                    // সাদা background
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                    const dataUrl = canvas.toDataURL('image/png');
+                    const fileId = 'pdfphoto_p' + i + '_' + Date.now();
+
+                    await new Promise(resolve => {
+                        canvas.toBlob(function(blob) {
+                            window.downloadData[fileId] = {
+                                blob: blob,
+                                filename: `page_${i}_HD.png`
+                            };
+                            downloadLinks.push({ fileId, page: i, dataUrl });
+                            resolve();
+                        }, 'image/png');
+                    });
+                }
+
+                progressEl.textContent = `✅ সব ${totalPages} পেজ convert সম্পন্ন!`;
+
+                downloadArea.style.display = 'block';
+                let html = `<span class="success-badge">✅ ${totalPages} টি HD PNG তৈরি হয়েছে!</span>`;
+
+                downloadLinks.forEach(({ fileId, page, dataUrl }) => {
+                    html += `
+                        <div style="display:flex; align-items:center; gap:8px; margin:6px 0; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px;">
+                            <img src="${dataUrl}" style="width:48px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #e2e8f0;" />
+                            <button onclick="triggerDownload('${fileId}')" class="btn-download" style="margin:0; flex:1; padding:8px;">
+                                ⬇️ Page ${page} Download
+                            </button>
+                        </div>`;
+                });
+
+                // সব একসাথে download button (যদি একাধিক পেজ)
+                if (totalPages > 1) {
+                    html += `
+                        <button onclick="downloadAllPages()" class="btn-download" style="background:linear-gradient(135deg,#7c3aed,#6d28d9); margin-top:8px;">
+                            📦 সব পেজ একসাথে Download (${totalPages} PNG)
+                        </button>`;
+                    window._allPdfPhotoIds = downloadLinks.map(d => d.fileId);
+                }
+
+                downloadArea.innerHTML = html;
+
+            } catch (err) {
+                progressEl.textContent = '❌ Error: ' + err.message;
+                console.error(err);
+            }
+        }
+
+        window.downloadAllPages = async function() {
+            const ids = window._allPdfPhotoIds || [];
+            for (let i = 0; i < ids.length; i++) {
+                await new Promise(r => setTimeout(r, 300));
+                triggerDownload(ids[i]);
+            }
+        };
 
         const dummyDiv = document.createElement('div');
         dummyDiv.id = "qr-reader-dummy-id";
