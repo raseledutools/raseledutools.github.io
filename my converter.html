@@ -94,6 +94,9 @@
             transition: background-color 0.3s ease;
         }
         .scrollable-home-btn:hover { background-color: #005f7a; }
+        @keyframes liveScan { 0% { top: 0; } 100% { top: 100%; } }
+        #live-qr-modal { display: none; }
+        #live-qr-modal.active { display: flex !important; }
     </style>
 </head>
 <body class="p-6 md:p-10 relative">
@@ -160,13 +163,51 @@
                 <div>
                     <div class="icon-box bg-yellow-100 text-yellow-700">📷</div>
                     <h3 class="text-lg font-bold text-slate-800">QR Reader</h3>
-                    <p class="text-slate-500 text-sm mb-3">Read QR from Image.</p>
+                    <p class="text-slate-500 text-sm mb-3">Read QR from Image or Camera.</p>
                 </div>
                 <div>
+                    <!-- Live Camera Button -->
+                    <button onclick="openLiveCameraScanner()" class="btn-action bg-teal-600" style="margin-top:0; background:#0d9488;">
+                        📹 Live Camera Scanner
+                    </button>
+                    <!-- Upload Image -->
+                    <p class="text-xs text-slate-400 text-center my-2">— অথবা ছবি আপলোড করো —</p>
                     <input type="file" id="qr-input-file" accept="image/*" class="text-sm">
                     <div id="qr-reader-result" class="text-xs break-all"></div>
                     <button onclick="readQRCode()" class="btn-action bg-yellow-700">Scan Image</button>
                 </div>
+            </div>
+
+            <!-- ✅ LIVE CAMERA QR SCANNER MODAL -->
+            <div id="live-qr-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+                <p style="color:white; font-size:18px; font-weight:800; margin-bottom:14px;">📹 Live QR Scanner</p>
+                <div style="position:relative; width:300px; height:300px; border-radius:16px; overflow:hidden; border:3px solid #14b8a6; box-shadow: 0 0 0 4px rgba(20,184,166,0.3);">
+                    <video id="live-qr-video" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
+                    <div id="live-scan-line" style="position:absolute; left:0; top:0; width:100%; height:3px; background:linear-gradient(to right, transparent, #14b8a6, transparent); animation:liveScan 2s linear infinite;"></div>
+                    <!-- Corner markers -->
+                    <div style="position:absolute; top:8px; left:8px; width:22px; height:22px; border-top:3px solid #14b8a6; border-left:3px solid #14b8a6; border-radius:3px 0 0 0;"></div>
+                    <div style="position:absolute; top:8px; right:8px; width:22px; height:22px; border-top:3px solid #14b8a6; border-right:3px solid #14b8a6; border-radius:0 3px 0 0;"></div>
+                    <div style="position:absolute; bottom:8px; left:8px; width:22px; height:22px; border-bottom:3px solid #14b8a6; border-left:3px solid #14b8a6; border-radius:0 0 0 3px;"></div>
+                    <div style="position:absolute; bottom:8px; right:8px; width:22px; height:22px; border-bottom:3px solid #14b8a6; border-right:3px solid #14b8a6; border-radius:0 0 3px 0;"></div>
+                </div>
+                <canvas id="live-qr-canvas" style="display:none;"></canvas>
+
+                <!-- Result box -->
+                <div id="live-qr-result-box" style="display:none; margin-top:14px; background:white; border-radius:12px; padding:14px 18px; max-width:300px; width:90%; text-align:center;">
+                    <p style="font-size:12px; color:#059669; font-weight:700; margin-bottom:4px;">✅ QR Code পাওয়া গেছে!</p>
+                    <p id="live-qr-result-text" style="font-size:14px; color:#1e293b; word-break:break-all; margin:6px 0;"></p>
+                    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
+                        <button onclick="copyLiveQRResult()" style="background:#059669; color:white; border:none; padding:7px 14px; border-radius:7px; font-size:13px; cursor:pointer; font-weight:600;">📋 Copy</button>
+                        <a id="live-qr-open-link" href="#" target="_blank" style="display:none; background:#2563eb; color:white; padding:7px 14px; border-radius:7px; font-size:13px; text-decoration:none; font-weight:600;">🔗 Open</a>
+                        <button onclick="resumeLiveScan()" style="background:#f59e0b; color:white; border:none; padding:7px 14px; border-radius:7px; font-size:13px; cursor:pointer; font-weight:600;">🔄 আবার Scan</button>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; justify-content:center;">
+                    <button onclick="switchLiveCamera()" style="background:#475569; color:white; border:none; padding:10px 18px; border-radius:8px; font-size:14px; cursor:pointer; font-weight:600;">🔄 Camera Switch</button>
+                    <button onclick="closeLiveCameraScanner()" style="background:#ef4444; color:white; border:none; padding:10px 18px; border-radius:8px; font-size:14px; cursor:pointer; font-weight:600;">✖ বন্ধ করো</button>
+                </div>
+                <p id="live-camera-status" style="color:#94a3b8; font-size:13px; margin-top:12px;">Camera চালু হচ্ছে...</p>
             </div>
 
             <div class="tool-card border-t-4 border-gray-600">
@@ -678,6 +719,106 @@
         dummyDiv.id = "qr-reader-dummy-id";
         dummyDiv.style.display = "none";
         document.body.appendChild(dummyDiv);
+
+        // ========== LIVE CAMERA QR SCANNER ==========
+        let liveStream = null;
+        let liveScanInterval = null;
+        let liveFacingMode = 'environment';
+        let liveScanning = true;
+
+        window.openLiveCameraScanner = async function() {
+            const modal = document.getElementById('live-qr-modal');
+            modal.style.display = 'flex';
+            document.getElementById('live-qr-result-box').style.display = 'none';
+            liveScanning = true;
+            await startLiveCamera();
+        };
+
+        async function startLiveCamera() {
+            const status = document.getElementById('live-camera-status');
+            status.textContent = 'Camera চালু হচ্ছে...';
+            if (liveStream) liveStream.getTracks().forEach(t => t.stop());
+            try {
+                liveStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: liveFacingMode, width: { ideal: 640 }, height: { ideal: 640 } }
+                });
+                const video = document.getElementById('live-qr-video');
+                video.srcObject = liveStream;
+                video.play();
+                status.textContent = '🟢 Camera চালু — QR Code এর দিকে ধরো';
+                if (liveScanInterval) clearInterval(liveScanInterval);
+                liveScanInterval = setInterval(scanLiveFrame, 250);
+            } catch (err) {
+                status.textContent = '❌ Camera error: ' + err.message;
+            }
+        }
+
+        function scanLiveFrame() {
+            if (!liveScanning) return;
+            const video = document.getElementById('live-qr-video');
+            const canvas = document.getElementById('live-qr-canvas');
+            if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            // html5-qrcode এর scanFile ব্যবহার করে decode করব
+            canvas.toBlob(function(blob) {
+                if (!blob || !liveScanning) return;
+                const file = new File([blob], 'frame.png', { type: 'image/png' });
+                const tempQr = new Html5Qrcode("live-qr-dummy");
+                tempQr.scanFile(file, false)
+                    .then(function(decoded) {
+                        if (liveScanning && decoded) {
+                            liveScanning = false;
+                            showLiveResult(decoded);
+                        }
+                    })
+                    .catch(function() {});
+            }, 'image/png');
+        }
+
+        function showLiveResult(text) {
+            document.getElementById('live-qr-result-text').textContent = text;
+            const linkEl = document.getElementById('live-qr-open-link');
+            if (text.startsWith('http://') || text.startsWith('https://')) {
+                linkEl.href = text;
+                linkEl.style.display = 'inline-block';
+            } else {
+                linkEl.style.display = 'none';
+            }
+            document.getElementById('live-qr-result-box').style.display = 'block';
+            document.getElementById('live-camera-status').textContent = '✅ QR Code Scan সফল!';
+        }
+
+        window.resumeLiveScan = function() {
+            document.getElementById('live-qr-result-box').style.display = 'none';
+            document.getElementById('live-camera-status').textContent = '🟢 Ready — QR Code এর দিকে ধরো';
+            liveScanning = true;
+        };
+
+        window.closeLiveCameraScanner = function() {
+            document.getElementById('live-qr-modal').style.display = 'none';
+            if (liveStream) liveStream.getTracks().forEach(t => t.stop());
+            if (liveScanInterval) clearInterval(liveScanInterval);
+            liveStream = null;
+        };
+
+        window.switchLiveCamera = function() {
+            liveFacingMode = liveFacingMode === 'environment' ? 'user' : 'environment';
+            startLiveCamera();
+        };
+
+        window.copyLiveQRResult = function() {
+            const text = document.getElementById('live-qr-result-text').textContent;
+            navigator.clipboard.writeText(text).then(() => alert('Copied!'));
+        };
+
+        // live-qr dummy div
+        const liveDummyDiv = document.createElement('div');
+        liveDummyDiv.id = "live-qr-dummy";
+        liveDummyDiv.style.display = "none";
+        document.body.appendChild(liveDummyDiv);
 
     </script>
     
