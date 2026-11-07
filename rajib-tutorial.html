@@ -422,6 +422,55 @@ body{color:var(--text)}
 .pay-note a,.link-btn{color:var(--accent2)}
 @media(max-width:600px){.manage-wrap{padding:20px 14px 40px}.manage-hdr{padding:22px 20px;border-radius:18px}.manage-hdr h2{font-size:23px}}
 
+/* LIVE CLASS / LIVE EXAM PAGES */
+#viewLive{--lg:linear-gradient(135deg,#F0446E 0%,#FF7A3D 100%);--lc:#E8365D;--lglow:0 12px 30px rgba(240,68,110,.35);--lsoft:rgba(232,54,93,.09);--lbg:#FFF5F8;background:linear-gradient(180deg,var(--lbg) 0,#fff 420px);min-height:calc(100vh - 56px)}
+#viewLive[data-type="exam"]{--lg:linear-gradient(135deg,#4F35E8 0%,#B24DF0 100%);--lc:#5B3DF0;--lglow:0 12px 30px rgba(91,61,240,.35);--lsoft:rgba(91,61,240,.09);--lbg:#F6F3FF}
+.lv-hero{position:relative;overflow:hidden;background:var(--lg);color:#fff;padding:34px 48px 52px}
+.lv-hero::before{content:"";position:absolute;width:380px;height:380px;border-radius:50%;background:rgba(255,255,255,.13);right:-90px;top:-150px}
+.lv-hero::after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;background:rgba(255,255,255,.09);right:22%;bottom:-130px}
+.lv-hero>*{position:relative;z-index:1}
+.lv-tabs{display:flex;width:fit-content;gap:6px;padding:5px;border-radius:999px;background:rgba(255,255,255,.18);margin-bottom:30px}
+.lv-tabs button{display:flex;align-items:center;gap:8px;padding:9px 18px;border-radius:999px;font-size:13px;font-weight:700;color:#fff;transition:.15s}
+.lv-tabs button svg{width:16px;height:16px}
+.lv-tabs button:hover{background:rgba(255,255,255,.18)}
+.lv-tabs button.on{background:#fff;color:var(--lc);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.lv-status{display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.1em;padding:7px 15px;border-radius:999px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);margin-bottom:18px}
+.lv-status i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.6)}
+.lv-status.on{background:#fff;color:#D6183F;border-color:#fff}
+.lv-status.on i{background:#E5173F;animation:lvp 1.6s infinite}
+@keyframes lvp{0%{box-shadow:0 0 0 0 rgba(229,23,63,.6)}70%{box-shadow:0 0 0 8px rgba(229,23,63,0)}100%{box-shadow:0 0 0 0 rgba(229,23,63,0)}}
+.lv-hero h1{font-size:clamp(30px,4.4vw,48px);font-weight:800;letter-spacing:-.03em;line-height:1.12;max-width:760px}
+.lv-lead{font-size:16.5px;line-height:1.7;max-width:600px;margin-top:14px;opacity:.94;font-weight:500}
+.lv-time{display:inline-flex;align-items:center;gap:10px;margin-top:20px;padding:10px 18px;border-radius:12px;background:rgba(255,255,255,.18);font-weight:700;font-size:14.5px}
+.lv-time svg{width:19px;height:19px}
+.lv-actions{margin-top:28px}
+.lv-join{display:inline-flex;align-items:center;gap:11px;text-decoration:none;padding:16px 30px;border-radius:14px;background:#fff;color:var(--lc);font-size:15.5px;font-weight:800;box-shadow:0 12px 28px rgba(0,0,0,.22);transition:transform .15s,box-shadow .15s}
+.lv-join svg{width:19px;height:19px}
+.lv-join:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(0,0,0,.28)}
+.lv-join.off{background:rgba(255,255,255,.2);color:#fff;border:2px solid rgba(255,255,255,.7);box-shadow:none}
+.lv-join.off:hover{background:rgba(255,255,255,.3)}
+.lv-body{max-width:1040px;margin:0 auto;padding:0 40px 60px}
+.lv-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:-30px;position:relative;z-index:2}
+.lv-card{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow)}
+.lv-ico{width:46px;height:46px;border-radius:13px;background:var(--lg);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--lglow)}
+.lv-ico svg{width:22px;height:22px}
+.lv-card small{display:block;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--sub)}
+.lv-card b{display:block;font-size:15px;font-weight:800;color:var(--text);margin-top:3px;line-height:1.35}
+.lv-player{position:relative;aspect-ratio:16/9;border-radius:20px;overflow:hidden;margin-top:26px;background:#0F0C1A;box-shadow:0 18px 44px rgba(20,18,26,.22)}
+.lv-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.lv-empty{text-align:center;background:#fff;border:2px dashed rgba(20,18,26,.16);border-radius:20px;padding:42px 24px;margin-top:26px}
+.lv-empty-ico{width:62px;height:62px;border-radius:50%;background:var(--lsoft);color:var(--lc);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.lv-empty-ico svg{width:28px;height:28px}
+.lv-empty h3{font-size:19px;font-weight:800}
+.lv-empty p{font-size:14px;line-height:1.7;color:var(--sub);max-width:460px;margin:8px auto 0;font-weight:500}
+.lv-h2{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:38px 0 16px}
+.lv-tips{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.lv-tip{display:flex;gap:14px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.lv-n{width:32px;height:32px;border-radius:10px;background:var(--lsoft);color:var(--lc);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lv-tip b{font-size:14.5px;font-weight:800;display:block}
+.lv-tip p{font-size:13px;line-height:1.6;color:var(--sub);margin-top:4px;font-weight:500}
+@media(max-width:700px){.lv-tips{grid-template-columns:1fr}.lv-hero{padding:24px 20px 46px}.lv-body{padding:0 16px 44px}.lv-join{width:100%;justify-content:center}.lv-tabs{display:flex;width:100%}.lv-tabs button{flex:1;justify-content:center;padding:9px 8px}}
+
 /* RESPONSIVE */
 @media(max-width:900px){
   body{display:block}
@@ -592,6 +641,9 @@ body{color:var(--text)}
       </div>
     </div>
   </div>
+
+  <!-- LIVE CLASS / LIVE EXAM -->
+  <div class="view" id="viewLive"></div>
 
   <!-- MANAGE (admin) -->
   <div class="view" id="viewManage">
@@ -826,6 +878,7 @@ const SEMESTERS=["1st Semester","2nd Semester","3rd Semester","4th Semester","5t
 let courses=[], curCourse=null, curVideo=null, adminIn=false, pendingDelFn=null;
 let members=[], session=null, pendingVid=null;
 let filterSem="", searchQ="";
+let liveType="class";
 let live={classTitle:"",classTime:"",classUrl:"",examTitle:"",examTime:"",examUrl:"",premiumUrl:"",premiumInfo:""};
 
 const $=id=>document.getElementById(id);
@@ -851,7 +904,7 @@ window.goView=function(id){
   window.scrollTo(0,0);
   document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
   if(id==="viewHome") $("navHome").classList.add("active");
-  const titles={viewHome:"Rajib Tutorial",viewCourse:curCourse?.title||"Course",viewManage:"Manage Courses",viewMembers:"Premium Members"};
+  const titles={viewHome:"Rajib Tutorial",viewCourse:curCourse?.title||"Course",viewManage:"Manage Courses",viewMembers:"Premium Members",viewLive:liveType==="exam"?"Live Exam":"Live Class"};
   $("topbarTitle").textContent=titles[id]||"Rajib Tutorial";
 };
 window.goHome=function(){curCourse=null;curVideo=null;goView("viewHome");renderCourseGrid();renderSidebarCourses();closeSidebar()};
@@ -869,16 +922,64 @@ function renderLive(){
   if(cOn&&(live.classTitle||live.classTime)) parts.push(`<span>Live Class: <b>${esc(live.classTitle||"Scheduled")}</b>${live.classTime?" · "+esc(live.classTime):""}</span>`);
   if(eOn&&(live.examTitle||live.examTime)) parts.push(`<span>Live Exam: <b>${esc(live.examTitle||"Scheduled")}</b>${live.examTime?" · "+esc(live.examTime):""}</span>`);
   $("liveInfo").innerHTML=parts.join("");
+  if($("viewLive").classList.contains("active"))renderLivePage();
 }
-window.openLive=function(type){
-  const url=safeUrl(type==="class"?live.classUrl:live.examUrl);
-  if(url){window.open(url,"_blank","noopener");return}
-  $("noticeTitle").textContent=type==="class"?"No live class right now":"No live exam right now";
-  $("noticeMsg").textContent=(type==="class"
-    ?"There is no live class scheduled at the moment."
-    :"There is no live exam scheduled at the moment.")+" Please check back later or follow our announcements.";
-  openM("mNotice");
-};
+window.openLive=function(type){liveType=type==="exam"?"exam":"class";renderLivePage();goView("viewLive");closeSidebar()};
+function platformOf(u){try{const h=new URL(u).hostname.replace(/^www\./,"");
+  if(/youtu/.test(h))return"YouTube Live";if(/meet\.google/.test(h))return"Google Meet";if(/zoom/.test(h))return"Zoom";
+  if(/facebook|fb\.watch/.test(h))return"Facebook Live";return h}catch(e){return"Online"}}
+function renderLivePage(){
+  const exam=liveType==="exam",name=exam?"Live Exam":"Live Class";
+  const url=safeUrl(exam?live.examUrl:live.classUrl),on=!!url;
+  const title=(exam?live.examTitle:live.classTitle)||name;
+  const time=(exam?live.examTime:live.classTime)||"";
+  const embedRaw=on?ytEmbed(url):null,embed=embedRaw?embedRaw.replace("autoplay=1","autoplay=0"):null;
+  const tips=exam?[
+    ["Stable internet","Use a reliable connection and keep your phone or laptop fully charged."],
+    ["Be ready early","Join about 10 minutes before the start time so you can settle in."],
+    ["Keep materials handy","Have a pen, paper and a calculator ready before the exam begins."],
+    ["Stay in the session","Do not refresh or leave the page once the exam has started."]
+  ]:[
+    ["Stable internet","A steady connection gives you smooth video and audio."],
+    ["Join on time","Open the session 5 minutes early so you do not miss the beginning."],
+    ["Prepare your notes","Keep a notebook and pen ready to write down key points."],
+    ["Ask questions","Note down your doubts and ask the instructor during the class."]
+  ];
+  const ic={
+    clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    globe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
+    pulse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>',
+    cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+    ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>'
+  };
+  const v=$("viewLive");v.dataset.type=exam?"exam":"class";
+  v.innerHTML=`
+  <section class="lv-hero">
+    <div class="lv-tabs">
+      <button class="${exam?"":"on"}" onclick="openLive('class')">${I.video} Live Class</button>
+      <button class="${exam?"on":""}" onclick="openLive('exam')">${ic.cal} Live Exam</button>
+    </div>
+    <div class="lv-status ${on?"on":""}"><i></i>${on?"LIVE NOW":"NOT SCHEDULED"}</div>
+    <h1>${esc(title)}</h1>
+    <p class="lv-lead">${exam?"Test your preparation under real exam conditions and get ready for your finals.":"Learn together with your instructor in real time, ask questions and clear your doubts instantly."}</p>
+    ${time?`<div class="lv-time">${ic.clock}<span>${esc(time)}</span></div>`:""}
+    <div class="lv-actions">
+      ${on?`<a class="lv-join" href="${esc(url)}" target="_blank" rel="noopener">Join ${name} ${ic.ext}</a>`
+          :`<button class="lv-join off" onclick="goHome();setTimeout(()=>$('coursesAnchor').scrollIntoView(),50)">Browse recorded courses</button>`}
+    </div>
+  </section>
+  <div class="lv-body">
+    <div class="lv-cards">
+      <div class="lv-card"><div class="lv-ico">${ic.pulse}</div><div><small>Status</small><b>${on?"Open for joining":"Nothing scheduled"}</b></div></div>
+      <div class="lv-card"><div class="lv-ico">${ic.clock}</div><div><small>Schedule</small><b>${time?esc(time):"To be announced"}</b></div></div>
+      <div class="lv-card"><div class="lv-ico">${ic.globe}</div><div><small>Platform</small><b>${on?esc(platformOf(url)):"Not available yet"}</b></div></div>
+    </div>
+    ${embed?`<div class="lv-player"><iframe src="${embed}" allow="autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe></div>`:""}
+    ${on?"":`<div class="lv-empty"><div class="lv-empty-ico">${I.video}</div><h3>No ${name.toLowerCase()} right now</h3><p>There is no ${name.toLowerCase()} scheduled at the moment. Please check back later, or continue learning with the recorded video courses.</p></div>`}
+    <h2 class="lv-h2">${on?"Before you join":"When a session is scheduled"}</h2>
+    <div class="lv-tips">${tips.map((t,i)=>`<div class="lv-tip"><span class="lv-n">${i+1}</span><div><b>${t[0]}</b><p>${t[1]}</p></div></div>`).join("")}</div>
+  </div>`;
+}
 window.openLiveSettings=function(){
   $("lcTitle").value=live.classTitle||"";$("lcTime").value=live.classTime||"";$("lcUrl").value=live.classUrl||"";
   $("leTitle").value=live.examTitle||"";$("leTime").value=live.examTime||"";$("leUrl").value=live.examUrl||"";
