@@ -680,14 +680,11 @@ window.showToast = s => {
 function ytEmbed(url){
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   if(!m) return null;
-  // rel=0: no related videos, modestbranding=1: hide YT logo
-  // iv_load_policy=3: no annotations, playsinline=1: mobile inline
-  // fs=0: hide fullscreen btn (keeps user in our player)
-  // rel=0: no related videos after end
-  // modestbranding=1: minimal YT branding
-  // iv_load_policy=3: no annotations
-  // origin: locks embed to our domain
-  return `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&color=white&enablejsapi=0&fs=0`;
+  // rel=0: no related videos  |  modestbranding=1: minimal YT branding
+  // iv_load_policy=3: no annotations  |  playsinline=1: mobile inline
+  // NOTE: fs=0 causes Error 153 — YouTube blocks it. We use our own
+  // custom Fullscreen button via browser Fullscreen API instead.
+  return `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&color=white&enablejsapi=0`;
 }
 
 // ─── VIEWS ───────────────────────────────────────────────
