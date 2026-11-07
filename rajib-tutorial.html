@@ -97,6 +97,13 @@ svg{display:block;flex-shrink:0}
 .btn-bkash:disabled{opacity:.65;cursor:wait}
 .pay-note{font-size:11.5px;color:var(--sub);text-align:center;line-height:1.6;margin-top:14px}
 .pay-note a,.link-btn{color:var(--accent2);font-weight:600;text-decoration:underline;cursor:pointer}
+.ca-box{max-height:210px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:6px}
+.ca-item{display:flex;align-items:flex-start;gap:10px;padding:9px 8px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;line-height:1.4}
+.ca-item:hover{background:var(--card)}
+.ca-item input{accent-color:#D97757;width:16px;height:16px;margin-top:1px;flex-shrink:0}
+.ca-item small{display:block;font-size:11px;color:var(--sub);font-weight:400;margin-top:2px}
+.ca-all{border-bottom:1px solid var(--border);border-radius:8px 8px 0 0;margin-bottom:4px;font-weight:700;color:var(--accent2)}
+.ca-empty{padding:12px;font-size:12.5px;color:var(--sub)}
 .lock-ico{width:14px;height:14px;color:var(--sub);flex-shrink:0}
 .btn-hamburger{display:none;width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
 .btn-hamburger svg{width:20px;height:20px}
@@ -538,12 +545,12 @@ svg{display:block;flex-shrink:0}
 <div class="modal-bg hidden" id="mGate">
   <div class="modal">
     <div class="gate-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-    <div class="modal-title">Premium required</div>
-    <div class="modal-sub">Video lessons are available to Premium members only. Upgrade to unlock every lesson in all courses.</div>
+    <div class="modal-title" id="gateTitle">Premium required</div>
+    <div class="modal-sub" id="gateSub">Video lessons are available to Premium members only.</div>
     <div class="gate-info hidden" id="gateInfo"></div>
     <div class="col-acts">
       <button class="btn-ok" onclick="getPremium()">Become Premium</button>
-      <button class="btn-secondary" onclick="closeM('mGate');openMemberLogin()">I'm already Premium: Login</button>
+      <button class="btn-secondary" id="gateLogin" onclick="closeM('mGate');openMemberLogin()">I'm already Premium: Login</button>
       <button class="btn-cancel" onclick="closeM('mGate')">Maybe later</button>
     </div>
   </div>
@@ -572,9 +579,8 @@ svg{display:block;flex-shrink:0}
 <div class="modal-bg hidden" id="mMemberLogin">
   <div class="modal">
     <div class="modal-title">Premium Login</div>
-    <div class="modal-sub">Enter the mobile number and access code you received when you became a Premium member.</div>
-    <div class="fl"><label>Mobile Number</label><input type="tel" id="lmMobile" placeholder="01XXXXXXXXX" autocomplete="tel"/></div>
-    <div class="fl"><label>Access Code</label><input type="password" id="lmCode" placeholder="Your access code" onkeydown="if(event.key==='Enter')doMemberLogin()"/></div>
+    <div class="modal-sub">Enter the mobile number that has Premium access to log in.</div>
+    <div class="fl"><label>Mobile Number</label><input type="tel" id="lmMobile" placeholder="01XXXXXXXXX" autocomplete="tel" onkeydown="if(event.key==='Enter')doMemberLogin()"/></div>
     <div class="err-msg h" id="lmErr"></div>
     <div class="modal-acts">
       <button class="btn-cancel" onclick="closeM('mMemberLogin')">Cancel</button>
@@ -586,12 +592,12 @@ svg{display:block;flex-shrink:0}
 <div class="modal-bg hidden" id="mMember">
   <div class="modal">
     <div class="modal-title" id="mMemberTitle">Add Premium Member</div>
-    <div class="modal-sub">The access code is stored securely and cannot be viewed later, so share it with the member now.</div>
+    <div class="modal-sub">This mobile number will be able to log in. Choose which courses the member can watch.</div>
     <input type="hidden" id="editMid"/>
     <div class="fl"><label>Name *</label><input type="text" id="mmName" placeholder="Student name"/></div>
     <div class="fl"><label>Mobile Number *</label><input type="tel" id="mmMobile" placeholder="01XXXXXXXXX"/></div>
-    <div class="fl"><label id="mmCodeLbl">Access Code * (min 4 characters)</label><input type="text" id="mmCode" placeholder="e.g. 4829" autocomplete="off"/></div>
     <div class="fl"><label>Valid Until (optional)</label><input type="date" id="mmExpiry"/></div>
+    <div class="fl"><label>Course Access</label><div class="ca-box" id="mmCourses"></div></div>
     <div class="modal-acts">
       <button class="btn-cancel" onclick="closeM('mMember')">Cancel</button>
       <button class="btn-ok" onclick="saveMember()">Save</button>
@@ -820,7 +826,7 @@ function renderVlist(){
 }
 window.playVideo=function(vid){
   const want=curCourse?.videos?.find(v=>v.id===vid);if(!want)return;
-  if(!canWatch()){pendingVid=vid;openPremiumGate();return}
+  if(!canWatch()){pendingVid=vid;openPremiumGate(isPremium()?"noaccess":"login");return}
   curVideo=want;
   renderVlist();
   const area=$("playerArea"),embed=ytEmbed(curVideo.url||"");
@@ -986,14 +992,23 @@ document.addEventListener("webkitfullscreenchange",onFsChange);
 
 // ─── Premium membership ──────────────────────────────────
 const LS_KEY="rt_member";
-async function sha(str){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
-const hashCode=(mobile,code)=>sha("rt1:"+mobile+":"+String(code).trim());
 function normMobile(v){let d=String(v||"").replace(/\D/g,"");if(d.startsWith("880"))d="0"+d.slice(3);return d}
 function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 const curMember=()=>session?members.find(m=>m.id==="_member_"+session.mobile)||null:null;
-const memberValid=m=>!!m&&!!session&&m.hash===session.hash&&(!m.expiry||todayStr()<=m.expiry);
+const memberValid=m=>!!m&&!!session&&(!m.expiry||todayStr()<=m.expiry);
+const hasAll=m=>m.allCourses===true||(m.allCourses===undefined&&m.courseIds===undefined);
+function courseAllowed(c){
+  if(adminIn)return true;
+  const m=curMember();if(!c||!isPremium())return false;
+  return hasAll(m)||(m.courseIds||[]).includes(c.id);
+}
+function accessLabel(m){
+  if(hasAll(m))return"All courses";
+  const n=(m.courseIds||[]).filter(id=>courses.some(c=>c.id===id)).length;
+  return n+(n===1?" course":" courses");
+}
 const isPremium=()=>memberValid(curMember());
-const canWatch=()=>adminIn||isPremium();
+const canWatch=()=>courseAllowed(curCourse);
 function saveSession(){try{session?localStorage.setItem(LS_KEY,JSON.stringify(session)):localStorage.removeItem(LS_KEY)}catch(e){}}
 function validateSession(){
   if(session&&!isPremium()){
@@ -1008,14 +1023,17 @@ function renderUser(){
     <div class="umenu hidden" id="uMenu"><div class="um-name">${esc(name)}</div><div class="um-sub">${esc(sub)}</div>${adminIn?"":`<button class="um-btn" onclick="memberLogout()">Logout</button>`}</div>`;
   if(adminIn){wrap.innerHTML=chip("Admin","Administrator access");return}
   const m=curMember();
-  if(isPremium()){wrap.innerHTML=chip(m.name||"Member",m.expiry?"Premium · valid until "+m.expiry:"Premium member");return}
+  if(isPremium()){wrap.innerHTML=chip(m.name||"Member","Premium · "+accessLabel(m)+(m.expiry?" · until "+m.expiry:""));return}
   wrap.innerHTML=`<button class="btn-login" onclick="openMemberLogin()">Login</button><button class="btn-premium" onclick="openPremiumGate()">${I.star} Go Premium</button>`;
 }
 window.toggleUserMenu=e=>{e.stopPropagation();$("uMenu")?.classList.toggle("hidden")};
 document.addEventListener("click",()=>$("uMenu")?.classList.add("hidden"));
 
-window.openPremiumGate=function(){
-  const info=(live.premiumInfo||"").trim(),box=$("gateInfo");
+window.openPremiumGate=function(reason){
+  const info=(live.premiumInfo||"").trim(),box=$("gateInfo"),na=reason==="noaccess";
+  $("gateTitle").textContent=na?"Course not included":"Premium required";
+  $("gateSub").textContent=na?"Your Premium access does not include this course. Upgrade to unlock all courses, or contact the admin.":"Video lessons are available to Premium members only. Become Premium, or log in if your number already has access.";
+  $("gateLogin").classList.toggle("hidden",na);
   box.textContent=info;box.classList.toggle("hidden",!info);
   openM("mGate");
 };
@@ -1047,28 +1065,27 @@ window.startPayment=async function(){
   btn.disabled=false;btn.textContent="Pay with bKash";
 };
 window.openMemberLogin=function(){
-  $("lmMobile").value="";$("lmCode").value="";$("lmErr").classList.add("h");
+  $("lmMobile").value="";$("lmErr").classList.add("h");
   openM("mMemberLogin");setTimeout(()=>$("lmMobile").focus(),120);
 };
-async function memberAuth(mobile,code){
+async function memberAuth(mobile){
   try{
     const snap=await getDoc(doc(db,"tutorial_courses","_member_"+mobile));
     const m=snap.exists()?snap.data():null;
-    const h=await hashCode(mobile,code);
-    if(!m||m.hash!==h) return {err:"Invalid mobile number or access code."};
+    if(!m||!m.isMember) return {err:"This mobile number does not have Premium access. Please become Premium or contact the admin."};
     if(m.expiry&&todayStr()>m.expiry) return {err:"This Premium membership has expired. Please renew."};
-    session={mobile,hash:h};saveSession();
+    session={mobile};saveSession();
     const rec={id:snap.id,...m},i=members.findIndex(x=>x.id===snap.id);
     if(i>=0)members[i]=rec;else members.push(rec);
     return {name:m.name||"Member"};
   }catch(e){return {err:"Could not verify right now. Please try again."}}
 }
 window.doMemberLogin=async function(){
-  const mobile=normMobile($("lmMobile").value),code=$("lmCode").value.trim(),err=$("lmErr"),btn=$("lmBtn");
+  const mobile=normMobile($("lmMobile").value),err=$("lmErr"),btn=$("lmBtn");
   const fail=m=>{err.textContent=m;err.classList.remove("h")};
-  if(!mobile||!code){fail("Please enter your mobile number and access code.");return}
+  if(!/^01\d{9}$/.test(mobile)){fail("Enter a valid 11-digit mobile number (01XXXXXXXXX).");return}
   btn.disabled=true;btn.textContent="Checking…";
-  const r=await memberAuth(mobile,code);
+  const r=await memberAuth(mobile);
   btn.disabled=false;btn.textContent="Login";
   if(r.err){fail(r.err);return}
   closeM("mMemberLogin");renderUser();if(curCourse)renderVlist();
@@ -1089,38 +1106,42 @@ function renderMembers(){
     return `<div class="manage-card single">
       <div class="mc-icon">${I.star}</div>
       <div class="mc-info"><strong>${esc(m.name)}</strong><span>${esc(m.mobile)}</span>
-        <span>${exp?'<span class="badge exp">Expired</span>':'<span class="badge ok">Active</span>'} ${m.expiry?"until "+esc(m.expiry):"No expiry"}</span></div>
+        <span>${exp?'<span class="badge exp">Expired</span>':'<span class="badge ok">Active</span>'} ${m.expiry?"until "+esc(m.expiry):"No expiry"} · ${esc(accessLabel(m))}</span></div>
       <div class="mc-acts">
         <button class="btn-ic e" onclick="openEditMember('${m.id}')" aria-label="Edit">${I.edit}</button>
         <button class="btn-ic d" onclick="confirmDelMember('${m.id}')" aria-label="Remove">${I.trash}</button>
       </div></div>`}).join("");
 }
+function renderCourseChecks(m){
+  const all=!m||hasAll(m),ids=new Set(m?.courseIds||[]);
+  $("mmCourses").innerHTML=`<label class="ca-item ca-all"><input type="checkbox" id="caAll" ${all?"checked":""} onchange="toggleCaAll()"/><span>All courses (including new ones)</span></label>`+
+    (courses.length?courses.map(c=>`<label class="ca-item"><input type="checkbox" class="caC" value="${esc(c.id)}" ${!all&&ids.has(c.id)?"checked":""} ${all?"disabled":""}/><span>${esc(c.title)}<small>${esc([c.courseName,c.className,c.subject].filter(Boolean).join(" · "))}</small></span></label>`).join(""):`<div class="ca-empty">No courses created yet</div>`);
+}
+window.toggleCaAll=()=>{const a=$("caAll").checked;document.querySelectorAll(".caC").forEach(i=>{i.disabled=a;if(a)i.checked=false})};
 window.openAddMember=function(){
   $("editMid").value="";$("mMemberTitle").textContent="Add Premium Member";
-  $("mmName").value="";$("mmMobile").value="";$("mmMobile").disabled=false;$("mmCode").value="";$("mmExpiry").value="";
-  $("mmCodeLbl").textContent="Access Code * (min 4 characters)";openM("mMember");
+  $("mmName").value="";$("mmMobile").value="";$("mmMobile").disabled=false;$("mmExpiry").value="";
+  renderCourseChecks(null);openM("mMember");
 };
 window.openEditMember=function(id){
   const m=members.find(x=>x.id===id);if(!m)return;
   $("editMid").value=id;$("mMemberTitle").textContent="Edit Premium Member";
   $("mmName").value=m.name||"";$("mmMobile").value=m.mobile||"";$("mmMobile").disabled=true;
-  $("mmCode").value="";$("mmExpiry").value=m.expiry||"";
-  $("mmCodeLbl").textContent="New Access Code (leave empty to keep current)";openM("mMember");
+  $("mmExpiry").value=m.expiry||"";renderCourseChecks(m);openM("mMember");
 };
 window.saveMember=async function(){
-  const name=$("mmName").value.trim(),mobile=normMobile($("mmMobile").value),code=$("mmCode").value.trim(),expiry=$("mmExpiry").value;
-  const eid=$("editMid").value;
-  if(!name||!mobile){showToast("Please enter name and mobile number");return}
-  if(!eid&&code.length<4){showToast("Access code must be at least 4 characters");return}
-  if(eid&&code&&code.length<4){showToast("Access code must be at least 4 characters");return}
+  const name=$("mmName").value.trim(),mobile=normMobile($("mmMobile").value),expiry=$("mmExpiry").value,eid=$("editMid").value;
+  const allC=$("caAll").checked,ids=[...document.querySelectorAll(".caC:checked")].map(i=>i.value);
+  if(!name){showToast("Please enter the member name");return}
+  if(!/^01\d{9}$/.test(mobile)){showToast("Enter a valid 11-digit mobile number");return}
+  if(!allC&&!ids.length){showToast("Select at least one course, or choose All courses");return}
   try{
     if(eid){
-      const data={name,expiry};if(code)data.hash=await hashCode(mobile,code);
-      await updateDoc(doc(db,"tutorial_courses",eid),data);showToast("Member updated");
+      await updateDoc(doc(db,"tutorial_courses",eid),{name,expiry,allCourses:allC,courseIds:ids});showToast("Member updated");
     }else{
       const id="_member_"+mobile;
       if(members.some(m=>m.id===id)){showToast("This mobile number is already a member");return}
-      await setDoc(doc(db,"tutorial_courses",id),{isMember:true,name,mobile,hash:await hashCode(mobile,code),expiry,created:Date.now()});
+      await setDoc(doc(db,"tutorial_courses",id),{isMember:true,name,mobile,expiry,allCourses:allC,courseIds:ids,created:Date.now()});
       showToast("Member added");
     }
     closeM("mMember");await loadCourses();renderMembers();
@@ -1139,10 +1160,10 @@ $("playerArea").innerHTML=placeholder(I.play,"Select a lesson to start watching"
 try{session=JSON.parse(localStorage.getItem(LS_KEY)||"null")}catch(e){session=null}
 renderUser();
 (async()=>{
-  const m=location.hash.match(/^#activate=(\d{11})\.(\d{4,12})$/);
+  const m=location.hash.match(/^#activate=(\d{11})(?:\.\d+)?$/);
   if(!m)return;
   history.replaceState(null,"",location.pathname+location.search);
-  const r=await memberAuth(m[1],m[2]);
+  const r=await memberAuth(m[1]);
   if(r.err){showToast(r.err);return}
   renderUser();if(curCourse)renderVlist();
   showToast("Premium activated. Welcome, "+r.name);
