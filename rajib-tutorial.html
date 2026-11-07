@@ -259,12 +259,13 @@ button{cursor:pointer}
   display:block;position:relative;
   min-height:0;overflow:hidden;
 }
-/* iframe overflows 60px above to clip YouTube's title/channel bar.
-   Bottom is NOT clipped so seek bar / play / volume stay visible.
-   A small overlay div (added in JS) covers only the share button area. */
+/* iframe overflows:
+   - top: 60px  → clips YouTube title/channel bar
+   - bottom: 60px → clips share/watch-later/YouTube-logo row (~55px tall)
+   Seek bar + time + controls remain visible (they sit 60-100px from bottom) */
 .player-area iframe{
   width:100%;
-  height:calc(100% + 60px);
+  height:calc(100% + 120px);
   position:absolute;
   top:-60px;left:0;
   border:none;
@@ -307,7 +308,7 @@ button{cursor:pointer}
 .player-area:fullscreen iframe,
 .player-area:-webkit-full-screen iframe{
   top:-60px;
-  height:calc(100% + 60px);
+  height:calc(100% + 120px);
   width:100%;
   position:absolute;
   left:0;
@@ -826,15 +827,14 @@ window.playVideo = function(vid){
   const area  = document.getElementById("playerArea");
   const embed = ytEmbed(curVideo.url||"");
   if(embed){
-    // top:-60px clips YouTube's title/channel bar (top 60px hidden by overflow:hidden)
-    // Bottom control bar (seek/play/volume) stays fully visible
-    // Small overlays cover only the share/logo buttons in the bottom-right corner
-    // These overlays sit ABOVE the control bar area, not on the seek bar itself
+    // iframe overflows 60px top + 60px bottom via CSS (.player-area iframe)
+    // top  clip: hides YouTube title/channel bar
+    // bottom clip: hides share/watch-later/YouTube-logo row (~55px)
+    // seek bar + time + controls sit at 60-100px from bottom → fully visible
     area.innerHTML=`
       <iframe src="${embed}"
         allow="autoplay;encrypted-media;accelerometer;gyroscope;picture-in-picture"
-        allowfullscreen></iframe>
-      <div style="position:absolute;bottom:40px;right:0;width:200px;height:50px;z-index:10;pointer-events:all;cursor:default"></div>`;
+        allowfullscreen></iframe>`;
   } else if(curVideo.url){
     area.innerHTML=`<video controls autoplay src="${esc(curVideo.url)}" style="width:100%;height:100%;background:#000"></video>`;
   } else {
