@@ -256,11 +256,15 @@ button{cursor:pointer}
 .player-area{
   background:#000;width:100%;
   flex:1;
-  display:flex;align-items:center;justify-content:center;position:relative;
-  min-height:0;
+  display:block;position:relative;
+  min-height:0;overflow:hidden;
 }
 .player-area iframe{width:100%;height:100%;border:none;display:block}
-.player-placeholder{text-align:center;color:var(--sub);padding:40px}
+.player-placeholder{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--sub);padding:40px;
+}
 .player-placeholder .pp-ico{font-size:56px;margin-bottom:12px}
 .player-info{padding:12px 20px;flex-shrink:0}
 .player-title{font-size:16px;font-weight:700;margin-bottom:4px}
@@ -629,10 +633,9 @@ window.showToast = s => {
 function ytEmbed(url){
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
   if(!m) return null;
-  // rel=0: no related, modestbranding=1: hide logo, iv_load_policy=3: no annotations
-  // disablekb=1: no keyboard, fs=0: no fullscreen btn (keeps user in page)
-  // playsinline=1: mobile inline, origin lock
-  return `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=0&fs=1&playsinline=1&color=white`;
+  // rel=0: no related videos, modestbranding=1: hide YT logo
+  // iv_load_policy=3: no annotations, playsinline=1: mobile inline
+  return `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&color=white&enablejsapi=0`;
 }
 
 // ─── VIEWS ───────────────────────────────────────────────
@@ -773,12 +776,15 @@ window.playVideo = function(vid){
   const area  = document.getElementById("playerArea");
   const embed = ytEmbed(curVideo.url||"");
   if(embed){
-    // sandbox blocks popups/top-nav so share→open-YouTube is prevented
-    area.innerHTML=`<iframe src="${embed}"
-      allow="autoplay;encrypted-media;accelerometer;gyroscope;picture-in-picture"
-      sandbox="allow-scripts allow-same-origin allow-presentation"
-      referrerpolicy="no-referrer"
-      style="width:100%;height:100%;border:none;display:block"></iframe>`;
+    // Overlay covers the top-right corner where YT share/logo/title buttons appear
+    // This prevents users from clicking share or the YouTube logo to leave the page
+    area.innerHTML=`
+      <iframe src="${embed}"
+        allow="autoplay;encrypted-media;accelerometer;gyroscope;picture-in-picture"
+        allowfullscreen
+        style="width:100%;height:100%;border:none;display:block;position:absolute;top:0;left:0"></iframe>
+      <div style="position:absolute;top:0;right:0;width:180px;height:44px;z-index:10;cursor:default" title=""></div>
+      <div style="position:absolute;top:0;left:0;width:120px;height:44px;z-index:10;cursor:default" title=""></div>`;
   } else if(curVideo.url){
     area.innerHTML=`<video controls autoplay src="${esc(curVideo.url)}" style="width:100%;height:100%;background:#000"></video>`;
   } else {
