@@ -776,15 +776,19 @@ window.playVideo = function(vid){
   const area  = document.getElementById("playerArea");
   const embed = ytEmbed(curVideo.url||"");
   if(embed){
-    // Overlay covers the top-right corner where YT share/logo/title buttons appear
-    // This prevents users from clicking share or the YouTube logo to leave the page
+    // Overlay strategy to block YouTube share/logo/title UI:
+    // 1. Top bar (full width, 48px): covers YT title + logo on top-left, share on top-right
+    // 2. Bottom-right corner (220px × 56px): covers share button that appears when controls show
+    // 3. Bottom-left corner (120px × 56px): covers YT logo/watermark on bottom-left
+    // cursor:default + pointer-events:all ensures clicks never reach the iframe in those zones
     area.innerHTML=`
       <iframe src="${embed}"
         allow="autoplay;encrypted-media;accelerometer;gyroscope;picture-in-picture"
         allowfullscreen
         style="width:100%;height:100%;border:none;display:block;position:absolute;top:0;left:0"></iframe>
-      <div style="position:absolute;top:0;right:0;width:180px;height:44px;z-index:10;cursor:default" title=""></div>
-      <div style="position:absolute;top:0;left:0;width:120px;height:44px;z-index:10;cursor:default" title=""></div>`;
+      <div style="position:absolute;top:0;left:0;right:0;height:52px;z-index:10;cursor:default;pointer-events:all" title=""></div>
+      <div style="position:absolute;bottom:0;right:0;width:220px;height:60px;z-index:10;cursor:default;pointer-events:all" title=""></div>
+      <div style="position:absolute;bottom:0;left:0;width:160px;height:60px;z-index:10;cursor:default;pointer-events:all" title=""></div>`;
   } else if(curVideo.url){
     area.innerHTML=`<video controls autoplay src="${esc(curVideo.url)}" style="width:100%;height:100%;background:#000"></video>`;
   } else {
