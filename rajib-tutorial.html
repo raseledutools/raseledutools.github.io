@@ -358,6 +358,70 @@ body{color:var(--text)}
 .plan.sel{border-color:var(--accent);background:var(--accent-soft)}
 .footer{color:#3E3A48;font-weight:500}
 
+/* INNER PAGES: admin, members, course player, modals */
+#viewManage,#viewMembers{background:linear-gradient(180deg,#FFF5F8 0,#fff 360px);min-height:calc(100vh - 56px)}
+.manage-wrap{max-width:1040px;margin:0 auto;padding:32px 40px 56px}
+.manage-hdr{position:relative;overflow:hidden;background:var(--grad);color:#fff;border-radius:22px;padding:30px 34px;margin-bottom:28px;box-shadow:var(--glow)}
+.manage-hdr::before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.14);right:-70px;top:-110px}
+.manage-hdr::after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.10);right:150px;bottom:-90px}
+.manage-hdr>*{position:relative;z-index:1}
+.manage-hdr h2{color:#fff;font-size:28px;font-weight:800;letter-spacing:-.02em}
+.manage-hdr h2::after{display:block;font-size:13.5px;font-weight:500;opacity:.92;margin-top:5px;letter-spacing:0}
+#viewManage .manage-hdr h2::after{content:"Create courses, add video lessons and manage live sessions"}
+#viewMembers .manage-hdr{background:linear-gradient(135deg,#5B3DF0 0%,#B24DF0 100%);box-shadow:0 10px 26px rgba(109,74,240,.35)}
+#viewMembers .manage-hdr h2::after{content:"Control who has Premium access and which courses they can watch"}
+.manage-hdr .btn-add{background:#fff;color:var(--accent2);box-shadow:0 6px 16px rgba(0,0,0,.18)}
+#viewMembers .manage-hdr .btn-add{color:#5B3DF0}
+.manage-hdr .btn-add:hover{background:#fff;filter:brightness(.97)}
+.manage-hdr .btn-secondary{background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.75);color:#fff}
+.manage-hdr .btn-secondary:hover{background:rgba(255,255,255,.28)}
+.manage-card{border-radius:16px 16px 0 0;padding:16px 18px}
+.manage-card.single{border-radius:16px;margin-bottom:12px}
+.mc-icon{width:46px;height:46px;border-radius:13px;background:var(--grad);color:#fff;box-shadow:0 6px 14px rgba(240,68,110,.28)}
+.manage-card:nth-child(8n+3) .mc-icon{background:linear-gradient(135deg,#6D4AF0,#B24DF0);box-shadow:0 6px 14px rgba(109,74,240,.28)}
+.manage-card:nth-child(8n+5) .mc-icon{background:linear-gradient(135deg,#0E9F8E,#2BC66B);box-shadow:0 6px 14px rgba(14,159,142,.28)}
+.manage-card:nth-child(8n+7) .mc-icon{background:linear-gradient(135deg,#2563EB,#06B6D4);box-shadow:0 6px 14px rgba(37,99,235,.28)}
+.manage-card.single .mc-icon{background:linear-gradient(135deg,#6D4AF0,#B24DF0);box-shadow:0 6px 14px rgba(109,74,240,.28)}
+.mc-info strong{font-size:15.5px;font-weight:800;color:var(--text)}
+.mc-info span{color:var(--sub);font-weight:500}
+.vsub{border-radius:0 0 16px 16px;padding:0 18px 14px;margin-bottom:16px;box-shadow:var(--shadow)}
+.vsub-title{color:var(--accent2);font-weight:800}
+.vm-num{background:var(--accent-soft);color:var(--accent2);font-weight:800}
+.vm-info strong{font-weight:700}
+.btn-add-sm{background:var(--accent-soft);color:var(--accent2);font-weight:800;border:1px solid rgba(232,54,93,.25)}
+.btn-add-sm:hover{background:var(--grad);color:#fff;border-color:transparent}
+.btn-ic{border:1.5px solid rgba(20,18,26,.14);color:#3E3A48}
+.badge{font-weight:800}
+/* course player */
+.vlist-panel{background:#fff}
+.vlist-header{background:var(--grad);color:#fff;border-bottom:none;padding:22px 22px 20px}
+.vlist-header h2{color:#fff;font-weight:800;font-size:18px}
+.vlist-header p{color:rgba(255,255,255,.9);font-weight:600}
+.btn-back{color:#fff;background:rgba(255,255,255,.18);padding:6px 12px;border-radius:999px;font-weight:700}
+.btn-back:hover{background:rgba(255,255,255,.3);color:#fff}
+.vnum{background:var(--accent-soft);color:var(--accent2);font-weight:800}
+.vlist-item{border-radius:12px}
+.vlist-item:hover{background:var(--bg2);border-color:rgba(232,54,93,.2)}
+.vtitle{font-weight:700;color:var(--text)}
+.vdur{color:var(--sub);font-weight:600}
+.vlist-item.playing{background:var(--accent-soft)}
+.player-panel{background:linear-gradient(180deg,#FFF7F9 0,#fff 260px)}
+.player-area{background:#0F0C1A;border:none;box-shadow:0 18px 44px rgba(20,18,26,.22);border-radius:18px}
+.player-placeholder{color:#E6E1EE;font-weight:600;background:radial-gradient(500px 260px at 50% 40%,rgba(240,68,110,.28),transparent 70%),#0F0C1A}
+.pp-ico{background:var(--grad);color:#fff;box-shadow:var(--glow)}
+.player-title{font-size:21px;font-weight:800;color:var(--text)}
+.player-meta{color:var(--sub);font-weight:600}
+.btn-fullscreen{border:1.5px solid var(--accent);color:var(--accent2);font-weight:700;background:#fff}
+.btn-fullscreen:hover{background:var(--grad);color:#fff;border-color:transparent}
+/* modals */
+.modal{background-color:#fff;background-image:linear-gradient(135deg,#F0446E,#FF7A3D);background-size:100% 5px;background-repeat:no-repeat;padding-top:30px}
+.modal-title{font-size:20px;font-weight:800}
+.modal-sub{color:var(--sub)}
+.modal h4{color:var(--accent2);font-weight:800}
+.gate-ico{background:var(--grad);color:#fff;box-shadow:var(--glow)}
+.pay-note a,.link-btn{color:var(--accent2)}
+@media(max-width:600px){.manage-wrap{padding:20px 14px 40px}.manage-hdr{padding:22px 20px;border-radius:18px}.manage-hdr h2{font-size:23px}}
+
 /* RESPONSIVE */
 @media(max-width:900px){
   body{display:block}
