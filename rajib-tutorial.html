@@ -83,6 +83,20 @@ svg{display:block;flex-shrink:0}
 .badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;display:inline-block}
 .badge.ok{background:rgba(76,195,138,.15);color:var(--green)}
 .badge.exp{background:rgba(239,107,91,.15);color:var(--red)}
+.plans{display:grid;gap:10px;margin-bottom:16px}
+.plan{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:.15s}
+.plan:hover{border-color:rgba(217,119,87,.5)}
+.plan input{accent-color:#D97757;width:17px;height:17px}
+.plan.sel{border-color:var(--accent);background:var(--accent-soft)}
+.plan .pn{font-size:14px;font-weight:700}
+.plan .ps{font-size:11.5px;color:var(--sub);margin-top:2px}
+.plan .pp{margin-left:auto;font-size:16px;font-weight:800;color:var(--accent2)}
+.plan .save{font-size:10px;font-weight:800;background:rgba(76,195,138,.16);color:var(--green);padding:2px 7px;border-radius:5px;margin-left:8px;vertical-align:middle}
+.btn-bkash{display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;border-radius:11px;background:#E2136E;color:#fff;font-size:14px;font-weight:800;transition:.15s}
+.btn-bkash:hover{background:#c40f5f}
+.btn-bkash:disabled{opacity:.65;cursor:wait}
+.pay-note{font-size:11.5px;color:var(--sub);text-align:center;line-height:1.6;margin-top:14px}
+.pay-note a,.link-btn{color:var(--accent2);font-weight:600;text-decoration:underline;cursor:pointer}
 .lock-ico{width:14px;height:14px;color:var(--sub);flex-shrink:0}
 .btn-hamburger{display:none;width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
 .btn-hamburger svg{width:20px;height:20px}
@@ -512,8 +526,8 @@ svg{display:block;flex-shrink:0}
     <div class="fl"><label>Schedule</label><input type="text" id="leTime" placeholder="e.g. Saturday, 9:00 PM"/></div>
     <div class="fl"><label>Exam Link</label><input type="url" id="leUrl" placeholder="https://…"/></div>
     <h4>Premium</h4>
-    <div class="fl"><label>“Become Premium” Link</label><input type="url" id="pmUrl" placeholder="WhatsApp, Facebook or payment page link"/></div>
-    <div class="fl"><label>Premium Info (shown to students)</label><textarea id="pmInfo" placeholder="e.g. 1 month: ৳50 · Pay via bKash 01XXXXXXXXX, then send the receipt to get your access code."></textarea></div>
+    <div class="fl"><label>Support / Help Link (optional)</label><input type="url" id="pmUrl" placeholder="WhatsApp or Facebook link shown as “Need help?”"/></div>
+    <div class="fl"><label>Premium Info (shown in the Premium popup, optional)</label><textarea id="pmInfo" placeholder="e.g. Unlock every lesson, live class and exam with Premium."></textarea></div>
     <div class="modal-acts">
       <button class="btn-cancel" onclick="closeM('mLive')">Cancel</button>
       <button class="btn-ok" onclick="saveLive()">Save</button>
@@ -532,6 +546,26 @@ svg{display:block;flex-shrink:0}
       <button class="btn-secondary" onclick="closeM('mGate');openMemberLogin()">I'm already Premium: Login</button>
       <button class="btn-cancel" onclick="closeM('mGate')">Maybe later</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="mPay">
+  <div class="modal">
+    <div class="modal-title">Become Premium</div>
+    <div class="modal-sub">Choose a plan and pay securely with bKash. Your Premium access is activated automatically right after payment.</div>
+    <div class="plans" id="plans">
+      <label class="plan sel"><input type="radio" name="plan" value="1month" checked/><div><div class="pn">1 Month</div><div class="ps">Full access to all video lessons</div></div><div class="pp">৳50</div></label>
+      <label class="plan"><input type="radio" name="plan" value="6month"/><div><div class="pn">6 Months<span class="save">SAVE 40%</span></div><div class="ps">Best for a full semester</div></div><div class="pp">৳300</div></label>
+      <label class="plan"><input type="radio" name="plan" value="1year"/><div><div class="pn">1 Year<span class="save">BEST VALUE</span></div><div class="ps">Complete diploma preparation</div></div><div class="pp">৳500</div></label>
+    </div>
+    <div class="fl"><label>Your Name *</label><input type="text" id="payName" placeholder="Full name" autocomplete="name"/></div>
+    <div class="fl"><label>Mobile Number *</label><input type="tel" id="payMobile" placeholder="01XXXXXXXXX" autocomplete="tel"/></div>
+    <div class="err-msg h" id="payErr"></div>
+    <div class="col-acts" style="margin-top:6px">
+      <button class="btn-bkash" id="payBtn" onclick="startPayment()">Pay with bKash</button>
+      <button class="btn-cancel" onclick="closeM('mPay')">Cancel</button>
+    </div>
+    <div class="pay-note">Payment is processed securely by bKash. Already Premium? <a onclick="closeM('mPay');openMemberLogin()">Login</a><span id="payHelp"></span></div>
   </div>
 </div>
 
@@ -986,36 +1020,60 @@ window.openPremiumGate=function(){
   openM("mGate");
 };
 window.getPremium=function(){
-  const url=safeUrl(live.premiumUrl);
-  if(url){window.open(url,"_blank","noopener");return}
   closeM("mGate");
-  $("noticeTitle").textContent="Become Premium";
-  $("noticeMsg").textContent="Please contact the admin to get your Premium access code.";
-  openM("mNotice");
+  $("payErr").classList.add("h");
+  const u=safeUrl(live.premiumUrl);
+  $("payHelp").innerHTML=u?` · <a href="${esc(u)}" target="_blank" rel="noopener">Need help?</a>`:"";
+  openM("mPay");setTimeout(()=>$("payName").focus(),120);
+};
+const BACKEND="https://rasfocus-backend.onrender.com";
+document.addEventListener("change",e=>{
+  if(e.target.name==="plan")document.querySelectorAll("#plans .plan").forEach(l=>l.classList.toggle("sel",l.querySelector("input").checked));
+});
+window.startPayment=async function(){
+  const name=$("payName").value.trim(),mobile=normMobile($("payMobile").value);
+  const plan=document.querySelector('input[name="plan"]:checked')?.value||"1month";
+  const err=$("payErr"),btn=$("payBtn"),fail=m=>{err.textContent=m;err.classList.remove("h")};
+  err.classList.add("h");
+  if(name.length<2){fail("Please enter your name.");return}
+  if(!/^01\d{9}$/.test(mobile)){fail("Enter a valid 11-digit mobile number (01XXXXXXXXX).");return}
+  btn.disabled=true;btn.textContent="Connecting to bKash… (may take up to 30 seconds)";
+  try{
+    const r=await fetch(BACKEND+"/api/tutorial/bkash/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,mobile,plan})});
+    const d=await r.json();
+    if(d.success&&d.bkashURL){window.location.href=d.bkashURL;return}
+    fail(d.message||"Could not start the payment. Please try again.");
+  }catch(e){fail("Server is waking up or unreachable. Please wait 30 seconds and try again.")}
+  btn.disabled=false;btn.textContent="Pay with bKash";
 };
 window.openMemberLogin=function(){
   $("lmMobile").value="";$("lmCode").value="";$("lmErr").classList.add("h");
   openM("mMemberLogin");setTimeout(()=>$("lmMobile").focus(),120);
 };
+async function memberAuth(mobile,code){
+  try{
+    const snap=await getDoc(doc(db,"tutorial_courses","_member_"+mobile));
+    const m=snap.exists()?snap.data():null;
+    const h=await hashCode(mobile,code);
+    if(!m||m.hash!==h) return {err:"Invalid mobile number or access code."};
+    if(m.expiry&&todayStr()>m.expiry) return {err:"This Premium membership has expired. Please renew."};
+    session={mobile,hash:h};saveSession();
+    const rec={id:snap.id,...m},i=members.findIndex(x=>x.id===snap.id);
+    if(i>=0)members[i]=rec;else members.push(rec);
+    return {name:m.name||"Member"};
+  }catch(e){return {err:"Could not verify right now. Please try again."}}
+}
 window.doMemberLogin=async function(){
   const mobile=normMobile($("lmMobile").value),code=$("lmCode").value.trim(),err=$("lmErr"),btn=$("lmBtn");
   const fail=m=>{err.textContent=m;err.classList.remove("h")};
   if(!mobile||!code){fail("Please enter your mobile number and access code.");return}
   btn.disabled=true;btn.textContent="Checking…";
-  try{
-    const snap=await getDoc(doc(db,"tutorial_courses","_member_"+mobile));
-    const m=snap.exists()?snap.data():null;
-    const h=await hashCode(mobile,code);
-    if(!m||m.hash!==h){fail("Invalid mobile number or access code.");return}
-    if(m.expiry&&todayStr()>m.expiry){fail("This Premium membership has expired. Please renew.");return}
-    session={mobile,hash:h};saveSession();
-    const i=members.findIndex(x=>x.id===snap.id);const rec={id:snap.id,...m};
-    if(i>=0)members[i]=rec;else members.push(rec);
-    closeM("mMemberLogin");renderUser();if(curCourse)renderVlist();
-    showToast("Welcome, "+(m.name||"Member"));
-    if(pendingVid){const v=pendingVid;pendingVid=null;playVideo(v)}
-  }catch(e){fail("Could not verify right now. Please try again.")}
-  finally{btn.disabled=false;btn.textContent="Login"}
+  const r=await memberAuth(mobile,code);
+  btn.disabled=false;btn.textContent="Login";
+  if(r.err){fail(r.err);return}
+  closeM("mMemberLogin");renderUser();if(curCourse)renderVlist();
+  showToast("Welcome, "+r.name);
+  if(pendingVid){const v=pendingVid;pendingVid=null;playVideo(v)}
 };
 window.memberLogout=function(){session=null;pendingVid=null;saveSession();curVideo=null;
   if(curCourse){$("playerArea").innerHTML=placeholder(I.play,"Select a lesson to start watching");$("playerTitle").textContent="–";$("playerMeta").textContent="";renderVlist()}
@@ -1080,6 +1138,15 @@ window.confirmDelMember=function(id){
 $("playerArea").innerHTML=placeholder(I.play,"Select a lesson to start watching");
 try{session=JSON.parse(localStorage.getItem(LS_KEY)||"null")}catch(e){session=null}
 renderUser();
+(async()=>{
+  const m=location.hash.match(/^#activate=(\d{11})\.(\d{4,12})$/);
+  if(!m)return;
+  history.replaceState(null,"",location.pathname+location.search);
+  const r=await memberAuth(m[1],m[2]);
+  if(r.err){showToast(r.err);return}
+  renderUser();if(curCourse)renderVlist();
+  showToast("Premium activated. Welcome, "+r.name);
+})();
 loadCourses();
 </script>
 </body>
