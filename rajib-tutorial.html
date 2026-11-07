@@ -275,9 +275,42 @@ button{cursor:pointer}
   color:var(--sub);padding:40px;
 }
 .player-placeholder .pp-ico{font-size:56px;margin-bottom:12px}
-.player-info{padding:12px 20px;flex-shrink:0}
+.player-info{padding:10px 20px;flex-shrink:0;display:flex;align-items:center;gap:10px}
+.player-info-text{flex:1;min-width:0}
 .player-title{font-size:16px;font-weight:700;margin-bottom:4px}
 .player-meta{font-size:12px;color:var(--sub)}
+
+/* Custom fullscreen button */
+.btn-fullscreen{
+  flex-shrink:0;
+  background:rgba(74,158,255,.13);border:1px solid rgba(74,158,255,.25);
+  border-radius:9px;padding:8px 14px;
+  color:var(--accent);font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:6px;
+  transition:background .2s,border-color .2s;
+  white-space:nowrap;
+}
+.btn-fullscreen:hover{background:rgba(74,158,255,.25);border-color:rgba(74,158,255,.5)}
+
+/* When player-area itself is fullscreen: fill screen, keep clip */
+.player-area:fullscreen{
+  width:100vw;height:100vh;
+  overflow:hidden;position:relative;
+  background:#000;
+}
+.player-area:-webkit-full-screen{
+  width:100vw;height:100vh;
+  overflow:hidden;position:relative;
+  background:#000;
+}
+.player-area:fullscreen iframe,
+.player-area:-webkit-full-screen iframe{
+  top:-60px;
+  height:calc(100% + 180px);
+  width:100%;
+  position:absolute;
+  left:0;
+}
 
 @media(max-width:860px){
   .vlist-panel{width:100%;border-right:none;border-bottom:1px solid var(--border);flex-shrink:0}
@@ -483,8 +516,13 @@ button{cursor:pointer}
           </div>
         </div>
         <div class="player-info">
-          <div class="player-title" id="playerTitle">—</div>
-          <div class="player-meta"  id="playerMeta"></div>
+          <div class="player-info-text">
+            <div class="player-title" id="playerTitle">—</div>
+            <div class="player-meta"  id="playerMeta"></div>
+          </div>
+          <button class="btn-fullscreen" id="btnFullscreen" onclick="toggleFullscreen()" title="Fullscreen">
+            <span id="fsIcon">⛶</span> <span id="fsLabel">Fullscreen</span>
+          </button>
         </div>
       </div>
     </div>
@@ -649,7 +687,7 @@ function ytEmbed(url){
   // modestbranding=1: minimal YT branding
   // iv_load_policy=3: no annotations
   // origin: locks embed to our domain
-  return `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&color=white&enablejsapi=0&fs=0&origin=${encodeURIComponent(location.origin)}`;
+  return `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&color=white&enablejsapi=0&fs=0`;
 }
 
 // ─── VIEWS ───────────────────────────────────────────────
@@ -1016,6 +1054,32 @@ window.closeM= id=>document.getElementById(id).classList.add("hidden");
 document.querySelectorAll(".modal-bg").forEach(m=>
   m.addEventListener("click",e=>{ if(e.target===m) m.classList.add("hidden"); })
 );
+
+// ─── FULLSCREEN ──────────────────────────────────────────
+window.toggleFullscreen = function(){
+  const area = document.getElementById('playerArea');
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  if(!isFs){
+    // Enter fullscreen on the player-area div (not the iframe!)
+    // overflow:hidden stays active → YouTube UI chrome stays clipped
+    const req = area.requestFullscreen || area.webkitRequestFullscreen;
+    if(req) req.call(area);
+  } else {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if(exit) exit.call(document);
+  }
+};
+
+// Update button icon when fullscreen state changes
+function onFsChange(){
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const icon  = document.getElementById('fsIcon');
+  const label = document.getElementById('fsLabel');
+  if(icon)  icon.textContent  = isFs ? '✕' : '⛶';
+  if(label) label.textContent = isFs ? 'Exit' : 'Fullscreen';
+}
+document.addEventListener('fullscreenchange', onFsChange);
+document.addEventListener('webkitfullscreenchange', onFsChange);
 
 // ─── BOOT ────────────────────────────────────────────────
 loadCourses();
