@@ -29,7 +29,8 @@ svg{display:block;flex-shrink:0}
 .hidden{display:none!important}
 
 /* SIDEBAR */
-.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;z-index:200;transition:transform .28s ease}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:fixed;left:0;top:0;transform:translateX(-100%);z-index:200;transition:transform .3s cubic-bezier(.4,0,.2,1),box-shadow .3s}
+.sidebar.open{transform:none;box-shadow:12px 0 40px rgba(60,20,25,.28)}
 .sidebar-top{padding:20px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
 .sidebar-logo{width:40px;height:40px;border-radius:11px;background:#FFF1EB;border:1px solid rgba(217,119,87,.25);display:flex;align-items:center;justify-content:center}
 .sidebar-brand{font-size:16px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
@@ -261,6 +262,31 @@ svg{display:block;flex-shrink:0}
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#1E1B18;color:#fff;border:1px solid transparent;padding:12px 20px;border-radius:11px;font-size:13px;font-weight:500;z-index:900;box-shadow:0 10px 30px rgba(30,27,24,.25)}
 .toast.h{display:none}
 
+/* SIDEBAR THEME: coral to deep rose + 3-line menu button */
+.sidebar{background:linear-gradient(180deg,#CF5A3A 0%,#B84A55 55%,#A33D66 100%);border-right:none;color:#fff}
+.sidebar-top{border-bottom:1px solid rgba(255,255,255,.18)}
+.sidebar-logo{background:#fff;border:none;box-shadow:0 4px 12px rgba(60,20,25,.25)}
+.sidebar-brand{color:#fff}
+.sidebar-brand small{color:rgba(255,255,255,.78)}
+.nav-label{color:rgba(255,255,255,.66)}
+.nav-item,.course-nav-item{color:rgba(255,255,255,.88)}
+.nav-item:hover,.course-nav-item:hover{background:rgba(255,255,255,.15);color:#fff}
+.nav-item.active,.course-nav-item.active{background:#fff;color:#B8453F;font-weight:600;box-shadow:0 4px 14px rgba(60,20,25,.2)}
+.live-dot{background:#fff;animation:pulseW 1.8s infinite}
+@keyframes pulseW{0%{box-shadow:0 0 0 0 rgba(255,255,255,.7)}70%{box-shadow:0 0 0 7px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.sidebar-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3)}
+.admin-sidebar{border-top:1px solid rgba(255,255,255,.18)}
+.admin-section-label{color:#fff}
+.btn-admin-action{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.22)}
+.btn-admin-action:hover{background:rgba(255,255,255,.22);border-color:#fff}
+.btn-admin-action.btn-logout{color:#FFE1DB}
+.sidebar-bottom{border-top:1px solid rgba(255,255,255,.18)}
+.btn-admin-login{border:1px solid rgba(255,255,255,.4);color:#fff}
+.btn-admin-login:hover{background:rgba(255,255,255,.16);border-color:#fff;color:#fff}
+.btn-hamburger{display:flex;background:#fff;color:var(--text);transition:border-color .15s,color .15s,background .15s}
+.btn-hamburger:hover{border-color:var(--accent);color:var(--accent2);background:var(--accent-soft)}
+.btn-hamburger svg{width:20px;height:20px}
+
 /* RESPONSIVE */
 @media(max-width:900px){
   body{display:block}
@@ -311,7 +337,7 @@ svg{display:block;flex-shrink:0}
       <span>Live Exam</span><i class="live-dot hidden" id="dotExam"></i>
     </div>
     <div class="nav-label">Courses</div>
-    <div id="sidebarCourses"><div style="padding:6px 12px;font-size:12px;color:var(--sub)">Loading…</div></div>
+    <div id="sidebarCourses"><div style="padding:6px 12px;font-size:12px;color:rgba(255,255,255,.75)">Loading…</div></div>
   </nav>
 
   <div class="admin-sidebar" id="adminSidebar">
@@ -798,7 +824,7 @@ function renderCourseGrid(){
 }
 function renderSidebarCourses(){
   const wrap=$("sidebarCourses");
-  if(!courses.length){wrap.innerHTML=`<div style="padding:6px 12px;font-size:12px;color:var(--sub)">No courses yet</div>`;return}
+  if(!courses.length){wrap.innerHTML=`<div style="padding:6px 12px;font-size:12px;color:rgba(255,255,255,.75)">No courses yet</div>`;return}
   wrap.innerHTML=courses.map(c=>`
     <div class="course-nav-item ${curCourse?.id===c.id?"active":""}" onclick="openCourse('${c.id}')">
       <span class="course-nav-dot"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis">${esc(c.title)}</span>
@@ -979,7 +1005,7 @@ window.runConfirm=()=>pendingDelFn&&pendingDelFn();
 window.openM=id=>$(id).classList.remove("hidden");
 window.closeM=id=>$(id).classList.add("hidden");
 document.querySelectorAll(".modal-bg").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.add("hidden")}));
-document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".modal-bg").forEach(m=>m.classList.add("hidden"))});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){document.querySelectorAll(".modal-bg").forEach(m=>m.classList.add("hidden"));closeSidebar()}});
 
 // ─── Fullscreen ──────────────────────────────────────────
 window.toggleFullscreen=function(){
