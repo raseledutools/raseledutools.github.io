@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rajib Tutorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0F1923; --bg2:#0D1F38; --card:#1A2535; --card2:#1f2f45;
+  --accent:#4A9EFF; --purple:#7B5CF5; --green:#34C98A; --red:#FF6B6B;
+  --text:#E8EDF2; --sub:#8A9BB0; --border:rgba(138,155,176,.15);
+  --sidebar-w:280px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow-x:hidden}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--card2);border-radius:3px}
+
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════════ */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--card);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  height:100vh;position:sticky;top:0;overflow:hidden;
+  transition:width .3s ease;
+  z-index:200;
+}
+.sidebar-top{
+  padding:20px 16px 14px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.sidebar-logo{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;font-weight:800;color:#fff;
+}
+.sidebar-brand{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden}
+.sidebar-brand small{display:block;font-size:11px;color:var(--sub);font-weight:400}
+
+/* Nav links */
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 10px}
+.nav-label{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;padding:8px 8px 4px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 10px;border-radius:10px;cursor:pointer;
+  font-size:13px;font-weight:500;color:var(--sub);
+  transition:background .15s,color .15s;
+  white-space:nowrap;overflow:hidden;
+}
+.nav-item:hover{background:var(--card2);color:var(--text)}
+.nav-item.active{background:rgba(74,158,255,.15);color:var(--accent)}
+.nav-item .ni{font-size:17px;flex-shrink:0;width:22px;text-align:center}
+.nav-item .nt{flex:1;overflow:hidden;text-overflow:ellipsis}
+.nav-item .nbadge{
+  background:rgba(74,158,255,.2);color:var(--accent);
+  font-size:10px;font-weight:700;border-radius:6px;padding:1px 6px;flex-shrink:0;
+}
+
+/* Course list in sidebar */
+.sidebar-courses{padding:0 10px 8px}
+.course-nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 10px;border-radius:9px;cursor:pointer;
+  font-size:12px;font-weight:500;color:var(--sub);
+  transition:background .15s,color .15s;
+  white-space:nowrap;overflow:hidden;
+}
+.course-nav-item:hover{background:var(--card2);color:var(--text)}
+.course-nav-item.active{background:rgba(74,158,255,.12);color:var(--accent)}
+.course-nav-dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0}
+.course-nav-item.active .course-nav-dot{background:var(--accent)}
+
+/* Sidebar bottom — admin area */
+.sidebar-bottom{
+  border-top:1px solid var(--border);
+  padding:12px 10px;flex-shrink:0;
+}
+.btn-admin-login{
+  display:flex;align-items:center;gap:10px;
+  width:100%;padding:11px 10px;border-radius:10px;
+  background:rgba(123,92,245,.12);border:1px solid rgba(123,92,245,.25);
+  color:var(--purple);font-size:13px;font-weight:600;
+  transition:background .2s,border-color .2s;
+}
+.btn-admin-login:hover{background:rgba(123,92,245,.2);border-color:rgba(123,92,245,.45)}
+.btn-admin-login .ai{font-size:17px}
+
+/* Admin logged-in section in sidebar */
+.admin-sidebar{display:none;padding:0 10px 4px}
+.admin-sidebar.show{display:block}
+.admin-section-label{font-size:10px;font-weight:700;color:var(--purple);letter-spacing:.08em;text-transform:uppercase;padding:8px 8px 4px;display:flex;align-items:center;gap:5px}
+.btn-admin-action{
+  display:flex;align-items:center;gap:10px;
+  width:100%;padding:9px 10px;border-radius:9px;
+  background:none;border:none;
+  color:var(--sub);font-size:12px;font-weight:500;
+  transition:background .15s,color .15s;text-align:left;
+  margin-bottom:2px;
+}
+.btn-admin-action:hover{background:var(--card2);color:var(--text)}
+.btn-admin-action .ai2{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+.btn-logout{color:var(--red)!important}
+.btn-logout:hover{background:rgba(255,107,107,.1)!important}
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE overlay
+═══════════════════════════════════════════════════════ */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+@media(max-width:720px){
+  .sidebar{position:fixed;left:0;top:0;height:100%;transform:translateX(-100%);transition:transform .3s ease}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.show{display:block}
+  .topbar{display:flex!important}
+  .main{margin-left:0!important}
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOPBAR (mobile only)
+═══════════════════════════════════════════════════════ */
+.topbar{
+  display:none;position:fixed;top:0;left:0;right:0;z-index:198;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  height:56px;padding:0 16px;
+  align-items:center;gap:12px;
+  backdrop-filter:blur(10px);
+}
+.btn-hamburger{
+  background:none;border:none;color:var(--text);font-size:22px;
+  width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;flex-shrink:0;
+}
+.topbar-title{font-size:16px;font-weight:700;flex:1}
+
+/* ═══════════════════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════════════════ */
+.main{flex:1;overflow-y:auto;height:100vh;display:flex;flex-direction:column}
+@media(max-width:720px){.main{padding-top:56px;height:auto;min-height:100vh}}
+
+/* ── Page switching ── */
+.view{display:none}
+.view.active{display:block}
+
+/* ═══════════════════════════════════════════════════════
+   HOME VIEW
+═══════════════════════════════════════════════════════ */
+.home-hero{
+  padding:48px 32px 32px;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(74,158,255,.1) 0%,transparent 70%);
+  text-align:center;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.25);
+  border-radius:20px;padding:5px 14px;font-size:12px;color:var(--accent);
+  font-weight:600;margin-bottom:16px;
+}
+.home-hero h1{font-size:clamp(24px,4vw,42px);font-weight:800;line-height:1.2;margin-bottom:10px}
+.home-hero h1 span{background:linear-gradient(135deg,var(--accent),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home-hero p{color:var(--sub);font-size:15px;max-width:460px;margin:0 auto 28px;line-height:1.6}
+.hero-stats{display:flex;gap:28px;justify-content:center;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-n{font-size:28px;font-weight:800;color:var(--accent)}
+.stat-l{font-size:11px;color:var(--sub);margin-top:2px}
+
+/* Course grid */
+.courses-section{padding:0 28px 48px;max-width:1000px;width:100%}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.sec-title{font-size:16px;font-weight:700}
+.course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.course-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;cursor:pointer;
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+}
+.course-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.3);border-color:rgba(74,158,255,.3)}
+.cc-thumb{
+  height:120px;
+  background:linear-gradient(135deg,rgba(74,158,255,.18),rgba(123,92,245,.18));
+  display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;
+}
+.cc-vcount{
+  position:absolute;bottom:8px;right:8px;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+  border-radius:7px;padding:2px 8px;font-size:11px;color:var(--accent);font-weight:600;
+}
+.cc-body{padding:14px}
+.cc-tag{font-size:11px;color:var(--purple);font-weight:600;margin-bottom:4px}
+.cc-name{font-size:14px;font-weight:700;margin-bottom:4px;line-height:1.3}
+.cc-meta{font-size:11px;color:var(--sub);margin-bottom:10px}
+.cc-foot{display:flex;align-items:center;justify-content:space-between;padding-top:9px;border-top:1px solid var(--border)}
+.cc-vids{font-size:11px;color:var(--accent);font-weight:600}
+.btn-watch{
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  border:none;border-radius:7px;padding:6px 12px;
+  font-size:11px;font-weight:600;color:#fff;transition:opacity .2s;
+}
+.btn-watch:hover{opacity:.85}
+
+/* Loading / empty */
+.loader{text-align:center;padding:60px 20px;color:var(--sub)}
+.spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:60px 20px}
+.empty-ico{font-size:52px;margin-bottom:12px}
+.empty p{color:var(--sub);font-size:14px}
+
+/* ═══════════════════════════════════════════════════════
+   COURSE VIEW (video list + player)
+═══════════════════════════════════════════════════════ */
+.course-view-wrap{display:flex;gap:0;height:100%;min-height:calc(100vh - 56px)}
+@media(min-width:721px){.course-view-wrap{height:100vh}}
+
+/* video list panel */
+.vlist-panel{
+  width:340px;flex-shrink:0;
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.vlist-header{padding:16px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.vlist-header h2{font-size:15px;font-weight:700;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vlist-header p{font-size:12px;color:var(--sub)}
+.vlist-scroll{flex:1;overflow-y:auto;padding:10px}
+.vlist-item{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 10px;border-radius:11px;cursor:pointer;
+  transition:background .15s;margin-bottom:4px;
+}
+.vlist-item:hover{background:var(--card2)}
+.vlist-item.playing{background:rgba(74,158,255,.13);border:1px solid rgba(74,158,255,.2)}
+.vnum{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:rgba(74,158,255,.12);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--accent);
+}
+.vlist-item.playing .vnum{background:var(--accent);color:#fff}
+.vinfo{flex:1;min-width:0}
+.vtitle{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vdur{font-size:11px;color:var(--sub);margin-top:2px}
+.vplay-ico{font-size:20px;color:var(--sub);flex-shrink:0}
+.vlist-item.playing .vplay-ico{color:var(--accent)}
+
+/* player panel */
+.player-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.player-area{
+  background:#000;width:100%;
+  aspect-ratio:16/9;max-height:55vh;
+  display:flex;align-items:center;justify-content:center;position:relative;
+}
+.player-area iframe{width:100%;height:100%;border:none}
+.player-placeholder{text-align:center;color:var(--sub);padding:40px}
+.player-placeholder .pp-ico{font-size:56px;margin-bottom:12px}
+.player-info{padding:18px 20px}
+.player-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.player-meta{font-size:13px;color:var(--sub)}
+
+@media(max-width:860px){
+  .vlist-panel{width:100%;border-right:none;border-bottom:1px solid var(--border)}
+  .course-view-wrap{flex-direction:column}
+  .player-area{max-height:50vw}
+  .vlist-scroll{max-height:220px}
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════════════════ */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.72);
+  display:flex;align-items:center;justify-content:center;
+  z-index:900;padding:20px;animation:fadeIn .15s ease;
+}
+.modal-bg.hidden{display:none}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.modal{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:26px;width:100%;max-width:420px;
+  box-shadow:0 20px 56px rgba(0,0,0,.55);
+}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:9px}
+.modal-sub{font-size:12px;color:var(--sub);margin-bottom:20px}
+.fl{margin-bottom:14px}
+.fl label{font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:6px}
+.fl input,.fl select,.fl textarea{
+  width:100%;background:var(--bg);border:1.5px solid var(--border);
+  border-radius:10px;padding:10px 13px;color:var(--text);
+  font-size:14px;outline:none;transition:border-color .2s;
+}
+.fl input:focus,.fl select:focus,.fl textarea:focus{border-color:var(--accent)}
+.fl input.has-err{border-color:var(--red)}
+.fl select option{background:var(--card)}
+.fl textarea{resize:vertical;min-height:68px}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:42px}
+.btn-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--sub);font-size:17px}
+.err-msg{font-size:12px;color:var(--red);margin-top:-9px;margin-bottom:12px;display:flex;align-items:center;gap:5px}
+.err-msg.h{display:none}
+.modal-acts{display:flex;gap:9px;justify-content:flex-end;margin-top:4px}
+.btn-cancel{background:none;border:1px solid var(--border);border-radius:9px;padding:9px 16px;color:var(--sub);font-size:13px;font-weight:500;transition:background .15s}
+.btn-cancel:hover{background:var(--card2)}
+.btn-ok{background:linear-gradient(135deg,var(--purple),var(--accent));border:none;border-radius:9px;padding:9px 20px;color:#fff;font-size:13px;font-weight:600;transition:opacity .2s}
+.btn-ok:hover{opacity:.87}
+.btn-ok:disabled{opacity:.4;cursor:not-allowed}
+.btn-ok.red{background:var(--red)}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════ */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:12px;padding:11px 22px;font-size:13px;font-weight:500;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:999;
+  transition:opacity .3s;pointer-events:none;white-space:nowrap;
+}
+.toast.h{opacity:0}
+
+/* ═══════════════════════════════════════════════════════
+   ADMIN MANAGE VIEW (full page list)
+═══════════════════════════════════════════════════════ */
+.manage-wrap{padding:24px 28px;max-width:800px}
+.manage-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.manage-hdr h2{font-size:18px;font-weight:700}
+.btn-add{
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  border:none;border-radius:10px;padding:9px 18px;
+  color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;
+  transition:opacity .2s;
+}
+.btn-add:hover{opacity:.87}
+.manage-list{display:flex;flex-direction:column;gap:9px}
+.manage-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:13px;padding:13px 15px;
+  display:flex;align-items:center;gap:12px;
+}
+.mc-icon{width:42px;height:42px;border-radius:9px;background:rgba(74,158,255,.13);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.mc-info{flex:1;min-width:0}
+.mc-info strong{font-size:14px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc-info span{font-size:12px;color:var(--sub)}
+.mc-acts{display:flex;gap:5px;flex-shrink:0}
+.btn-ic{background:none;border:none;border-radius:7px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:15px;transition:background .15s}
+.btn-ic.e{color:var(--accent)} .btn-ic.e:hover{background:rgba(74,158,255,.13)}
+.btn-ic.d{color:var(--red)}    .btn-ic.d:hover{background:rgba(255,107,107,.13)}
+
+/* video manage sub-section */
+.vsub-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px;border-top:1px solid var(--border);margin-top:4px}
+.vsub-title{font-size:14px;font-weight:700;color:var(--accent)}
+.btn-add-sm{background:rgba(52,201,138,.15);border:none;border-radius:8px;padding:6px 13px;color:var(--green);font-size:12px;font-weight:600;transition:background .15s}
+.btn-add-sm:hover{background:rgba(52,201,138,.25)}
+.vmanage-list{display:flex;flex-direction:column;gap:7px;margin-bottom:4px}
+.vmanage-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.vm-num{width:28px;height:28px;border-radius:50%;background:rgba(52,201,138,.13);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0}
+.vm-info{flex:1;min-width:0}
+.vm-info strong{font-size:12px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vm-info span{font-size:11px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;display:block;white-space:nowrap}
+
+@media(max-width:600px){
+  .manage-wrap{padding:16px}
+  .courses-section,.home-hero{padding-left:16px;padding-right:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+
+  <div class="sidebar-top">
+    <div class="sidebar-logo">R</div>
+    <div class="sidebar-brand">Rajib Tutorial<small>EEE Courses</small></div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu</div>
+    <div class="nav-item active" id="navHome" onclick="goHome()">
+      <span class="ni">🏠</span><span class="nt">Home</span>
+    </div>
+    <div class="nav-label" style="margin-top:8px">Courses</div>
+    <div class="sidebar-courses" id="sidebarCourses">
+      <div style="padding:6px 8px;font-size:12px;color:var(--sub)">Loading…</div>
+    </div>
+  </nav>
+
+  <!-- Admin logged-in section -->
+  <div class="admin-sidebar" id="adminSidebar">
+    <div class="admin-section-label">🔐 Admin Panel</div>
+    <button class="btn-admin-action" onclick="goView('viewManage')">
+      <span class="ai2">📚</span> Manage Courses
+    </button>
+    <button class="btn-admin-action btn-logout" onclick="adminLogout()">
+      <span class="ai2">🚪</span> Logout
+    </button>
+  </div>
+
+  <div class="sidebar-bottom">
+    <button class="btn-admin-login" id="btnAdminLogin" onclick="openAdminLogin()">
+      <span class="ai">🔐</span> Admin Login
+    </button>
+  </div>
+</aside>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     TOPBAR (mobile)
+═══════════════════════════════════════════════════════ -->
+<div class="topbar" id="topbar">
+  <button class="btn-hamburger" onclick="openSidebar()">☰</button>
+  <span class="topbar-title" id="topbarTitle">Rajib Tutorial</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN
+═══════════════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- HOME -->
+  <div class="view active" id="viewHome">
+    <div class="home-hero">
+      <div class="hero-badge">⚡ EEE Related Courses</div>
+      <h1>Learn with <span>Rajib Tutorial</span></h1>
+      <p>Electrical &amp; Electronic Engineering related video courses. Click any course to start watching.</p>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-n" id="statC">—</div><div class="stat-l">Courses</div></div>
+        <div class="stat"><div class="stat-n" id="statV">—</div><div class="stat-l">Videos</div></div>
+      </div>
+    </div>
+    <div class="courses-section">
+      <div class="sec-hdr">
+        <span class="sec-title">All Courses</span>
+        <span style="font-size:12px;color:var(--sub)" id="cntLabel"></span>
+      </div>
+      <div id="courseGridWrap">
+        <div class="loader"><div class="spin"></div><p>Loading courses…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURSE + PLAYER -->
+  <div class="view" id="viewCourse">
+    <div class="course-view-wrap">
+      <div class="vlist-panel">
+        <div class="vlist-header">
+          <h2 id="cpTitle">Course</h2>
+          <p id="cpSub">0 videos</p>
+        </div>
+        <div class="vlist-scroll" id="vlistScroll"></div>
+      </div>
+      <div class="player-panel">
+        <div class="player-area" id="playerArea">
+          <div class="player-placeholder">
+            <div class="pp-ico">▶</div>
+            <p>Select a video to play</p>
+          </div>
+        </div>
+        <div class="player-info">
+          <div class="player-title" id="playerTitle">—</div>
+          <div class="player-meta"  id="playerMeta"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE COURSES (admin) -->
+  <div class="view" id="viewManage">
+    <div class="manage-wrap">
+      <div class="manage-hdr">
+        <h2>📚 Manage Courses</h2>
+        <button class="btn-add" onclick="openAddCourse()">+ Add Course</button>
+      </div>
+      <div id="manageCourseList">
+        <div class="loader"><div class="spin"></div><p>Loading…</p></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════════════ -->
+
+<!-- Admin Login -->
+<div class="modal-bg hidden" id="mLogin">
+  <div class="modal">
+    <div class="modal-title">🔐 Admin Login</div>
+    <div class="modal-sub">Admin panel এ প্রবেশ করুন</div>
+    <div class="fl">
+      <label>Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="pwIn" placeholder="Enter password"
+               oninput="clearPwErr()" onkeydown="if(event.key==='Enter')doLogin()"/>
+        <button class="btn-eye" onclick="toggleEye()" id="eyeBtn">👁</button>
+      </div>
+    </div>
+    <div class="err-msg h" id="pwErr">❌ Incorrect password</div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeM('mLogin')">Cancel</button>
+      <button class="btn-ok" onclick="doLogin()">🔓 Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Course -->
+<div class="modal-bg hidden" id="mCourse">
+  <div class="modal">
+    <div class="modal-title" id="mCourseTitle">📚 New Course</div>
+    <div class="modal-sub">Course তথ্য দিন</div>
+    <input type="hidden" id="editCId"/>
+    <div class="fl"><label>Course Name *</label><input type="text" id="cName" placeholder="e.g. EEE Foundation Course"/></div>
+    <div class="fl"><label>Title *</label><input type="text" id="cTitle" placeholder="e.g. Circuit Analysis 2025"/></div>
+    <div class="fl">
+      <label>Class</label>
+      <select id="cClass">
+        <option value="">— Select —</option>
+        <option>Class 9</option><option>Class 10</option><option>SSC</option>
+        <option>Class 11</option><option>Class 12</option><option>HSC</option>
+        <option>Diploma</option><option>BSc</option><option>Other</option>
+      </select>
+    </div>
+    <div class="fl">
+      <label>Subject</label>
+      <select id="cSubject">
+        <option value="">— Select —</option>
+        <option>Physics</option><option>Math</option><option>Circuit Analysis</option>
+        <option>Electronics</option><option>Electrical Machines</option>
+        <option>Power Systems</option><option>Digital Electronics</option><option>ICT</option><option>Other</option>
+      </select>
+    </div>
+    <div class="fl"><label>Description</label><textarea id="cDesc" placeholder="Short description…"></textarea></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeM('mCourse')">Cancel</button>
+      <button class="btn-ok" onclick="saveCourse()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Video -->
+<div class="modal-bg hidden" id="mVideo">
+  <div class="modal">
+    <div class="modal-title" id="mVideoTitle">🎬 Add Video</div>
+    <div class="modal-sub">YouTube link paste করুন</div>
+    <input type="hidden" id="editVId"/>
+    <input type="hidden" id="editVCourse"/>
+    <div class="fl"><label>Video Title *</label><input type="text" id="vTitle" placeholder="e.g. Lesson 1 — Ohm's Law"/></div>
+    <div class="fl">
+      <label>YouTube Link *</label>
+      <input type="url" id="vUrl" placeholder="https://youtube.com/watch?v=...  or  youtu.be/..."/>
+    </div>
+    <div class="fl"><label>Duration (minutes, optional)</label><input type="number" id="vDur" placeholder="e.g. 18" min="0"/></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeM('mVideo')">Cancel</button>
+      <button class="btn-ok" onclick="saveVideo()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm delete -->
+<div class="modal-bg hidden" id="mConfirm">
+  <div class="modal">
+    <div class="modal-title">🗑️ <span id="confTitle">Delete?</span></div>
+    <div class="modal-sub" id="confMsg">permanently delete হবে।</div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeM('mConfirm')">Cancel</button>
+      <button class="btn-ok red" onclick="runConfirm()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast h" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     FIREBASE + LOGIC
+═══════════════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc,
+         setDoc, updateDoc, deleteDoc }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ─── Firebase config ──────────────────────────────────────
+// 🔧 Replace with your actual Firebase project config:
+// Firebase Console → Project Settings → Your apps → Web → Config
+const firebaseConfig = {
+  apiKey:       "AIzaSyDGd3KAo45UuqmeGFALziz_oKm3htEASHY",
+  authDomain:   "mywebtools-f8d53.firebaseapp.com",
+  projectId:    "mywebtools-f8d53"
+};
+// ──────────────────────────────────────────────────────────
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// ─── State ────────────────────────────────────────────────
+let courses      = [];
+let curCourse    = null;
+let curVideo     = null;
+let adminIn      = false;
+let pendingDelFn = null;
+
+// ─── UTILS ───────────────────────────────────────────────
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") }
+
+let toastT;
+window.showToast = s => {
+  const t=document.getElementById("toast");
+  t.textContent=s; t.classList.remove("h");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.add("h"),2600);
+};
+
+function ytEmbed(url){
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0` : null;
+}
+
+// ─── VIEWS ───────────────────────────────────────────────
+window.goView = function(id){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0,0);
+  // update nav active state
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  if(id==="viewHome") document.getElementById("navHome").classList.add("active");
+  // topbar title
+  const titles = {viewHome:"Rajib Tutorial", viewCourse: curCourse?.title||"Course", viewManage:"Manage Courses"};
+  document.getElementById("topbarTitle").textContent = titles[id]||"Rajib Tutorial";
+};
+
+window.goHome = function(){
+  curCourse=null; curVideo=null;
+  goView("viewHome");
+  renderCourseGrid();
+};
+
+// ─── SIDEBAR mobile ──────────────────────────────────────
+window.openSidebar  = ()=>{ document.getElementById("sidebar").classList.add("open"); document.getElementById("overlay").classList.add("show"); };
+window.closeSidebar = ()=>{ document.getElementById("sidebar").classList.remove("open"); document.getElementById("overlay").classList.remove("show"); };
+
+// ─── LOAD COURSES ────────────────────────────────────────
+async function loadCourses(){
+  try{
+    const snap = await getDocs(collection(db,"tutorial_courses"));
+    courses=[];
+    snap.forEach(d=>{
+      const data=d.data();
+      courses.push({
+        id:d.id,
+        courseName: data.courseName||"",
+        title: data.title||d.id,
+        className: data.className||"",
+        subject: data.subject||"",
+        description: data.description||"",
+        videos: (data.videos||[]).map(v=>({
+          id: v.id||"",
+          title: v.title||"",
+          url: v.cloudinaryUrl||v.url||"",
+          durationMinutes: v.durationMinutes||0
+        }))
+      });
+    });
+  }catch(e){
+    courses=[];
+    document.getElementById("courseGridWrap").innerHTML=
+      `<div class="empty"><div class="empty-ico">⚠️</div><p>Firebase config দরকার।<br/><small>index.html এ firebaseConfig replace করো।</small></p></div>`;
+    return;
+  }
+  renderCourseGrid();
+  renderSidebarCourses();
+  updateStats();
+  if(adminIn) renderManage();
+}
+
+function updateStats(){
+  const tv=courses.reduce((s,c)=>s+(c.videos?.length||0),0);
+  document.getElementById("statC").textContent=courses.length;
+  document.getElementById("statV").textContent=tv;
+  document.getElementById("cntLabel").textContent=`${courses.length} courses`;
+}
+
+const emojis=["⚡","🔌","💡","🛠️","📐","🔋","📡","⚙️","🌐","🔧"];
+
+function renderCourseGrid(){
+  const wrap=document.getElementById("courseGridWrap");
+  if(!courses.length){
+    wrap.innerHTML=`<div class="empty"><div class="empty-ico">📚</div><p>No courses yet.<br/><small>Admin panel থেকে course যোগ করো।</small></p></div>`;
+    return;
+  }
+  wrap.innerHTML=`<div class="course-grid">${courses.map((c,i)=>`
+    <div class="course-card" onclick="openCourse('${c.id}')">
+      <div class="cc-thumb"><span>${emojis[i%emojis.length]}</span>
+        <span class="cc-vcount">${c.videos?.length||0} videos</span></div>
+      <div class="cc-body">
+        ${c.courseName?`<div class="cc-tag">${esc(c.courseName)}</div>`:""}
+        <div class="cc-name">${esc(c.title)}</div>
+        <div class="cc-meta">${[c.className,c.subject].filter(Boolean).join(" • ")||"EEE Course"}</div>
+        <div class="cc-foot">
+          <span class="cc-vids">▶ ${c.videos?.length||0} videos</span>
+          <button class="btn-watch" onclick="event.stopPropagation();openCourse('${c.id}')">Watch →</button>
+        </div>
+      </div>
+    </div>`).join("")}</div>`;
+}
+
+function renderSidebarCourses(){
+  const wrap=document.getElementById("sidebarCourses");
+  if(!courses.length){ wrap.innerHTML=`<div style="padding:6px 8px;font-size:12px;color:var(--sub)">No courses yet</div>`; return; }
+  wrap.innerHTML=courses.map(c=>`
+    <div class="course-nav-item ${curCourse?.id===c.id?'active':''}" onclick="openCourse('${c.id}')">
+      <div class="course-nav-dot"></div>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis">${esc(c.title)}</span>
+    </div>`).join("");
+}
+
+// ─── OPEN COURSE ─────────────────────────────────────────
+window.openCourse = function(cid){
+  curCourse = courses.find(c=>c.id===cid);
+  if(!curCourse) return;
+  curVideo = null;
+  document.getElementById("cpTitle").textContent = curCourse.title;
+  document.getElementById("cpSub").textContent   = `${curCourse.videos?.length||0} videos`;
+  renderVlist();
+  document.getElementById("playerArea").innerHTML=`<div class="player-placeholder"><div class="pp-ico">▶</div><p>Select a video to play</p></div>`;
+  document.getElementById("playerTitle").textContent="—";
+  document.getElementById("playerMeta").textContent="";
+  goView("viewCourse");
+  renderSidebarCourses();
+  closeSidebar();
+};
+
+function renderVlist(){
+  const wrap=document.getElementById("vlistScroll");
+  const vids=curCourse?.videos||[];
+  if(!vids.length){ wrap.innerHTML=`<div class="empty" style="padding:30px 10px"><div class="empty-ico">🎬</div><p>No videos yet</p></div>`; return; }
+  wrap.innerHTML=vids.map((v,i)=>`
+    <div class="vlist-item ${curVideo?.id===v.id?'playing':''}" onclick="playVideo('${v.id}')">
+      <div class="vnum">${curVideo?.id===v.id?'▶':(i+1)}</div>
+      <div class="vinfo">
+        <div class="vtitle">${esc(v.title)}</div>
+        ${v.durationMinutes?`<div class="vdur">⏱ ${v.durationMinutes} min</div>`:""}
+      </div>
+      <span class="vplay-ico">${curVideo?.id===v.id?'🔊':'▷'}</span>
+    </div>`).join("");
+}
+
+// ─── PLAY VIDEO ──────────────────────────────────────────
+window.playVideo = function(vid){
+  curVideo = curCourse?.videos?.find(v=>v.id===vid);
+  if(!curVideo) return;
+  renderVlist();
+
+  const area  = document.getElementById("playerArea");
+  const embed = ytEmbed(curVideo.url||"");
+  if(embed){
+    area.innerHTML=`<iframe src="${embed}" allow="autoplay;fullscreen;accelerometer;gyroscope;picture-in-picture" allowfullscreen></iframe>`;
+  } else if(curVideo.url){
+    area.innerHTML=`<video controls autoplay src="${esc(curVideo.url)}" style="width:100%;height:100%;background:#000"></video>`;
+  } else {
+    area.innerHTML=`<div class="player-placeholder"><div class="pp-ico">⚠️</div><p>No URL set for this video</p></div>`;
+  }
+  document.getElementById("playerTitle").textContent = curVideo.title;
+  document.getElementById("playerMeta").textContent  = curVideo.durationMinutes ? `⏱ ${curVideo.durationMinutes} min` : "";
+  // scroll into view on mobile
+  document.getElementById("playerArea").scrollIntoView({behavior:"smooth",block:"nearest"});
+};
+
+// ─── ADMIN LOGIN ─────────────────────────────────────────
+const ADMIN_PW = "1111";
+
+window.openAdminLogin = function(){
+  if(adminIn){ goView("viewManage"); return; }
+  document.getElementById("pwIn").value="";
+  clearPwErr();
+  openM("mLogin");
+  setTimeout(()=>document.getElementById("pwIn").focus(),120);
+};
+
+window.doLogin = function(){
+  if(document.getElementById("pwIn").value === ADMIN_PW){
+    adminIn=true;
+    closeM("mLogin");
+    // show admin sidebar section, hide login btn
+    document.getElementById("adminSidebar").classList.add("show");
+    document.getElementById("btnAdminLogin").style.display="none";
+    renderManage();
+    goView("viewManage");
+    closeSidebar();
+    showToast("Admin panel এ স্বাগতম ✓");
+  } else {
+    document.getElementById("pwErr").classList.remove("h");
+    document.getElementById("pwIn").value="";
+    document.getElementById("pwIn").focus();
+  }
+};
+
+window.adminLogout = function(){
+  adminIn=false;
+  document.getElementById("adminSidebar").classList.remove("show");
+  document.getElementById("btnAdminLogin").style.display="";
+  goHome();
+  showToast("Logged out");
+};
+
+window.clearPwErr = ()=>document.getElementById("pwErr").classList.add("h");
+window.toggleEye  = ()=>{
+  const i=document.getElementById("pwIn");
+  i.type=i.type==="password"?"text":"password";
+  document.getElementById("eyeBtn").textContent=i.type==="password"?"👁":"🙈";
+};
+
+// ─── MANAGE COURSES ──────────────────────────────────────
+function renderManage(){
+  const wrap=document.getElementById("manageCourseList");
+  if(!courses.length){
+    wrap.innerHTML=`<div class="empty"><div class="empty-ico">📚</div><p>No courses. "+ Add Course" বাটন চাপো।</p></div>`;
+    return;
+  }
+  wrap.innerHTML=`<div class="manage-list">${courses.map((c,i)=>`
+    <div class="manage-card">
+      <div class="mc-icon">${emojis[i%emojis.length]}</div>
+      <div class="mc-info">
+        <strong>${esc(c.title)}</strong>
+        <span>${esc(c.courseName)} ${[c.className,c.subject].filter(Boolean).join(" • ")}</span>
+        <span style="color:var(--accent);font-size:11px">▶ ${c.videos?.length||0} videos</span>
+      </div>
+      <div class="mc-acts">
+        <button class="btn-ic e" onclick="openEditCourse('${c.id}')">✏️</button>
+        <button class="btn-ic d" onclick="confirmDelCourse('${c.id}')">🗑️</button>
+      </div>
+    </div>
+    <!-- video sub-section -->
+    <div style="padding:0 10px 12px;margin-top:-6px;background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 13px 13px;margin-bottom:8px">
+      <div class="vsub-hdr">
+        <span class="vsub-title">🎬 Videos (${c.videos?.length||0})</span>
+        <button class="btn-add-sm" onclick="openAddVideo('${c.id}')">+ Add Video</button>
+      </div>
+      ${c.videos?.length?`<div class="vmanage-list">${c.videos.map((v,j)=>`
+        <div class="vmanage-item">
+          <div class="vm-num">${j+1}</div>
+          <div class="vm-info">
+            <strong>${esc(v.title)}</strong>
+            <span>${v.url?(v.url.length>55?v.url.slice(0,55)+"…":v.url):"No URL"}</span>
+          </div>
+          <div class="mc-acts">
+            <button class="btn-ic e" onclick="openEditVideo('${c.id}','${v.id}')">✏️</button>
+            <button class="btn-ic d" onclick="confirmDelVideo('${c.id}','${v.id}')">🗑️</button>
+          </div>
+        </div>`).join("")}</div>`
+      :`<div style="font-size:12px;color:var(--sub);padding:6px 2px">No videos yet. "+ Add Video" বাটন চাপো।</div>`}
+    </div>`).join("")}</div>`;
+}
+
+// ─── COURSE CRUD ─────────────────────────────────────────
+window.openAddCourse = function(){
+  document.getElementById("editCId").value="";
+  document.getElementById("mCourseTitle").textContent="📚 New Course";
+  ["cName","cTitle","cDesc"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("cClass").value="";
+  document.getElementById("cSubject").value="";
+  openM("mCourse");
+};
+
+window.openEditCourse = function(cid){
+  const c=courses.find(x=>x.id===cid); if(!c) return;
+  document.getElementById("editCId").value=c.id;
+  document.getElementById("mCourseTitle").textContent="✏️ Edit Course";
+  document.getElementById("cName").value=c.courseName||"";
+  document.getElementById("cTitle").value=c.title||"";
+  document.getElementById("cClass").value=c.className||"";
+  document.getElementById("cSubject").value=c.subject||"";
+  document.getElementById("cDesc").value=c.description||"";
+  openM("mCourse");
+};
+
+window.saveCourse = async function(){
+  const name=document.getElementById("cName").value.trim();
+  const title=document.getElementById("cTitle").value.trim();
+  if(!name||!title){showToast("Course Name ও Title দিন ⚠️");return;}
+  const data={courseName:name,title,className:document.getElementById("cClass").value,
+    subject:document.getElementById("cSubject").value,description:document.getElementById("cDesc").value.trim()};
+  const eid=document.getElementById("editCId").value;
+  try{
+    if(eid){ await updateDoc(doc(db,"tutorial_courses",eid),data); showToast("Course updated ✓"); }
+    else   { const id="course_"+Date.now().toString(36); await setDoc(doc(db,"tutorial_courses",id),{...data,videos:[]}); showToast("Course created ✓"); }
+    closeM("mCourse");
+    await loadCourses();
+    renderManage();
+  }catch(e){showToast("Error: "+e.message);}
+};
+
+window.confirmDelCourse = function(cid){
+  const c=courses.find(x=>x.id===cid);
+  document.getElementById("confTitle").textContent="Delete Course?";
+  document.getElementById("confMsg").textContent=`"${c?.title||cid}" ও এর সব video permanently delete হবে।`;
+  pendingDelFn=async()=>{ await deleteDoc(doc(db,"tutorial_courses",cid)); showToast("Deleted"); closeM("mConfirm"); await loadCourses(); renderManage(); };
+  openM("mConfirm");
+};
+
+// ─── VIDEO CRUD ──────────────────────────────────────────
+window.openAddVideo = function(cid){
+  document.getElementById("editVId").value="";
+  document.getElementById("editVCourse").value=cid;
+  document.getElementById("mVideoTitle").textContent="🎬 Add Video";
+  document.getElementById("vTitle").value="";
+  document.getElementById("vUrl").value="";
+  document.getElementById("vDur").value="";
+  openM("mVideo");
+};
+
+window.openEditVideo = function(cid,vid){
+  const course=courses.find(c=>c.id===cid);
+  const video=course?.videos?.find(v=>v.id===vid); if(!video) return;
+  document.getElementById("editVId").value=vid;
+  document.getElementById("editVCourse").value=cid;
+  document.getElementById("mVideoTitle").textContent="✏️ Edit Video";
+  document.getElementById("vTitle").value=video.title||"";
+  document.getElementById("vUrl").value=video.url||"";
+  document.getElementById("vDur").value=video.durationMinutes||"";
+  openM("mVideo");
+};
+
+window.saveVideo = async function(){
+  const title=document.getElementById("vTitle").value.trim();
+  const url=document.getElementById("vUrl").value.trim();
+  if(!title||!url){showToast("Title ও YouTube link দিন ⚠️");return;}
+  const cid=document.getElementById("editVCourse").value;
+  const eid=document.getElementById("editVId").value;
+  const course=courses.find(c=>c.id===cid); if(!course) return;
+  const dur=parseInt(document.getElementById("vDur").value)||0;
+  let vids=[...(course.videos||[])];
+  if(eid){
+    vids=vids.map(v=>v.id===eid?{...v,title,cloudinaryUrl:url,url,durationMinutes:dur}:v);
+  } else {
+    vids.push({id:"vid_"+Date.now().toString(36),title,cloudinaryUrl:url,url,durationMinutes:dur});
+  }
+  try{
+    await updateDoc(doc(db,"tutorial_courses",cid),{videos:vids});
+    showToast(eid?"Video updated ✓":"Video added ✓");
+    closeM("mVideo");
+    await loadCourses();
+    renderManage();
+    // refresh if viewing same course
+    if(curCourse?.id===cid){ curCourse=courses.find(c=>c.id===cid); renderVlist(); }
+  }catch(e){showToast("Error: "+e.message);}
+};
+
+window.confirmDelVideo = function(cid,vid){
+  const c=courses.find(x=>x.id===cid);
+  const v=c?.videos?.find(x=>x.id===vid);
+  document.getElementById("confTitle").textContent="Delete Video?";
+  document.getElementById("confMsg").textContent=`"${v?.title||vid}" delete হবে।`;
+  pendingDelFn=async()=>{
+    const updated=c.videos.filter(x=>x.id!==vid);
+    await updateDoc(doc(db,"tutorial_courses",cid),{videos:updated});
+    showToast("Deleted"); closeM("mConfirm");
+    await loadCourses(); renderManage();
+    if(curCourse?.id===cid){ curCourse=courses.find(x=>x.id===cid); renderVlist(); }
+  };
+  openM("mConfirm");
+};
+
+window.runConfirm = ()=>pendingDelFn&&pendingDelFn();
+
+// ─── MODAL HELPERS ───────────────────────────────────────
+window.openM = id=>document.getElementById(id).classList.remove("hidden");
+window.closeM= id=>document.getElementById(id).classList.add("hidden");
+document.querySelectorAll(".modal-bg").forEach(m=>
+  m.addEventListener("click",e=>{ if(e.target===m) m.classList.add("hidden"); })
+);
+
+// ─── BOOT ────────────────────────────────────────────────
+loadCourses();
+</script>
+</body>
+</html>
