@@ -57,8 +57,34 @@ svg{display:block;flex-shrink:0}
 .sidebar-overlay.show{display:block}
 
 /* TOPBAR (mobile) */
-.topbar{display:none;position:fixed;top:0;left:0;right:0;height:56px;background:rgba(20,20,19,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);align-items:center;gap:12px;padding:0 14px;z-index:100}
-.btn-hamburger{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+.topbar{display:flex;position:sticky;top:0;height:56px;background:rgba(20,20,19,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);align-items:center;justify-content:space-between;gap:12px;padding:0 24px;z-index:100}
+.tb-left{display:flex;align-items:center;gap:12px;min-width:0}
+#userArea{position:relative;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.userchip{display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;border-radius:999px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:border-color .15s}
+.userchip:hover{border-color:var(--accent)}
+.av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#E8956F,#C4573A);color:#1a0f0a;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.un{font-size:13px;font-weight:600;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pro{font-size:10px;font-weight:800;letter-spacing:.08em;background:linear-gradient(135deg,#F0A683,#D97757);color:#1a0f0a;padding:3px 8px;border-radius:6px}
+.umenu{position:absolute;top:calc(100% + 8px);right:0;min-width:220px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:0 16px 40px rgba(0,0,0,.5);z-index:300}
+.um-name{font-size:14px;font-weight:700}
+.um-sub{font-size:12px;color:var(--sub);margin:3px 0 12px;line-height:1.5}
+.um-btn{width:100%;padding:9px;border-radius:9px;border:1px solid var(--border);font-size:13px;font-weight:600;color:var(--red)}
+.um-btn:hover{border-color:var(--red)}
+.btn-premium{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:999px;background:linear-gradient(135deg,#F0A683,#D97757);color:#1a0f0a;font-size:12.5px;font-weight:800}
+.btn-premium svg{width:14px;height:14px}
+.btn-login{padding:8px 16px;border-radius:999px;border:1px solid var(--border);font-size:12.5px;font-weight:600}
+.btn-login:hover{border-color:var(--accent)}
+.gate-ico{width:56px;height:56px;border-radius:50%;background:var(--accent-soft);color:var(--accent2);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.gate-ico svg{width:26px;height:26px}
+.gate-info{font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:6px;line-height:1.55;white-space:pre-line}
+.col-acts{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.col-acts button{width:100%}
+.manage-card.single{border-radius:13px;margin-bottom:10px}
+.badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;display:inline-block}
+.badge.ok{background:rgba(76,195,138,.15);color:var(--green)}
+.badge.exp{background:rgba(239,107,91,.15);color:var(--red)}
+.lock-ico{width:14px;height:14px;color:var(--sub);flex-shrink:0}
+.btn-hamburger{display:none;width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
 .btn-hamburger svg{width:20px;height:20px}
 .topbar-title{font-size:15px;font-weight:700}
 
@@ -129,8 +155,8 @@ svg{display:block;flex-shrink:0}
 .footer{padding:28px 48px 36px;border-top:1px solid var(--border);margin-top:28px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;font-size:12.5px;color:var(--sub)}
 
 /* COURSE VIEW */
-.course-view-wrap{display:flex;min-height:100vh}
-.vlist-panel{width:340px;flex-shrink:0;border-right:1px solid var(--border);background:var(--bg2);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.course-view-wrap{display:flex;min-height:calc(100vh - 56px)}
+.vlist-panel{width:340px;flex-shrink:0;border-right:1px solid var(--border);background:var(--bg2);display:flex;flex-direction:column;height:calc(100vh - 56px);position:sticky;top:56px}
 .vlist-header{padding:20px 20px 16px;border-bottom:1px solid var(--border)}
 .btn-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--sub);margin-bottom:12px}
 .btn-back:hover{color:var(--accent2)}
@@ -217,8 +243,10 @@ svg{display:block;flex-shrink:0}
   body{display:block}
   .sidebar{position:fixed;left:0;top:0;transform:translateX(-100%)}
   .sidebar.open{transform:none}
-  .topbar{display:flex}
-  .main{padding-top:56px}
+  .topbar{padding:0 14px}
+  .btn-hamburger{display:flex}
+  .un{max-width:90px}
+  .btn-login{display:none}
   .home-hero{padding:40px 20px 36px}
   .courses-section{padding:30px 20px 12px}
   .footer{padding:24px 20px}
@@ -268,8 +296,11 @@ svg{display:block;flex-shrink:0}
     <button class="btn-admin-action" onclick="goView('viewManage');closeSidebar()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg> Manage Courses
     </button>
+    <button class="btn-admin-action" onclick="openMembers();closeSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 .9-5.2 4.8 1.4 7L12 17.8 5.8 21.2l1.4-7L2 9.4l7-.9z"/></svg> Premium Members
+    </button>
     <button class="btn-admin-action" onclick="openLiveSettings();closeSidebar()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg> Live Settings
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg> Live &amp; Premium Settings
     </button>
     <button class="btn-admin-action btn-logout" onclick="adminLogout()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg> Logout
@@ -284,16 +315,17 @@ svg{display:block;flex-shrink:0}
 </aside>
 <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <button class="btn-hamburger" onclick="openSidebar()" aria-label="Open menu">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-  </button>
-  <span class="topbar-title" id="topbarTitle">Rajib Tutorial</span>
-</div>
-
 <!-- MAIN -->
 <main class="main">
+  <header class="topbar">
+    <div class="tb-left">
+      <button class="btn-hamburger" onclick="openSidebar()" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <span class="topbar-title" id="topbarTitle">Rajib Tutorial</span>
+    </div>
+    <div id="userArea"></div>
+  </header>
 
   <!-- HOME -->
   <div class="view active" id="viewHome">
@@ -383,11 +415,21 @@ svg{display:block;flex-shrink:0}
       <div class="manage-hdr">
         <h2>Manage Courses</h2>
         <div class="grp">
-          <button class="btn-secondary" onclick="openLiveSettings()">Live Settings</button>
+          <button class="btn-secondary" onclick="openLiveSettings()">Live &amp; Premium Settings</button>
           <button class="btn-add" onclick="openAddCourse()">+ Add Course</button>
         </div>
       </div>
       <div id="manageCourseList"><div class="loader"><div class="spin"></div>Loading…</div></div>
+    </div>
+  </div>
+  <!-- PREMIUM MEMBERS (admin) -->
+  <div class="view" id="viewMembers">
+    <div class="manage-wrap">
+      <div class="manage-hdr">
+        <h2>Premium Members</h2>
+        <div class="grp"><button class="btn-add" onclick="openAddMember()">+ Add Member</button></div>
+      </div>
+      <div id="memberList"></div>
     </div>
   </div>
 </main>
@@ -459,7 +501,7 @@ svg{display:block;flex-shrink:0}
 
 <div class="modal-bg hidden" id="mLive">
   <div class="modal">
-    <div class="modal-title">Live Settings</div>
+    <div class="modal-title">Live &amp; Premium Settings</div>
     <div class="modal-sub">Set the links shown on the home page buttons. Leave a link empty when nothing is scheduled.</div>
     <h4>Live Class</h4>
     <div class="fl"><label>Title</label><input type="text" id="lcTitle" placeholder="e.g. Circuit Analysis: Thevenin's Theorem"/></div>
@@ -469,9 +511,56 @@ svg{display:block;flex-shrink:0}
     <div class="fl"><label>Title</label><input type="text" id="leTitle" placeholder="e.g. Weekly Model Test 05"/></div>
     <div class="fl"><label>Schedule</label><input type="text" id="leTime" placeholder="e.g. Saturday, 9:00 PM"/></div>
     <div class="fl"><label>Exam Link</label><input type="url" id="leUrl" placeholder="https://…"/></div>
+    <h4>Premium</h4>
+    <div class="fl"><label>“Become Premium” Link</label><input type="url" id="pmUrl" placeholder="WhatsApp, Facebook or payment page link"/></div>
+    <div class="fl"><label>Premium Info (shown to students)</label><textarea id="pmInfo" placeholder="e.g. 1 month: ৳50 · Pay via bKash 01XXXXXXXXX, then send the receipt to get your access code."></textarea></div>
     <div class="modal-acts">
       <button class="btn-cancel" onclick="closeM('mLive')">Cancel</button>
       <button class="btn-ok" onclick="saveLive()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="mGate">
+  <div class="modal">
+    <div class="gate-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+    <div class="modal-title">Premium required</div>
+    <div class="modal-sub">Video lessons are available to Premium members only. Upgrade to unlock every lesson in all courses.</div>
+    <div class="gate-info hidden" id="gateInfo"></div>
+    <div class="col-acts">
+      <button class="btn-ok" onclick="getPremium()">Become Premium</button>
+      <button class="btn-secondary" onclick="closeM('mGate');openMemberLogin()">I'm already Premium: Login</button>
+      <button class="btn-cancel" onclick="closeM('mGate')">Maybe later</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="mMemberLogin">
+  <div class="modal">
+    <div class="modal-title">Premium Login</div>
+    <div class="modal-sub">Enter the mobile number and access code you received when you became a Premium member.</div>
+    <div class="fl"><label>Mobile Number</label><input type="tel" id="lmMobile" placeholder="01XXXXXXXXX" autocomplete="tel"/></div>
+    <div class="fl"><label>Access Code</label><input type="password" id="lmCode" placeholder="Your access code" onkeydown="if(event.key==='Enter')doMemberLogin()"/></div>
+    <div class="err-msg h" id="lmErr"></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeM('mMemberLogin')">Cancel</button>
+      <button class="btn-ok" id="lmBtn" onclick="doMemberLogin()">Login</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="mMember">
+  <div class="modal">
+    <div class="modal-title" id="mMemberTitle">Add Premium Member</div>
+    <div class="modal-sub">The access code is stored securely and cannot be viewed later, so share it with the member now.</div>
+    <input type="hidden" id="editMid"/>
+    <div class="fl"><label>Name *</label><input type="text" id="mmName" placeholder="Student name"/></div>
+    <div class="fl"><label>Mobile Number *</label><input type="tel" id="mmMobile" placeholder="01XXXXXXXXX"/></div>
+    <div class="fl"><label id="mmCodeLbl">Access Code * (min 4 characters)</label><input type="text" id="mmCode" placeholder="e.g. 4829" autocomplete="off"/></div>
+    <div class="fl"><label>Valid Until (optional)</label><input type="date" id="mmExpiry"/></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeM('mMember')">Cancel</button>
+      <button class="btn-ok" onclick="saveMember()">Save</button>
     </div>
   </div>
 </div>
@@ -499,7 +588,7 @@ svg{display:block;flex-shrink:0}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc }
+import { getFirestore, collection, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -522,6 +611,8 @@ const I = {
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>',
   book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>',
   video:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="14" height="14" rx="2"/><path d="M16 10l6-3v10l-6-3"/></svg>',
+  lock:'<svg class="lock-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5.2 4.8 1.4 7L12 17.8 5.8 21.2l1.4-7L2 9.4l7-.9z"/></svg>',
   warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>'
 };
 const thumbIcons=[I.bolt,I.chip,I.gear,I.wave];
@@ -530,8 +621,9 @@ const thumbIcons=[I.bolt,I.chip,I.gear,I.wave];
 const LIVE_DOC="_live_settings";
 const SEMESTERS=["1st Semester","2nd Semester","3rd Semester","4th Semester","5th Semester","6th Semester","7th Semester","8th Semester"];
 let courses=[], curCourse=null, curVideo=null, adminIn=false, pendingDelFn=null;
+let members=[], session=null, pendingVid=null;
 let filterSem="", searchQ="";
-let live={classTitle:"",classTime:"",classUrl:"",examTitle:"",examTime:"",examUrl:""};
+let live={classTitle:"",classTime:"",classUrl:"",examTitle:"",examTime:"",examUrl:"",premiumUrl:"",premiumInfo:""};
 
 const $=id=>document.getElementById(id);
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
@@ -555,7 +647,7 @@ window.goView=function(id){
   window.scrollTo(0,0);
   document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
   if(id==="viewHome") $("navHome").classList.add("active");
-  const titles={viewHome:"Rajib Tutorial",viewCourse:curCourse?.title||"Course",viewManage:"Manage Courses"};
+  const titles={viewHome:"Rajib Tutorial",viewCourse:curCourse?.title||"Course",viewManage:"Manage Courses",viewMembers:"Premium Members"};
   $("topbarTitle").textContent=titles[id]||"Rajib Tutorial";
 };
 window.goHome=function(){curCourse=null;curVideo=null;goView("viewHome");renderCourseGrid();renderSidebarCourses();closeSidebar()};
@@ -586,13 +678,14 @@ window.openLive=function(type){
 window.openLiveSettings=function(){
   $("lcTitle").value=live.classTitle||"";$("lcTime").value=live.classTime||"";$("lcUrl").value=live.classUrl||"";
   $("leTitle").value=live.examTitle||"";$("leTime").value=live.examTime||"";$("leUrl").value=live.examUrl||"";
+  $("pmUrl").value=live.premiumUrl||"";$("pmInfo").value=live.premiumInfo||"";
   openM("mLive");
 };
 window.saveLive=async function(){
-  const cu=$("lcUrl").value.trim(), eu=$("leUrl").value.trim();
-  if((cu&&!safeUrl(cu))||(eu&&!safeUrl(eu))){showToast("Links must start with http:// or https://");return}
+  const cu=$("lcUrl").value.trim(), eu=$("leUrl").value.trim(), pu=$("pmUrl").value.trim();
+  if((cu&&!safeUrl(cu))||(eu&&!safeUrl(eu))||(pu&&!safeUrl(pu))){showToast("Links must start with http:// or https://");return}
   const next={classTitle:$("lcTitle").value.trim(),classTime:$("lcTime").value.trim(),classUrl:cu,
-              examTitle:$("leTitle").value.trim(),examTime:$("leTime").value.trim(),examUrl:eu};
+              examTitle:$("leTitle").value.trim(),examTime:$("leTime").value.trim(),examUrl:eu,premiumUrl:pu,premiumInfo:$("pmInfo").value.trim()};
   try{
     await setDoc(doc(db,"tutorial_courses",LIVE_DOC),{live:next,isSettings:true});
     live=next;renderLive();closeM("mLive");showToast("Live settings saved");
@@ -603,10 +696,11 @@ window.saveLive=async function(){
 async function loadCourses(){
   try{
     const snap=await getDocs(collection(db,"tutorial_courses"));
-    courses=[];
+    courses=[];members=[];
     snap.forEach(d=>{
       const data=d.data();
       if(d.id===LIVE_DOC){live={...live,...(data.live||{})};return}
+      if(d.id.startsWith("_member_")){members.push({id:d.id,...data});return}
       courses.push({
         id:d.id,courseName:data.courseName||"",title:data.title||d.id,
         className:data.className||"",subject:data.subject||"",description:data.description||"",
@@ -619,6 +713,7 @@ async function loadCourses(){
     return;
   }
   buildSemFilter();renderLive();renderCourseGrid();renderSidebarCourses();updateStats();
+  validateSession();renderUser();if(curCourse)renderVlist();
   if(adminIn) renderManage();
 }
 function semOptions(extra){
@@ -686,10 +781,13 @@ function renderVlist(){
     <div class="vlist-item ${curVideo?.id===v.id?"playing":""}" onclick="playVideo('${v.id}')">
       <div class="vnum">${curVideo?.id===v.id?"▶":i+1}</div>
       <div class="vinfo"><div class="vtitle">${esc(v.title)}</div>${v.durationMinutes?`<div class="vdur">${v.durationMinutes} min</div>`:""}</div>
+      ${canWatch()?"":I.lock}
     </div>`).join("");
 }
 window.playVideo=function(vid){
-  curVideo=curCourse?.videos?.find(v=>v.id===vid);if(!curVideo)return;
+  const want=curCourse?.videos?.find(v=>v.id===vid);if(!want)return;
+  if(!canWatch()){pendingVid=vid;openPremiumGate();return}
+  curVideo=want;
   renderVlist();
   const area=$("playerArea"),embed=ytEmbed(curVideo.url||"");
   if(embed){
@@ -714,12 +812,12 @@ window.doLogin=function(){
   if($("pwIn").value===ADMIN_PW){
     adminIn=true;closeM("mLogin");
     $("adminSidebar").classList.add("show");$("btnAdminLogin").style.display="none";
-    renderManage();goView("viewManage");closeSidebar();showToast("Welcome to the admin panel");
+    renderManage();renderUser();if(curCourse)renderVlist();goView("viewManage");closeSidebar();showToast("Welcome to the admin panel");
   }else{$("pwErr").classList.remove("h");$("pwIn").value="";$("pwIn").focus()}
 };
 window.adminLogout=function(){
   adminIn=false;$("adminSidebar").classList.remove("show");$("btnAdminLogin").style.display="";
-  goHome();showToast("Logged out");
+  renderUser();goHome();showToast("Logged out");
 };
 window.clearPwErr=()=>$("pwErr").classList.add("h");
 window.toggleEye=()=>{const i=$("pwIn");i.type=i.type==="password"?"text":"password"};
@@ -851,8 +949,137 @@ function onFsChange(){const isFs=!!(document.fullscreenElement||document.webkitF
 document.addEventListener("fullscreenchange",onFsChange);
 document.addEventListener("webkitfullscreenchange",onFsChange);
 
+
+// ─── Premium membership ──────────────────────────────────
+const LS_KEY="rt_member";
+async function sha(str){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+const hashCode=(mobile,code)=>sha("rt1:"+mobile+":"+String(code).trim());
+function normMobile(v){let d=String(v||"").replace(/\D/g,"");if(d.startsWith("880"))d="0"+d.slice(3);return d}
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+const curMember=()=>session?members.find(m=>m.id==="_member_"+session.mobile)||null:null;
+const memberValid=m=>!!m&&!!session&&m.hash===session.hash&&(!m.expiry||todayStr()<=m.expiry);
+const isPremium=()=>memberValid(curMember());
+const canWatch=()=>adminIn||isPremium();
+function saveSession(){try{session?localStorage.setItem(LS_KEY,JSON.stringify(session)):localStorage.removeItem(LS_KEY)}catch(e){}}
+function validateSession(){
+  if(session&&!isPremium()){
+    const m=curMember();
+    if(m&&m.expiry&&todayStr()>m.expiry) showToast("Your Premium membership has expired");
+    session=null;saveSession();
+  }
+}
+function renderUser(){
+  const wrap=$("userArea");
+  const chip=(name,sub)=>`<div class="userchip" onclick="toggleUserMenu(event)"><span class="av">${esc((name||"U").trim().charAt(0).toUpperCase())}</span><span class="un">${esc(name)}</span><span class="pro">PRO</span></div>
+    <div class="umenu hidden" id="uMenu"><div class="um-name">${esc(name)}</div><div class="um-sub">${esc(sub)}</div>${adminIn?"":`<button class="um-btn" onclick="memberLogout()">Logout</button>`}</div>`;
+  if(adminIn){wrap.innerHTML=chip("Admin","Administrator access");return}
+  const m=curMember();
+  if(isPremium()){wrap.innerHTML=chip(m.name||"Member",m.expiry?"Premium · valid until "+m.expiry:"Premium member");return}
+  wrap.innerHTML=`<button class="btn-login" onclick="openMemberLogin()">Login</button><button class="btn-premium" onclick="openPremiumGate()">${I.star} Go Premium</button>`;
+}
+window.toggleUserMenu=e=>{e.stopPropagation();$("uMenu")?.classList.toggle("hidden")};
+document.addEventListener("click",()=>$("uMenu")?.classList.add("hidden"));
+
+window.openPremiumGate=function(){
+  const info=(live.premiumInfo||"").trim(),box=$("gateInfo");
+  box.textContent=info;box.classList.toggle("hidden",!info);
+  openM("mGate");
+};
+window.getPremium=function(){
+  const url=safeUrl(live.premiumUrl);
+  if(url){window.open(url,"_blank","noopener");return}
+  closeM("mGate");
+  $("noticeTitle").textContent="Become Premium";
+  $("noticeMsg").textContent="Please contact the admin to get your Premium access code.";
+  openM("mNotice");
+};
+window.openMemberLogin=function(){
+  $("lmMobile").value="";$("lmCode").value="";$("lmErr").classList.add("h");
+  openM("mMemberLogin");setTimeout(()=>$("lmMobile").focus(),120);
+};
+window.doMemberLogin=async function(){
+  const mobile=normMobile($("lmMobile").value),code=$("lmCode").value.trim(),err=$("lmErr"),btn=$("lmBtn");
+  const fail=m=>{err.textContent=m;err.classList.remove("h")};
+  if(!mobile||!code){fail("Please enter your mobile number and access code.");return}
+  btn.disabled=true;btn.textContent="Checking…";
+  try{
+    const snap=await getDoc(doc(db,"tutorial_courses","_member_"+mobile));
+    const m=snap.exists()?snap.data():null;
+    const h=await hashCode(mobile,code);
+    if(!m||m.hash!==h){fail("Invalid mobile number or access code.");return}
+    if(m.expiry&&todayStr()>m.expiry){fail("This Premium membership has expired. Please renew.");return}
+    session={mobile,hash:h};saveSession();
+    const i=members.findIndex(x=>x.id===snap.id);const rec={id:snap.id,...m};
+    if(i>=0)members[i]=rec;else members.push(rec);
+    closeM("mMemberLogin");renderUser();if(curCourse)renderVlist();
+    showToast("Welcome, "+(m.name||"Member"));
+    if(pendingVid){const v=pendingVid;pendingVid=null;playVideo(v)}
+  }catch(e){fail("Could not verify right now. Please try again.")}
+  finally{btn.disabled=false;btn.textContent="Login"}
+};
+window.memberLogout=function(){session=null;pendingVid=null;saveSession();curVideo=null;
+  if(curCourse){$("playerArea").innerHTML=placeholder(I.play,"Select a lesson to start watching");$("playerTitle").textContent="–";$("playerMeta").textContent="";renderVlist()}
+  renderUser();showToast("Logged out")};
+
+// ─── Admin: members ──────────────────────────────────────
+window.openMembers=function(){renderMembers();goView("viewMembers")};
+function renderMembers(){
+  const wrap=$("memberList");
+  if(!members.length){wrap.innerHTML=`<div class="empty">${I.star}<p>No Premium members yet. Click “+ Add Member”.</p></div>`;return}
+  wrap.innerHTML=members.map(m=>{
+    const exp=m.expiry&&todayStr()>m.expiry;
+    return `<div class="manage-card single">
+      <div class="mc-icon">${I.star}</div>
+      <div class="mc-info"><strong>${esc(m.name)}</strong><span>${esc(m.mobile)}</span>
+        <span>${exp?'<span class="badge exp">Expired</span>':'<span class="badge ok">Active</span>'} ${m.expiry?"until "+esc(m.expiry):"No expiry"}</span></div>
+      <div class="mc-acts">
+        <button class="btn-ic e" onclick="openEditMember('${m.id}')" aria-label="Edit">${I.edit}</button>
+        <button class="btn-ic d" onclick="confirmDelMember('${m.id}')" aria-label="Remove">${I.trash}</button>
+      </div></div>`}).join("");
+}
+window.openAddMember=function(){
+  $("editMid").value="";$("mMemberTitle").textContent="Add Premium Member";
+  $("mmName").value="";$("mmMobile").value="";$("mmMobile").disabled=false;$("mmCode").value="";$("mmExpiry").value="";
+  $("mmCodeLbl").textContent="Access Code * (min 4 characters)";openM("mMember");
+};
+window.openEditMember=function(id){
+  const m=members.find(x=>x.id===id);if(!m)return;
+  $("editMid").value=id;$("mMemberTitle").textContent="Edit Premium Member";
+  $("mmName").value=m.name||"";$("mmMobile").value=m.mobile||"";$("mmMobile").disabled=true;
+  $("mmCode").value="";$("mmExpiry").value=m.expiry||"";
+  $("mmCodeLbl").textContent="New Access Code (leave empty to keep current)";openM("mMember");
+};
+window.saveMember=async function(){
+  const name=$("mmName").value.trim(),mobile=normMobile($("mmMobile").value),code=$("mmCode").value.trim(),expiry=$("mmExpiry").value;
+  const eid=$("editMid").value;
+  if(!name||!mobile){showToast("Please enter name and mobile number");return}
+  if(!eid&&code.length<4){showToast("Access code must be at least 4 characters");return}
+  if(eid&&code&&code.length<4){showToast("Access code must be at least 4 characters");return}
+  try{
+    if(eid){
+      const data={name,expiry};if(code)data.hash=await hashCode(mobile,code);
+      await updateDoc(doc(db,"tutorial_courses",eid),data);showToast("Member updated");
+    }else{
+      const id="_member_"+mobile;
+      if(members.some(m=>m.id===id)){showToast("This mobile number is already a member");return}
+      await setDoc(doc(db,"tutorial_courses",id),{isMember:true,name,mobile,hash:await hashCode(mobile,code),expiry,created:Date.now()});
+      showToast("Member added");
+    }
+    closeM("mMember");await loadCourses();renderMembers();
+  }catch(e){showToast("Error: "+e.message)}
+};
+window.confirmDelMember=function(id){
+  const m=members.find(x=>x.id===id);
+  $("confTitle").textContent="Remove member?";
+  $("confMsg").textContent=`“${m?.name||id}” will lose Premium access immediately.`;
+  pendingDelFn=async()=>{await deleteDoc(doc(db,"tutorial_courses",id));showToast("Member removed");closeM("mConfirm");await loadCourses();renderMembers()};
+  openM("mConfirm");
+};
+
 // ─── Boot ────────────────────────────────────────────────
 $("playerArea").innerHTML=placeholder(I.play,"Select a lesson to start watching");
+try{session=JSON.parse(localStorage.getItem(LS_KEY)||"null")}catch(e){session=null}
+renderUser();
 loadCourses();
 </script>
 </body>
