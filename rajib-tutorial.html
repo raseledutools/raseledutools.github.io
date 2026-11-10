@@ -1223,16 +1223,23 @@ function renderVlist(){
 window.playVideo=async function(vid){
   const want=curCourse?.videos?.find(v=>v.id===vid);if(!want)return;
   if(!canWatch()){pendingVid=vid;openPremiumGate(isPremium()?"noaccess":"login");return}
-  // ── Verify session token before every play ──
+  // ── Verify session before every play ──
   if(session?.mobile&&!adminIn){
     try{
       const snap=await getDoc(doc(db,"tutorial_courses","_member_"+session.mobile));
       if(snap.exists()){
         const d=snap.data();
-        if(d.sessionToken && session.token && d.sessionToken!==session.token){
+        // Token mismatch → kicked out by another device
+        if(d.sessionToken && d.sessionToken!==session.token){
           _forceLogoutUser("এই video চালু করা যাচ্ছে না। আপনার account অন্য device-এ login হয়েছে।");
           return;
         }
+        // Allowed-device block
+        if(d.allowedDevices&&d.allowedDevices.length>0&&!d.allowedDevices.includes(DEVICE_ID)){
+          _forceLogoutUser("এই device-এ video দেখার অনুমতি নেই।");
+          return;
+        }
+        // Expiry
         if(d.expiry&&todayStr()>d.expiry){
           _forceLogoutUser("আপনার Premium membership মেয়াদোত্তীর্ণ।");
           return;
@@ -1440,9 +1447,10 @@ async function checkSessionAlive(){
     const snap=await getDoc(doc(db,"tutorial_courses","_member_"+session.mobile));
     if(!snap.exists()){_forceLogoutUser("এই account টি মুছে ফেলা হয়েছে।");return}
     const d=snap.data();
-    // Token mismatch → another device logged in
-    if(d.sessionToken && session.token && d.sessionToken!==session.token){
-      _forceLogoutUser("আপনার account অন্য একটি device-এ login করা হয়েছে। এখানে session শেষ হয়ে গেছে।");
+    // Token mismatch OR missing token → another device logged in
+    // If Firestore has a token but local session doesn't match → kick out
+    if(d.sessionToken && d.sessionToken!==session.token){
+      _forceLogoutUser("আপনার account অন্য একটি device-এ login হয়েছে। এই session শেষ।");
       return;
     }
     // Expiry check
@@ -1463,7 +1471,8 @@ function _forceLogoutUser(msg){
 }
 function startSessionPoll(){
   stopSessionPoll();
-  _sessionPollTimer=setInterval(checkSessionAlive,30000);// every 30s
+  checkSessionAlive();// immediate first check
+  _sessionPollTimer=setInterval(checkSessionAlive,10000);// every 10s
 }
 function stopSessionPoll(){
   if(_sessionPollTimer){clearInterval(_sessionPollTimer);_sessionPollTimer=null;}
@@ -1533,14 +1542,18 @@ async function memberAuth(mobile, forceDevice=false){
       }
     }
 
-    // ── Single-device enforcement via active session ──
-    const curDev=m.activeDevice;
-    const hasOtherActive = !forceDevice && curDev && curDev.deviceId && curDev.deviceId!==DEVICE_ID;
+    // ── Single-device enforcement via session token ──
+    // If Firestore has an active token from a DIFFERENT device → conflict
+    const hasOtherActive = !forceDevice
+      && m.sessionToken                       // token exists in Firestore
+      && m.sessionDevice                      // device recorded
+      && m.sessionDevice !== DEVICE_ID;       // it's not THIS device
+
     if(hasOtherActive){
-      return {err:null, deviceConflict:true, otherDevice:curDev.label||"অন্য device"};
+      return {err:null, deviceConflict:true, otherDevice:m.activeDevice?.label||"অন্য device"};
     }
 
-    // ── Generate a new session token (invalidates old device) ──
+    // ── Generate a new session token (invalidates ALL other devices instantly) ──
     const token=genToken();
     const devInfo={deviceId:DEVICE_ID,label:deviceLabel(),loginTime:Date.now()};
     await updateDoc(doc(db,"tutorial_courses","_member_"+mobile),{
@@ -1699,7 +1712,7 @@ window.forceLogoutDevice=async function(){
   const id=$("dsMemberId").value;
   if(!id)return;
   try{
-    await updateDoc(doc(db,"tutorial_courses",id),{activeDevice:null});
+    await updateDoc(doc(db,"tutorial_courses",id),{activeDevice:null,sessionToken:null,sessionDevice:null});
     showToast("Device logout করা হয়েছে");
     closeM("mDeviceSettings");
     await loadCourses();renderMembers();
