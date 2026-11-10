@@ -1220,9 +1220,26 @@ function renderVlist(){
       ${canWatch()?"":I.lock}
     </div>`).join("");
 }
-window.playVideo=function(vid){
+window.playVideo=async function(vid){
   const want=curCourse?.videos?.find(v=>v.id===vid);if(!want)return;
   if(!canWatch()){pendingVid=vid;openPremiumGate(isPremium()?"noaccess":"login");return}
+  // ── Verify session token before every play ──
+  if(session?.mobile&&!adminIn){
+    try{
+      const snap=await getDoc(doc(db,"tutorial_courses","_member_"+session.mobile));
+      if(snap.exists()){
+        const d=snap.data();
+        if(d.sessionToken && session.token && d.sessionToken!==session.token){
+          _forceLogoutUser("এই video চালু করা যাচ্ছে না। আপনার account অন্য device-এ login হয়েছে।");
+          return;
+        }
+        if(d.expiry&&todayStr()>d.expiry){
+          _forceLogoutUser("আপনার Premium membership মেয়াদোত্তীর্ণ।");
+          return;
+        }
+      }
+    }catch(e){}// network issue — allow play
+  }
   curVideo=want;
   renderVlist();
   const area=$("playerArea"),embed=ytEmbed(curVideo.url||"");
@@ -1409,9 +1426,47 @@ function saveSession(){try{session?localStorage.setItem(LS_KEY,JSON.stringify(se
 function validateSession(){
   if(session&&!isPremium()){
     const m=curMember();
-    if(m&&m.expiry&&todayStr()>m.expiry) showToast("Your Premium membership has expired");
+    if(m&&m.expiry&&todayStr()>m.expiry) showToast("আপনার Premium membership মেয়াদোত্তীর্ণ হয়েছে");
     session=null;saveSession();
   }
+}
+
+// ── Session-token heartbeat ───────────────────────────────
+let _sessionPollTimer=null;
+function genToken(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
+async function checkSessionAlive(){
+  if(!session?.mobile||adminIn)return;
+  try{
+    const snap=await getDoc(doc(db,"tutorial_courses","_member_"+session.mobile));
+    if(!snap.exists()){_forceLogoutUser("এই account টি মুছে ফেলা হয়েছে।");return}
+    const d=snap.data();
+    // Token mismatch → another device logged in
+    if(d.sessionToken && session.token && d.sessionToken!==session.token){
+      _forceLogoutUser("আপনার account অন্য একটি device-এ login করা হয়েছে। এখানে session শেষ হয়ে গেছে।");
+      return;
+    }
+    // Expiry check
+    if(d.expiry&&todayStr()>d.expiry){_forceLogoutUser("আপনার Premium membership মেয়াদোত্তীর্ণ।");return}
+  }catch(e){}// network fail — keep going silently
+}
+function _forceLogoutUser(msg){
+  stopSessionPoll();
+  // Stop video immediately
+  if(curVideo){
+    const area=$("playerArea");
+    area.innerHTML=placeholder(I.warn,msg);
+    curVideo=null;
+  }
+  session=null;saveSession();
+  renderUser();if(curCourse)renderVlist();
+  showToast(msg);
+}
+function startSessionPoll(){
+  stopSessionPoll();
+  _sessionPollTimer=setInterval(checkSessionAlive,30000);// every 30s
+}
+function stopSessionPoll(){
+  if(_sessionPollTimer){clearInterval(_sessionPollTimer);_sessionPollTimer=null;}
 }
 function renderUser(){
   const wrap=$("userArea");
@@ -1474,24 +1529,31 @@ async function memberAuth(mobile, forceDevice=false){
     // ── Allowed-device check (admin-controlled) ──
     if(m.allowedDevices && m.allowedDevices.length>0){
       if(!m.allowedDevices.includes(DEVICE_ID)){
-        return {err:"এই device থেকে login করার অনুমতি নেই। Admin-কে জানান।"};
+        return {err:"এই device থেকে login করার অনুমতি নেই। Admin এর সাথে যোগাযোগ করুন।"};
       }
     }
 
-    // ── Single-device enforcement ──
+    // ── Single-device enforcement via active session ──
     const curDev=m.activeDevice;
-    if(!forceDevice && curDev && curDev.deviceId && curDev.deviceId!==DEVICE_ID){
+    const hasOtherActive = !forceDevice && curDev && curDev.deviceId && curDev.deviceId!==DEVICE_ID;
+    if(hasOtherActive){
       return {err:null, deviceConflict:true, otherDevice:curDev.label||"অন্য device"};
     }
 
-    // Register this device as active
+    // ── Generate a new session token (invalidates old device) ──
+    const token=genToken();
     const devInfo={deviceId:DEVICE_ID,label:deviceLabel(),loginTime:Date.now()};
-    await updateDoc(doc(db,"tutorial_courses","_member_"+mobile),{activeDevice:devInfo});
+    await updateDoc(doc(db,"tutorial_courses","_member_"+mobile),{
+      activeDevice:devInfo,
+      sessionToken:token,
+      sessionDevice:DEVICE_ID
+    });
 
-    session={mobile};saveSession();
-    const rec={id:snap.id,...m,activeDevice:devInfo};
+    session={mobile,token};saveSession();
+    const rec={id:snap.id,...m,activeDevice:devInfo,sessionToken:token};
     const i=members.findIndex(x=>x.id===snap.id);
     if(i>=0)members[i]=rec;else members.push(rec);
+    startSessionPoll();
     return {name:m.name||"Member"};
   }catch(e){return {err:"এখন verify করা যাচ্ছে না। আবার চেষ্টা করুন।"}}
 }
@@ -1535,12 +1597,14 @@ window.deviceForceLogin=async function(){
 };
 window.memberLogout=async function(){
   const mobile=session?.mobile;
+  stopSessionPoll();
   session=null;pendingVid=null;saveSession();curVideo=null;
   if(curCourse){$("playerArea").innerHTML=placeholder(I.play,"Select a lesson to start watching");$("playerTitle").textContent="–";$("playerMeta").textContent="";renderVlist()}
   renderUser();showToast("Logged out");
-  // Clear activeDevice in Firestore
   if(mobile){
-    try{await updateDoc(doc(db,"tutorial_courses","_member_"+mobile),{activeDevice:null})}catch(e){}
+    try{await updateDoc(doc(db,"tutorial_courses","_member_"+mobile),{
+      activeDevice:null, sessionToken:null, sessionDevice:null
+    })}catch(e){}
   }
 };
 
@@ -1665,6 +1729,7 @@ window.removeAllowedDevice=async function(memberId,deviceId){
 // ─── Boot ────────────────────────────────────────────────
 $("playerArea").innerHTML=placeholder(I.play,"Select a lesson to start watching");
 try{session=JSON.parse(localStorage.getItem(LS_KEY)||"null")}catch(e){session=null}
+if(session?.mobile)startSessionPoll();
 renderUser();
 (async()=>{
   const m=location.hash.match(/^#activate=(\d{11})(?:\.\d+)?$/);
