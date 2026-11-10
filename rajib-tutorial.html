@@ -493,6 +493,19 @@ body{color:var(--text)}
   .hero-stats{gap:28px}
   .player-info{flex-direction:column;align-items:flex-start}
 }
+
+/* ── Screen capture prevention ──────────────────────────── */
+@media screen {
+  .player-area, .player-area *, .player-panel {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+}
+/* Blank out in screenshot mode (supported in some browsers) */
+@media print {
+  body { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -761,7 +774,7 @@ body{color:var(--text)}
   <div class="modal">
     <div class="gate-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
     <div class="modal-title" id="gateTitle">Premium required</div>
-    <div class="modal-sub" id="gateSub">Video lessons are available to Premium members only.</div>
+    <div class="modal-sub" id="gateSub">Video lessons are available to Premium members only. Contact admin on WhatsApp: 01566054963</div>
     <div class="gate-info hidden" id="gateInfo"></div>
     <div class="col-acts">
       <button class="btn-ok" onclick="getPremium()">Become Premium</button>
@@ -788,6 +801,7 @@ body{color:var(--text)}
       <button class="btn-cancel" onclick="closeM('mPay')">Cancel</button>
     </div>
     <div class="pay-note">Payment is processed securely by bKash. Already Premium? <a onclick="closeM('mPay');openMemberLogin()">Login</a><span id="payHelp"></span></div>
+    <div class="pay-note" style="margin-top:8px">যোগাযোগ: <a href="https://wa.me/8801566054963" target="_blank" rel="noopener">WhatsApp 01566054963</a></div>
   </div>
 </div>
 
@@ -841,6 +855,56 @@ body{color:var(--text)}
 
 <div class="toast h" id="toast"></div>
 
+
+<!-- Device Settings modal -->
+<div class="modal-bg hidden" id="mDeviceSettings">
+  <div class="modal">
+    <div class="modal-title">Device Settings</div>
+    <div class="modal-sub" id="dsMemberName">Member device management</div>
+    <input type="hidden" id="dsMemberId"/>
+    <div id="dsCurrentDevice" style="margin:12px 0;padding:12px;background:var(--bg2);border-radius:10px;font-size:13px"></div>
+    <h4 style="font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;margin:12px 0 6px">Allowed Devices</h4>
+    <div class="modal-sub" style="font-size:12px;margin-bottom:8px">শুধু এই device গুলো login করতে পারবে। Empty রাখলে যেকোনো device থেকে login করা যাবে (তবে একসময়ে শুধু একটি)।</div>
+    <div id="dsAllowedList" style="max-height:160px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:6px;margin-bottom:8px"></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeM('mDeviceSettings')">বন্ধ করুন</button>
+      <button class="btn-ok red" onclick="forceLogoutDevice()">Device Logout করুন</button>
+    </div>
+  </div>
+</div>
+<!-- Device conflict modal -->
+<div class="modal-bg hidden" id="mDeviceConflict">
+  <div class="modal">
+    <div class="gate-ico" style="background:linear-gradient(135deg,#F0446E,#FF7A3D)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    </div>
+    <div class="modal-title">অন্য একটি device-এ এই নম্বর দিয়ে login আছে</div>
+    <div class="modal-sub" id="deviceConflictMsg">এই mobile number টি এখন অন্য একটি device-এ সক্রিয়।<br/>আপনি কি আগের device-টি logout করতে চান এবং এখানে login করতে চান?</div>
+    <div class="col-acts">
+      <button class="btn-ok" id="deviceForceBtn" onclick="deviceForceLogin()">হ্যাঁ, এই device-এ login করুন</button>
+      <button class="btn-cancel" onclick="closeM('mDeviceConflict')">না, বাতিল করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- Contact admin (not logged in) modal -->
+<div class="modal-bg hidden" id="mContactAdmin">
+  <div class="modal">
+    <div class="gate-ico" style="background:linear-gradient(135deg,#4F35E8,#B24DF0)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div class="modal-title">Admin-কে Contact করুন</div>
+    <div class="modal-sub">Premium access পেতে নিচের WhatsApp নম্বরে যোগাযোগ করুন:</div>
+    <a href="https://wa.me/8801566054963" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:10px;margin:16px 0;padding:14px;background:#25D366;color:#fff;border-radius:12px;font-weight:800;font-size:15px;text-decoration:none">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2.062 22l4.934-1.354A9.956 9.956 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 11.999 2zM12 20c-1.613 0-3.12-.448-4.413-1.228l-.316-.188-3.283.9.927-3.183-.206-.325A7.958 7.958 0 0 1 4 12c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8z"/></svg>
+      WhatsApp: 01566054963
+    </a>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeM('mContactAdmin')">বন্ধ করুন</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc }
@@ -882,6 +946,73 @@ let liveType="class";
 let live={classTitle:"",classTime:"",classUrl:"",examTitle:"",examTime:"",examUrl:"",premiumUrl:"",premiumInfo:""};
 
 const $=id=>document.getElementById(id);
+
+// ── Screen capture / screenshot prevention ───────────────
+(function(){
+  // CSS trick: rotate content 180° on screenshot attempt
+  // Works in some Android / Chrome browsers
+  try{
+    const style=document.createElement('style');
+    style.id='_sc_protect';
+    // Hide content during screenshot in supported environments
+    document.head.appendChild(style);
+  }catch(e){}
+
+  // Prevent right-click on player
+  document.addEventListener('contextmenu',e=>{
+    if(e.target.closest('#playerArea, .player-area, .lv-player')){
+      e.preventDefault();
+    }
+  });
+
+  // Detect screen recording via visibilitychange (best-effort)
+  // Also disable keyboard shortcuts for screenshots
+  document.addEventListener('keydown',e=>{
+    // Block Print Screen
+    if(e.key==='PrintScreen'||e.code==='PrintScreen'){
+      e.preventDefault();
+      // Briefly blank the page
+      document.body.style.visibility='hidden';
+      setTimeout(()=>{document.body.style.visibility='';},400);
+    }
+    // Block Ctrl+Shift+S, Ctrl+P (print)
+    if((e.ctrlKey||e.metaKey)&&(e.key==='p'||e.key==='P'||e.shiftKey&&(e.key==='s'||e.key==='S'))){
+      e.preventDefault();
+    }
+  });
+})();
+
+
+// ── Device management ────────────────────────────────────
+const DEVICE_ID_KEY='rt_device_id';
+let _pendingDeviceMobile=null;
+
+function getOrCreateDeviceId(){
+  try{
+    let d=localStorage.getItem(DEVICE_ID_KEY);
+    if(!d){d='dev_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);localStorage.setItem(DEVICE_ID_KEY,d);}
+    return d;
+  }catch(e){return 'dev_fallback_'+Date.now().toString(36)}
+}
+const DEVICE_ID=getOrCreateDeviceId();
+
+function deviceLabel(){
+  const ua=navigator.userAgent;
+  let os='Unknown';
+  if(/Windows/.test(ua))os='Windows';
+  else if(/Android/.test(ua))os='Android';
+  else if(/iPhone|iPad/.test(ua))os='iOS';
+  else if(/Mac/.test(ua))os='Mac';
+  else if(/Linux/.test(ua))os='Linux';
+  let browser='Browser';
+  if(/Chrome/.test(ua)&&!/Edg/.test(ua))browser='Chrome';
+  else if(/Firefox/.test(ua))browser='Firefox';
+  else if(/Safari/.test(ua)&&!/Chrome/.test(ua))browser='Safari';
+  else if(/Edg/.test(ua))browser='Edge';
+  return os+' · '+browser;
+}
+
+
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function safeUrl(u){u=String(u||"").trim();return /^https?:\/\//i.test(u)?u:""}
 $("yr").textContent=new Date().getFullYear();
@@ -1333,33 +1464,85 @@ window.openMemberLogin=function(){
   $("lmMobile").value="";$("lmErr").classList.add("h");
   openM("mMemberLogin");setTimeout(()=>$("lmMobile").focus(),120);
 };
-async function memberAuth(mobile){
+async function memberAuth(mobile, forceDevice=false){
   try{
     const snap=await getDoc(doc(db,"tutorial_courses","_member_"+mobile));
     const m=snap.exists()?snap.data():null;
-    if(!m||!m.isMember) return {err:"This mobile number does not have Premium access. Please become Premium or contact the admin."};
-    if(m.expiry&&todayStr()>m.expiry) return {err:"This Premium membership has expired. Please renew."};
+    if(!m||!m.isMember) return {err:null, noAccess:true};
+    if(m.expiry&&todayStr()>m.expiry) return {err:"এই Premium membership মেয়াদোত্তীর্ণ। অনুগ্রহ করে নবায়ন করুন।"};
+
+    // ── Allowed-device check (admin-controlled) ──
+    if(m.allowedDevices && m.allowedDevices.length>0){
+      if(!m.allowedDevices.includes(DEVICE_ID)){
+        return {err:"এই device থেকে login করার অনুমতি নেই। Admin-কে জানান।"};
+      }
+    }
+
+    // ── Single-device enforcement ──
+    const curDev=m.activeDevice;
+    if(!forceDevice && curDev && curDev.deviceId && curDev.deviceId!==DEVICE_ID){
+      return {err:null, deviceConflict:true, otherDevice:curDev.label||"অন্য device"};
+    }
+
+    // Register this device as active
+    const devInfo={deviceId:DEVICE_ID,label:deviceLabel(),loginTime:Date.now()};
+    await updateDoc(doc(db,"tutorial_courses","_member_"+mobile),{activeDevice:devInfo});
+
     session={mobile};saveSession();
-    const rec={id:snap.id,...m},i=members.findIndex(x=>x.id===snap.id);
+    const rec={id:snap.id,...m,activeDevice:devInfo};
+    const i=members.findIndex(x=>x.id===snap.id);
     if(i>=0)members[i]=rec;else members.push(rec);
     return {name:m.name||"Member"};
-  }catch(e){return {err:"Could not verify right now. Please try again."}}
+  }catch(e){return {err:"এখন verify করা যাচ্ছে না। আবার চেষ্টা করুন।"}}
 }
 window.doMemberLogin=async function(){
   const mobile=normMobile($("lmMobile").value),err=$("lmErr"),btn=$("lmBtn");
   const fail=m=>{err.textContent=m;err.classList.remove("h")};
-  if(!/^01\d{9}$/.test(mobile)){fail("Enter a valid 11-digit mobile number (01XXXXXXXXX).");return}
-  btn.disabled=true;btn.textContent="Checking…";
-  const r=await memberAuth(mobile);
+  if(!/^01\d{9}$/.test(mobile)){fail("একটি সঠিক ১১-সংখ্যার মোবাইল নম্বর দিন (01XXXXXXXXX)।");return}
+  btn.disabled=true;btn.textContent="যাচাই করা হচ্ছে…";
+  const r=await memberAuth(mobile,false);
   btn.disabled=false;btn.textContent="Login";
+  if(r.noAccess){
+    // No access — show contact admin
+    closeM("mMemberLogin");
+    openM("mContactAdmin");
+    return;
+  }
+  if(r.deviceConflict){
+    // Another device is logged in
+    _pendingDeviceMobile=mobile;
+    $("deviceConflictMsg").innerHTML=`এই নম্বরটি এখন <strong>${esc(r.otherDevice)}</strong>-এ সক্রিয়।<br/>আপনি কি সেই device logout করে এই device-এ login করতে চান?`;
+    closeM("mMemberLogin");
+    openM("mDeviceConflict");
+    return;
+  }
   if(r.err){fail(r.err);return}
   closeM("mMemberLogin");renderUser();if(curCourse)renderVlist();
-  showToast("Welcome, "+r.name);
+  showToast("স্বাগতম, "+r.name);
   if(pendingVid){const v=pendingVid;pendingVid=null;playVideo(v)}
 };
-window.memberLogout=function(){session=null;pendingVid=null;saveSession();curVideo=null;
+
+window.deviceForceLogin=async function(){
+  if(!_pendingDeviceMobile)return;
+  const mobile=_pendingDeviceMobile;
+  closeM("mDeviceConflict");
+  const r=await memberAuth(mobile,true);
+  if(r.err){showToast(r.err);return}
+  renderUser();if(curCourse)renderVlist();
+  showToast("স্বাগতম, "+r.name);
+  _pendingDeviceMobile=null;
+  if(pendingVid){const v=pendingVid;pendingVid=null;playVideo(v)}
+};
+window.memberLogout=async function(){
+  const mobile=session?.mobile;
+  session=null;pendingVid=null;saveSession();curVideo=null;
   if(curCourse){$("playerArea").innerHTML=placeholder(I.play,"Select a lesson to start watching");$("playerTitle").textContent="–";$("playerMeta").textContent="";renderVlist()}
-  renderUser();showToast("Logged out")};
+  renderUser();showToast("Logged out");
+  // Clear activeDevice in Firestore
+  if(mobile){
+    try{await updateDoc(doc(db,"tutorial_courses","_member_"+mobile),{activeDevice:null})}catch(e){}
+  }
+};
 
 // ─── Admin: members ──────────────────────────────────────
 window.openMembers=function(){renderMembers();goView("viewMembers")};
@@ -1418,6 +1601,65 @@ window.confirmDelMember=function(id){
   $("confMsg").textContent=`“${m?.name||id}” will lose Premium access immediately.`;
   pendingDelFn=async()=>{await deleteDoc(doc(db,"tutorial_courses",id));showToast("Member removed");closeM("mConfirm");await loadCourses();renderMembers()};
   openM("mConfirm");
+};
+
+
+// ── Admin: device settings ───────────────────────────────
+window.openDeviceSettings=function(id){
+  const m=members.find(x=>x.id===id);if(!m)return;
+  $("dsMemberId").value=id;
+  $("dsMemberName").textContent=esc(m.name)+" — "+esc(m.mobile);
+  const dev=m.activeDevice;
+  $("dsCurrentDevice").innerHTML=dev
+    ?`<b>Currently logged in:</b><br/><span style="color:var(--green)">${esc(dev.label||"Unknown device")}</span><br/><small style="color:var(--sub)">Device ID: ${esc(dev.deviceId||"")}</small><br/><small style="color:var(--sub)">Login time: ${dev.loginTime?new Date(dev.loginTime).toLocaleString():"-"}</small>`
+    :`<span style="color:var(--sub)">এই member এখন কোনো device-এ login করা নেই।</span>`;
+
+  // Allowed devices list
+  const allowed=m.allowedDevices||[];
+  $("dsAllowedList").innerHTML=allowed.length
+    ?allowed.map((d,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;font-size:12.5px;border-bottom:1px solid var(--border)">
+        <span>Device ${i+1}: <code style="font-size:11px">${esc(d.slice(-12))}</code></span>
+        <button onclick="removeAllowedDevice('${id}','${esc(d)}')" style="color:var(--red);font-size:12px;font-weight:600;padding:3px 8px;border:1px solid rgba(239,107,91,.3);border-radius:6px">বাদ দিন</button>
+      </div>`).join("")
+    :`<div style="padding:10px;font-size:12.5px;color:var(--sub)">কোনো device restrict করা নেই। বর্তমান device যোগ করতে নিচের বোতাম ব্যবহার করুন।</div>`;
+
+  // Add current device button
+  if(dev&&dev.deviceId&&!allowed.includes(dev.deviceId)){
+    $("dsAllowedList").innerHTML+=`<div style="margin-top:8px"><button onclick="addAllowedDevice('${id}','${esc(dev.deviceId)}','${esc(dev.label||'')}');closeM('mDeviceSettings');openDeviceSettings('${id}')" style="width:100%;padding:9px;border-radius:9px;background:var(--accent-soft);color:var(--accent2);font-size:13px;font-weight:600;border:1px solid rgba(232,54,93,.2)">+ বর্তমান device টি allowed-list এ যোগ করুন</button></div>`;
+  }
+
+  openM("mDeviceSettings");
+};
+
+window.forceLogoutDevice=async function(){
+  const id=$("dsMemberId").value;
+  if(!id)return;
+  try{
+    await updateDoc(doc(db,"tutorial_courses",id),{activeDevice:null});
+    showToast("Device logout করা হয়েছে");
+    closeM("mDeviceSettings");
+    await loadCourses();renderMembers();
+  }catch(e){showToast("Error: "+e.message)}
+};
+
+window.addAllowedDevice=async function(memberId,deviceId,label){
+  const m=members.find(x=>x.id===memberId);if(!m)return;
+  const allowed=[...new Set([...(m.allowedDevices||[]),deviceId])];
+  try{
+    await updateDoc(doc(db,"tutorial_courses",memberId),{allowedDevices:allowed});
+    showToast("Device allowed-list এ যোগ হয়েছে");
+    await loadCourses();
+  }catch(e){showToast("Error: "+e.message)}
+};
+
+window.removeAllowedDevice=async function(memberId,deviceId){
+  const m=members.find(x=>x.id===memberId);if(!m)return;
+  const allowed=(m.allowedDevices||[]).filter(d=>d!==deviceId);
+  try{
+    await updateDoc(doc(db,"tutorial_courses",memberId),{allowedDevices:allowed});
+    showToast("Device সরানো হয়েছে");
+    await loadCourses();renderMembers();openDeviceSettings(memberId);
+  }catch(e){showToast("Error: "+e.message)}
 };
 
 // ─── Boot ────────────────────────────────────────────────
